@@ -5,8 +5,27 @@ import Foundation
 /// Replies are matched to outstanding requests by device index, sub-ID and address (see
 /// `HIDPPMessage.match(to:)`). Anything that doesn't answer a pending request — button
 /// events, receiver notifications, battery broadcasts — goes to `onUnsolicited`.
+///
+/// Requests pass a gate (D10): at most `maxInFlight` wait for their reply at once, the rest
+/// queue in FIFO order. A bare client doesn't limit them; `HIDPPLink` sets the limit from
+/// `ControllerTuning.maxInFlight` (1). `Lane.interactive` requests (button diversion, pointer speed) go ahead
+/// of `Lane.background` ones (probing, feature tables, battery, device information), so a
+/// sleeping receiver slot delays another slot's diversion by at most one request timeout.
+/// Fire-and-forget reports (`sendWithoutReply`) bypass the gate.
 public final class HIDPPClient: @unchecked Sendable {
     public enum Direction: Sendable { case outgoing, incoming }
+
+    /// The gate's priority lanes.
+    public enum Lane: Hashable, Sendable {
+        /// Changes the user is waiting for: setCidReporting, pointer speed.
+        case interactive
+        /// Everything else: probing, feature tables, battery and device information.
+        case background
+    }
+
+    /// The lane for requests sent from the current task without an explicit lane.
+    /// Set it for a whole operation with `HIDPPClient.$lane.withValue(.interactive) { ... }`.
+    @TaskLocal public static var lane: Lane = .background
 
     public let transport: HIDPPTransport
     /// Identifies our requests so replies can be told apart from device events (which use 0).
@@ -15,6 +34,12 @@ public final class HIDPPClient: @unchecked Sendable {
     /// How often a request the device answered with "busy" is sent again.
     public var busyRetryLimit = 2
     public var busyRetryDelay: TimeInterval = 0.05
+    /// Requests waiting for their reply at once (at least 1). Unlimited by default; hubs use 1
+    /// until hardware shows that receivers accept concurrent requests to different slots.
+    public var maxInFlight: Int {
+        get { gate.limit }
+        set { gate.limit = newValue }
+    }
 
     /// Invoked on the transport's delivery thread.
     public var onUnsolicited: ((HIDPPMessage) -> Void)?
@@ -31,6 +56,7 @@ public final class HIDPPClient: @unchecked Sendable {
     private var pending: [UUID: Pending] = [:]
     private var order: [UUID] = []
     private var closed = false
+    private let gate = RequestGate()
 
     public init(transport: HIDPPTransport) {
         self.transport = transport
@@ -39,10 +65,15 @@ public final class HIDPPClient: @unchecked Sendable {
     }
 
     /// Sends `request` and waits for the matching reply. Busy errors are retried a few times.
-    public func send(_ request: HIDPPMessage, timeout: TimeInterval? = nil) async throws -> HIDPPMessage {
+    /// `lane` defaults to the task's `HIDPPClient.lane`. The timeout counts from when the
+    /// request leaves the gate, not from when it was queued.
+    public func send(_ request: HIDPPMessage, timeout: TimeInterval? = nil, lane: Lane? = nil) async throws -> HIDPPMessage {
+        let lane = lane ?? Self.lane
         var attempt = 0
         while true {
             do {
+                try await gate.acquire(lane)
+                defer { gate.release() }
                 return try await sendOnce(request, timeout: timeout)
             } catch let error as HIDPPError where error.isBusy && attempt < busyRetryLimit {
                 attempt += 1
@@ -95,7 +126,8 @@ public final class HIDPPClient: @unchecked Sendable {
         featureIndex: UInt8,
         function: UInt8,
         parameters: [UInt8] = [],
-        timeout: TimeInterval? = nil
+        timeout: TimeInterval? = nil,
+        lane: Lane? = nil
     ) async throws -> [UInt8] {
         let request = HIDPPMessage.request(
             deviceIndex: deviceIndex,
@@ -104,7 +136,7 @@ public final class HIDPPClient: @unchecked Sendable {
             softwareID: softwareID,
             parameters: parameters
         )
-        return try await send(request, timeout: timeout).parameters
+        return try await send(request, timeout: timeout, lane: lane).parameters
     }
 
     /// Fails every pending request; further requests fail immediately.
@@ -116,6 +148,7 @@ public final class HIDPPClient: @unchecked Sendable {
         pending.removeAll()
         order.removeAll()
         lock.unlock()
+        gate.close()
         all.forEach { $0.continuation.resume(throwing: HIDPPError.transportClosed) }
         onClose?()
     }
@@ -154,5 +187,87 @@ public final class HIDPPClient: @unchecked Sendable {
         order.removeAll { $0 == id }
         lock.unlock()
         entry?.continuation.resume(with: result)
+    }
+}
+
+/// Admits at most `limit` requests at once; the others wait, interactive ones first, each lane
+/// in FIFO order. A released slot is handed straight to the next waiter.
+private final class RequestGate: @unchecked Sendable {
+    private let lock = NSLock()
+    private var inFlight = 0
+    private var _limit = Int.max
+    private var interactive: [CheckedContinuation<Void, Error>] = []
+    private var background: [CheckedContinuation<Void, Error>] = []
+    private var closed = false
+
+    var limit: Int {
+        get { lock.lock(); defer { lock.unlock() }; return _limit }
+        set {
+            lock.lock()
+            _limit = max(1, newValue)
+            var admitted: [CheckedContinuation<Void, Error>] = []
+            while inFlight < _limit, let next = popWaiter() {
+                inFlight += 1
+                admitted.append(next)
+            }
+            lock.unlock()
+            admitted.forEach { $0.resume() }
+        }
+    }
+
+    /// Waits for a slot. Throws `transportClosed` once closed, and `CancellationError` when the
+    /// task was cancelled while it waited (the slot is given back).
+    func acquire(_ lane: HIDPPClient.Lane) async throws {
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+            lock.lock()
+            if closed {
+                lock.unlock()
+                continuation.resume(throwing: HIDPPError.transportClosed)
+                return
+            }
+            if inFlight < _limit, interactive.isEmpty, background.isEmpty {
+                inFlight += 1
+                lock.unlock()
+                continuation.resume()
+                return
+            }
+            switch lane {
+            case .interactive: interactive.append(continuation)
+            case .background: background.append(continuation)
+            }
+            lock.unlock()
+        }
+        if Task.isCancelled {
+            release()
+            throw CancellationError()
+        }
+    }
+
+    func release() {
+        lock.lock()
+        if let next = popWaiter() {
+            lock.unlock()
+            next.resume()
+            return
+        }
+        inFlight = max(0, inFlight - 1)
+        lock.unlock()
+    }
+
+    func close() {
+        lock.lock()
+        closed = true
+        let waiting = interactive + background
+        interactive.removeAll()
+        background.removeAll()
+        lock.unlock()
+        waiting.forEach { $0.resume(throwing: HIDPPError.transportClosed) }
+    }
+
+    /// Requires `lock`.
+    private func popWaiter() -> CheckedContinuation<Void, Error>? {
+        if !interactive.isEmpty { return interactive.removeFirst() }
+        if !background.isEmpty { return background.removeFirst() }
+        return nil
     }
 }

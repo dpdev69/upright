@@ -41,6 +41,10 @@ final class ControllerTests: XCTestCase {
         return false
     }
 
+    private func isConnected(_ link: HIDPPLink, at index: UInt8) -> Bool {
+        UprightKitTests.isConnected(link, at: index)
+    }
+
     private func isAsleep(_ controller: MXVerticalController) -> Bool {
         if case .asleep = controller.state { return true }
         return false
@@ -128,10 +132,12 @@ final class ControllerTests: XCTestCase {
         controller.start()
 
         await eventually("connected") { isConnected(controller) }
+        await controller.waitUntilIdle()
         XCTAssertEqual(controller.snapshot?.deviceIndex, 4)
-        let firstDeviceRequest = mouse.sentReports.first { (1...6).contains($0[1]) }
-        XCTAssertEqual(firstDeviceRequest?[1], 4)
-        XCTAssertEqual(mouse.pingCount(to: 1), 0)
+        // Only occupied slots are asked anything; the keyboard in slot 1 isn't even pinged.
+        for slot: UInt8 in [1, 2, 3, 5, 6] {
+            XCTAssertEqual(mouse.pingCount(to: slot), 0, "slot \(slot)")
+        }
         XCTAssertEqual(mouse.registerWriteCount(0x02), 0)
     }
 
@@ -153,12 +159,25 @@ final class ControllerTests: XCTestCase {
         XCTAssertEqual(mouse.setReportingCount, SimulatedMXVertical.configurableCount)
     }
 
-    func testReceiverIgnoresOtherDevices() async {
-        let mouse = SimulatedMXVertical(mode: .receiver(slot: 1), name: "MX Keys")
-        let controller = makeController(mouse, kind: .receiver(.unifying))
-        controller.start()
-        await eventually("waiting") { controller.state == .waitingForDevice }
-        XCTAssertNil(controller.snapshot)
+    func testReceiverIgnoresKeyboardButServesOtherMouse() async throws {
+        let receiver = SimulatedReceiver.unifying([1: DeviceProfiles.mxKeys, 2: DeviceProfiles.mxMaster3])
+        let link = makeLink(receiver)
+        link.client.defaultTimeout = 0.2
+        link.configurationProvider = { _, snapshot in
+            EndpointConfiguration(divert: Set(snapshot.configurableControls.map(\.cid)))
+        }
+        link.start()
+
+        await eventually("MX Master connected") { isConnected(link, at: 2) }
+        await link.waitUntilIdle()
+        let snapshot = try XCTUnwrap(link.endpoints[2]?.snapshot)
+        XCTAssertEqual(snapshot.modelKey, ModelKey(productID: 0xB023))
+        XCTAssertEqual(receiver.diverted(slot: 2), Set(snapshot.configurableControls.map(\.cid)))
+        // The keyboard is left alone: no endpoint, no request, nothing diverted.
+        XCTAssertNil(link.endpoints[1])
+        XCTAssertEqual(receiver.pingCount(slot: 1), 0)
+        XCTAssertEqual(receiver.setReportingCount(slot: 1), 0)
+        XCTAssertTrue(receiver.diverted(slot: 1).isEmpty)
     }
 
     // MARK: Sleep and wake
@@ -524,20 +543,28 @@ final class ControllerTests: XCTestCase {
         XCTAssertEqual(events.last, ButtonEvent(cid: KnownControl.back, phase: .release))
     }
 
-    func testSecondLiveMXVerticalDoesNotStealTheSession() async {
+    func testSecondLiveMXVerticalGetsItsOwnSession() async {
         let mouse = SimulatedMXVertical(mode: .receiver(slot: 2))
-        mouse.addDevice(slot: 4, name: "MX Vertical", wirelessPID: MXVertical.wirelessProductID)
-        let controller = makeController(mouse, kind: .receiver(.unifying))
-        controller.setDesiredDiversion(defaultDiversion)
-        controller.start()
-        await eventually("connected") { isConnected(controller) }
-        let slot = controller.snapshot?.deviceIndex
+        mouse.addDevice(slot: 4, name: "MX Vertical", wirelessPID: DeviceProfiles.mxVertical.wirelessPID ?? 0)
+        let link = makeLink(mouse, kind: .receiver(.unifying))
+        link.client.defaultTimeout = 0.2
+        let diversion = defaultDiversion
+        link.configurationProvider = { _, _ in EndpointConfiguration(divert: diversion) }
+        link.start()
 
-        // A link-up from the other mouse while ours still answers.
-        mouse.onReport?(HIDPPMessage(reportID: .short, deviceIndex: slot == 2 ? 4 : 2, subID: 0x41, address: 0x04, parameters: [0x00, 0x7B, 0x40]).bytes)
+        await eventually("both connected") { isConnected(link, at: 2) && isConnected(link, at: 4) }
+        XCTAssertEqual(mouse.receiver?.diverted(slot: 2), expectedDiversion)
+        XCTAssertEqual(mouse.receiver?.diverted(slot: 4), expectedDiversion)
+        XCTAssertNotEqual(link.endpoints[2]?.snapshot?.identity?.unitID, link.endpoints[4]?.snapshot?.identity?.unitID)
+
+        // A link-up from one mouse leaves the other's session alone.
+        await link.waitUntilIdle()
+        let before = mouse.receiver?.setReportingCount(slot: 2)
+        mouse.receiver?.announceLink(slot: 4, up: true)
         await pause(0.2)
-        await controller.waitUntilIdle()
-        XCTAssertEqual(controller.snapshot?.deviceIndex, slot)
-        XCTAssertTrue(isConnected(controller))
+        await link.waitUntilIdle()
+        XCTAssertTrue(isConnected(link, at: 2))
+        XCTAssertTrue(isConnected(link, at: 4))
+        XCTAssertEqual(mouse.receiver?.setReportingCount(slot: 2), before)
     }
 }

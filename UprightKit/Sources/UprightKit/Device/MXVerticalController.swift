@@ -1,29 +1,62 @@
 import Foundation
 
-/// Owns one HID interface (receiver or directly connected mouse) and keeps an MX Vertical on it
-/// configured: finds the mouse, applies button diversion, and re-applies it whenever the mouse
-/// wakes up, reconnects, or the Mac resumes from sleep.
+/// What an `EndpointController` needs from the hub (`HIDPPLink`) that owns it.
+@MainActor
+protocol EndpointHub: AnyObject {
+    func endpoint(_ endpoint: EndpointController, didChangeState state: EndpointController.State)
+    /// The endpoint identified its device and nothing is diverted yet: retire stale endpoints
+    /// of the same unit and return the configuration to apply.
+    func endpointDidIdentify(_ endpoint: EndpointController, snapshot: DeviceSnapshot) -> EndpointConfiguration
+    func endpoint(_ endpoint: EndpointController, didEmit event: ButtonEvent)
+    func endpoint(_ endpoint: EndpointController, didMove delta: PointerDelta)
+    /// `chosenByDevice`: adopted from the mouse or stepped by `cycleDPI`, not set by the app.
+    func endpoint(_ endpoint: EndpointController, didChangeDesiredDPI dpi: Int?, chosenByDevice: Bool)
+    /// A receiver slot is coming back after losing its link: make sure the receiver still
+    /// sends notifications (coalesced across slots).
+    func endpointNeedsReceiverNotifications(_ endpoint: EndpointController) async
+    func endpoint(_ endpoint: EndpointController, log text: String)
+}
+
+/// Keeps one mouse configured: a receiver slot (1...6) or a directly connected device (0xFF).
+///
+/// It identifies the device, applies the configuration its hub hands it, and re-applies it
+/// whenever the mouse wakes up, reconnects, or the Mac resumes from sleep. Discovery and
+/// message routing belong to the hub (`HIDPPLink`); everything here is scoped to one address.
 ///
 /// Everything that talks to the device runs on one serial operation queue, so probes,
-/// reconfigurations and mapping changes never interleave. While the transport is open the
-/// controller never gives up: a mouse that stops answering is retried with exponential backoff,
-/// and any report it sends in the meantime triggers a reconfiguration right away. Closing the
-/// transport or calling `shutdown()` is terminal.
+/// reconfigurations and mapping changes for this mouse never interleave (requests to other
+/// mice interleave with them at the client's request gate). While the transport is open the
+/// controller never gives up: a mouse that stops answering is retried with exponential
+/// backoff, and any report it sends in the meantime triggers a reconfiguration right away.
+/// A device that isn't a supported mouse ends in the terminal `.unsupported` state and is
+/// never written to. Retiring the endpoint, closing the transport or `shutdown()` is terminal.
 @MainActor
-public final class MXVerticalController {
+public final class EndpointController {
     public enum State: Hashable, Sendable {
         case probing
-        /// No MX Vertical is answering yet (off, asleep, or paired elsewhere). Retried automatically.
+        /// The mouse isn't answering yet (off, asleep, or paired elsewhere). Retried automatically.
         case waitingForDevice
         case connected(DeviceSnapshot)
         /// The mouse stopped answering; it is reconfigured as soon as it answers again.
         case asleep(DeviceSnapshot)
+        /// Not a mouse Upright can serve. Terminal: no retry, no writes, never diverted.
+        case unsupported(UnsupportedReason, DeviceSnapshot?)
         /// The device can't be used right now. `.failed("Disconnected")` (transport closed) is terminal.
         case failed(String)
     }
 
     public let client: HIDPPClient
     public let kind: TransportKind
+    public let address: DeviceAddress
+    /// The receiver's wireless PID for the slot, or the interface's product ID on a direct link.
+    public let transportPID: UInt16?
+    /// The kind the receiver lists for the slot; the device's own answer wins.
+    public let kindHint: DeviceKind?
+    /// The name to show when the device reports none (the IOHID product string of a direct link).
+    public let fallbackName: String?
+    /// Whether an unanswered probe is retried with backoff. False only for a receiver slot that
+    /// isn't known to be paired while the receiver sends link notifications (they announce it).
+    public internal(set) var retriesWhileWaiting = true
 
     public private(set) var state: State = .probing {
         didSet {
@@ -33,7 +66,7 @@ public final class MXVerticalController {
             if case .connected = oldValue, !Self.isConnected(state) {
                 session?.releaseAll()
             }
-            onStateChange?(state)
+            hub?.endpoint(self, didChangeState: state)
         }
     }
     public private(set) var desiredDiversion: Set<UInt16> = []
@@ -41,42 +74,29 @@ public final class MXVerticalController {
     public private(set) var desiredRawXY: Set<UInt16> = []
     /// The pointer speed to keep. Many mice forget a speed set over HID++ when they reconnect,
     /// so it is re-applied when the mouse comes back at its default speed. A mouse that comes
-    /// back at another speed had it changed with its top button, and that speed is adopted
+    /// back at another speed had it changed with its own button, and that speed is adopted
     /// instead. Nil leaves the mouse's own setting alone.
-    public private(set) var desiredDPI: Int? {
-        didSet { if desiredDPI != oldValue { onDesiredDPIChange?(desiredDPI) } }
-    }
-    /// Set by `shutdown()` or when the transport closes. No further work runs afterwards.
+    public private(set) var desiredDPI: Int?
+    /// Set when the endpoint is retired, shut down, or its transport closes. No work runs afterwards.
     public private(set) var isShutDown = false
 
-    public var onStateChange: ((State) -> Void)?
-    public var onButtonEvent: ((ButtonEvent) -> Void)?
-    /// Raw movement (dx, dy) while a raw-XY control is held.
-    public var onPointerDelta: ((Int, Int) -> Void)?
-    /// `desiredDPI` changed: set through the API, by `cycleDPI`, or adopted from the mouse (by
-    /// `refreshDPI()` or a reconnect) after the top button changed the speed natively.
-    public var onDesiredDPIChange: ((Int?) -> Void)?
-    public var onLog: ((String) -> Void)?
+    var tuning: ControllerTuning
 
-    /// How long to wait for a receiver slot to answer during discovery.
-    public var probeTimeout: TimeInterval = 1.0
-    /// Pause before reconfiguring a mouse that just woke up, so it can finish reconnecting.
-    /// Wake-up signals that arrive within this window are coalesced into one pass.
-    public var reconnectDelay: TimeInterval = 0.6
-    /// First retry delay while the mouse doesn't answer; doubles per attempt up to `retryMaxDelay`.
-    public var retryBaseDelay: TimeInterval = 1
-    public var retryMaxDelay: TimeInterval = 30
-    /// How often the battery level is re-read while connected (0 disables).
-    public var batteryRefreshInterval: TimeInterval = 600
-    /// How long to listen for slot announcements when a receiver can't list its pairings.
-    public var announcementWait: TimeInterval = 0.3
-
+    private weak var hub: EndpointHub?
     private var session: DeviceSession?
     private var started = false
+    /// The last pointer speed the hub's configuration asked for (edge-triggered: a speed the
+    /// mouse chose isn't overridden until the configuration itself changes).
+    private var configuredDPI: Int?
+    /// The unit last identified here, kept when the session is dropped.
+    private(set) var lastDeviceID: DeviceID?
+    /// When the configuration was last applied (announcement echo detection).
+    private(set) var configuredAt: Date?
+    /// The slot lost its link (or stopped answering) since the last reconfiguration.
+    private var linkWasLost = false
 
     private enum OperationKey: Hashable {
-        case probe, reconfigure, recover, diversion, battery, dpi, deviceInfo
-        case connect(UInt8)
+        case probe, reconfigure, recover, diversion, battery, dpi, deviceInfo, connect
         /// Every cycle request runs; they aren't coalesced like the other keys.
         case cycleDPI(Int)
 
@@ -90,7 +110,7 @@ public final class MXVerticalController {
 
     private struct Operation {
         let key: OperationKey
-        let body: @MainActor (MXVerticalController) async -> Void
+        let body: @MainActor (EndpointController) async -> Void
     }
 
     private var queue: [Operation] = []
@@ -103,42 +123,141 @@ public final class MXVerticalController {
     private var batteryTimer: Task<Void, Never>?
     private var cycleRequests = 0
 
-    // Receiver bookkeeping.
-    /// Wireless PIDs per slot, from the pairing register and 0x41 notifications.
-    private var slotPIDs: [UInt8: UInt16] = [:]
-    /// Slots that answered with another device's name.
-    private var otherDeviceSlots: Set<UInt8> = []
-    private var notificationsEnabled = false
-    private var heardAnnouncement = false
-    private var announcementsRequestedAt: Date?
-    private var configuredAt: Date?
-
-    public init(transport: HIDPPTransport, kind: TransportKind) {
+    init(
+        client: HIDPPClient,
+        kind: TransportKind,
+        address: DeviceAddress,
+        hub: EndpointHub,
+        tuning: ControllerTuning = .init(),
+        transportPID: UInt16? = nil,
+        kindHint: DeviceKind? = nil,
+        fallbackName: String? = nil
+    ) {
+        self.client = client
         self.kind = kind
-        self.client = HIDPPClient(transport: transport)
-        client.onUnsolicited = { [weak self] message in
-            MainActorDelivery.run { self?.handle(message) }
-        }
-        client.onClose = { [weak self] in
-            MainActorDelivery.run { self?.transportClosed() }
-        }
+        self.address = address
+        self.hub = hub
+        self.tuning = tuning
+        self.transportPID = transportPID
+        self.kindHint = kindHint
+        self.fallbackName = fallbackName
     }
 
     public var snapshot: DeviceSnapshot? { session?.snapshot }
 
-    // MARK: Public API
+    public var isUnsupported: Bool {
+        if case .unsupported = state { return true }
+        return false
+    }
 
-    public func start() {
+    /// True while an operation is queued or running.
+    var isBusy: Bool { runner != nil }
+
+    // MARK: Lifecycle (driven by the hub)
+
+    /// Probes the device (a known receiver slot, or a direct link).
+    func start() {
         guard !started else { return }
         started = true
         enqueue(.probe) { await $0.probe() }
     }
 
-    /// Re-applies configuration (after the Mac wakes, or on request). Falls back to a full
-    /// re-probe when no mouse has been found yet.
-    public func refresh() {
+    /// Starts on a slot the receiver announced, or that sent a report: waits `reconnectDelay`
+    /// for the mouse to finish connecting, then connects without a `.probing` flicker.
+    func startAnnounced() {
+        guard !started else { return }
+        started = true
+        scheduleConnect()
+    }
+
+    /// Delivers a message addressed to this endpoint (receiver-level 0x40/0x41 are the hub's).
+    func receive(_ message: HIDPPMessage) {
+        guard !isShutDown, !isUnsupported else { return }
+        if let session, session.handle(message) {
+            if case .asleep = state { scheduleReconfigure("The mouse is sending reports again") }
+            return
+        }
+        noteActivity(from: message)
+    }
+
+    /// The receiver reported the slot's link going up or down (0x41). `announcementEcho`: the
+    /// hub asked for announcements after this slot was configured, so a link-up is not news.
+    func linkChanged(up: Bool, announcementEcho: Bool) {
+        guard !isShutDown, !isUnsupported else { return }
+        if let session {
+            if up {
+                if announcementEcho { return }
+                session.invalidateAppliedState()
+                scheduleReconfigure("Slot \(address.index) link restored")
+            } else {
+                log("Slot \(address.index) link lost")
+                linkWasLost = true
+                session.releaseAll()
+                if let snapshot = session.snapshot { transition(.asleep(snapshot)) }
+            }
+            return
+        }
+        guard up else { return }
+        log(String(format: "Slot %d connected", Int(address.index)))
+        scheduleConnect()
+    }
+
+    /// Removes the endpoint: releases held buttons and, when the device may still be reachable,
+    /// hands its diverted buttons back without waiting for replies. Terminal.
+    func retire(sendingRestore: Bool) {
+        guard !isShutDown else { return }
+        stopAllWork()
+        if let session {
+            session.releaseAll()
+            if sendingRestore { session.restoreMessages().forEach(client.sendWithoutReply) }
+        }
+        dropSession()
+    }
+
+    /// Stops all work and hands every diverted button back to the mouse without waiting for
+    /// replies. Terminal. The hub closes the client afterwards.
+    func shutdown() {
+        retire(sendingRestore: true)
+    }
+
+    /// The transport closed: everything held is released. Terminal.
+    func transportDidClose() {
+        stopAllWork()
+        dropSession()
+        state = .failed("Disconnected")
+    }
+
+    /// Drops the session and identifies the device again. No effect on an unsupported device.
+    func reconnect() {
+        guard canWork, !isUnsupported else { return }
         retryAttempt = 0
-        scheduleReconfigure(nil)
+        cancelRetry()
+        reconfigureTimer?.cancel()
+        reconfigureTimer = nil
+        dropSession()
+        started = true
+        enqueue(.probe) { await $0.probe() }
+    }
+
+    // MARK: Configuration
+
+    /// Applies what the hub's configuration provider decided for this mouse. The pointer speed
+    /// is edge-triggered: it is applied when the configured value changes, so a speed chosen on
+    /// the mouse itself isn't reverted by an unrelated resync.
+    public func apply(_ configuration: EndpointConfiguration) {
+        setDesiredDiversion(configuration.divert)
+        setDesiredRawXY(configuration.rawXY)
+        if configuration.dpi != configuredDPI {
+            configuredDPI = configuration.dpi
+            if configuration.dpi != desiredDPI { setDesiredDPI(configuration.dpi) }
+        }
+    }
+
+    /// A pointer speed chosen in the app for this mouse (nil: leave the mouse's own setting).
+    /// It also becomes the configured speed, so an identical configuration doesn't re-apply it.
+    func setDPIFromApp(_ dpi: Int?) {
+        configuredDPI = dpi
+        setDesiredDPI(dpi)
     }
 
     public func setDesiredDiversion(_ cids: Set<UInt16>) {
@@ -147,8 +266,8 @@ public final class MXVerticalController {
         scheduleDiversionUpdate()
     }
 
-    /// Controls that should report raw movement (dx, dy through `onPointerDelta`) instead of
-    /// moving the pointer while held. They are diverted as well, whatever `desiredDiversion` says.
+    /// Controls that should report raw movement (as pointer deltas) instead of moving the
+    /// pointer while held. They are diverted as well, whatever `desiredDiversion` says.
     /// Controls without the raw XY capability are only diverted.
     public func setDesiredRawXY(_ cids: Set<UInt16>) {
         guard cids != desiredRawXY else { return }
@@ -174,7 +293,7 @@ public final class MXVerticalController {
 
     /// Like `setDPI`; nil stops re-applying a speed and leaves the mouse's setting alone.
     public func setDesiredDPI(_ value: Int?) {
-        desiredDPI = value.map { snapshot?.dpi?.nearest(to: $0) ?? $0 }
+        updateDesiredDPI(value.map { snapshot?.dpi?.nearest(to: $0) ?? $0 }, chosenByDevice: false)
         guard desiredDPI != nil else { return }
         enqueue(.dpi) { controller in
             await controller.withConnectedSession("change the pointer speed") { session in
@@ -189,20 +308,20 @@ public final class MXVerticalController {
         cycleRequests += 1
         enqueue(.cycleDPI(cycleRequests)) { controller in
             await controller.withConnectedSession("change the pointer speed") { session in
-                // The top button may have changed the speed natively since we last looked.
+                // The mouse's own button may have changed the speed since we last looked.
                 try await session.refreshDPI()
                 guard let dpi = session.snapshot?.dpi else {
                     controller.log("This mouse can't change its pointer speed")
                     return
                 }
-                controller.desiredDPI = dpi.nextPreset(after: dpi.current, presets: presets)
+                controller.updateDesiredDPI(dpi.nextPreset(after: dpi.current, presets: presets), chosenByDevice: true)
                 try await controller.applyDesiredDPI(to: session)
             }
         }
     }
 
     /// Re-reads the pointer speed. A speed that differs from `desiredDPI` was changed on the
-    /// mouse (its top button cycles speeds natively when not diverted) and becomes the new
+    /// mouse (its DPI button cycles speeds natively when not diverted) and becomes the new
     /// `desiredDPI`. Meant for when the UI is about to show it.
     public func refreshDPI() {
         enqueue(.dpi) { controller in
@@ -210,6 +329,12 @@ public final class MXVerticalController {
                 try await controller.refreshDPI(of: session, adopting: true)
             }
         }
+    }
+
+    private func updateDesiredDPI(_ value: Int?, chosenByDevice: Bool) {
+        guard value != desiredDPI else { return }
+        desiredDPI = value
+        hub?.endpoint(self, didChangeDesiredDPI: value, chosenByDevice: chosenByDevice)
     }
 
     // MARK: Device information
@@ -245,16 +370,11 @@ public final class MXVerticalController {
         client.sendWithoutReply(message)
     }
 
-    /// Stops all work, hands every diverted button back to the mouse without waiting for
-    /// replies, then closes the client. Terminal.
-    public func shutdown() {
-        guard !isShutDown else { return }
-        stopAllWork()
-        if let session {
-            session.releaseAll()
-            session.restoreMessages().forEach(client.sendWithoutReply)
-        }
-        client.close()
+    /// Re-applies configuration (after the Mac wakes, or on request). Falls back to a full
+    /// re-probe when the mouse hasn't been identified yet.
+    public func refresh() {
+        retryAttempt = 0
+        scheduleReconfigure(nil)
     }
 
     /// Waits until every queued operation has finished. Mainly useful in tests.
@@ -266,7 +386,7 @@ public final class MXVerticalController {
 
     // MARK: Operation queue
 
-    private func enqueue(_ key: OperationKey, _ body: @escaping @MainActor (MXVerticalController) async -> Void) {
+    private func enqueue(_ key: OperationKey, _ body: @escaping @MainActor (EndpointController) async -> Void) {
         guard !isShutDown else { return }
         // Anything already waiting with the same key will do the same work.
         if queue.contains(where: { $0.key == key }) { return }
@@ -310,11 +430,11 @@ public final class MXVerticalController {
     /// Debounces wake-up signals (0x41 link-up, 0x1D4B, Mac wake, a report from a sleeping
     /// mouse) so a burst of them results in a single reconfiguration.
     private func scheduleReconfigure(_ reason: String?) {
-        guard !isShutDown else { return }
+        guard !isShutDown, !isUnsupported else { return }
         cancelRetry()
         guard reconfigureTimer == nil else { return }
         if let reason { log(reason) }
-        let delay = reconnectDelay
+        let delay = tuning.reconnectDelay
         reconfigureTimer = Task { [weak self] in
             if delay > 0 { try? await Task.sleep(nanoseconds: Self.nanoseconds(delay)) }
             guard let self, !Task.isCancelled else { return }
@@ -325,10 +445,10 @@ public final class MXVerticalController {
 
     /// Exponential backoff, capped at `retryMaxDelay`. Never gives up while the transport is open.
     private func scheduleRetry() {
-        guard !isShutDown, retryTimer == nil else { return }
-        let delay = min(retryBaseDelay * pow(2, Double(min(retryAttempt, 16))), retryMaxDelay)
+        guard !isShutDown, !isUnsupported, retryTimer == nil else { return }
+        let delay = min(tuning.retryBaseDelay * pow(2, Double(min(retryAttempt, 16))), tuning.retryMaxDelay)
         retryAttempt += 1
-        if delay < retryMaxDelay || retryAttempt <= 1 || retryAttempt % 10 == 0 {
+        if delay < tuning.retryMaxDelay || retryAttempt <= 1 || retryAttempt % 10 == 0 {
             log(String(format: "Trying again in %.1f s", delay))
         }
         retryTimer = Task { [weak self] in
@@ -345,8 +465,8 @@ public final class MXVerticalController {
     }
 
     private func startBatteryRefresh() {
-        guard batteryTimer == nil, batteryRefreshInterval > 0, !isShutDown else { return }
-        let interval = batteryRefreshInterval
+        guard batteryTimer == nil, tuning.batteryRefreshInterval > 0, !isShutDown else { return }
+        let interval = tuning.batteryRefreshInterval
         batteryTimer = Task { [weak self] in
             while !Task.isCancelled {
                 try? await Task.sleep(nanoseconds: Self.nanoseconds(interval))
@@ -373,86 +493,31 @@ public final class MXVerticalController {
     }
 
     private func probe(retrying: Bool = false) async {
-        guard canWork, session == nil else { return }
+        guard canWork, session == nil, !isUnsupported else { return }
         cancelRetry()
         // Retries stay in the waiting state so the UI doesn't flicker on every attempt.
-        if !retrying { transition(.probing) }
-        switch kind {
-        case .direct(let connection):
-            if !retrying { log("Probing MX Vertical over \(connection.title)") }
-            switch await connect(index: 0xFF) {
-            case .configured, .asleep, .closed:
-                return
-            case .unreachable(let error):
-                log("The MX Vertical isn't answering yet (\(error))")
-                transition(.waitingForDevice)
-            case .failed(let error):
-                log("Setup failed: \(error)")
-                transition(.failed(NSLocalizedString("The MX Vertical didn't answer HID++ requests. Try clicking a button to wake it, then choose Reconnect.", comment: "Connection status shown when setup fails")))
+        if !retrying {
+            transition(.probing)
+            switch kind {
+            case .direct(let connection): log("Probing the mouse over \(connection.title)")
+            case .receiver(let connection): log("Probing slot \(address.index) of the \(connection.title)")
             }
-            scheduleRetry()
-        case .receiver(let connection):
-            if !retrying { log("Probing \(connection.title)") }
-            await probeReceiver(retrying: retrying)
         }
+        switch await connect() {
+        case .configured, .asleep, .closed, .unsupported:
+            return
+        case .unreachable(let error):
+            if !retrying || !isReceiver { log("The mouse isn't answering yet (\(error))") }
+            transition(.waitingForDevice)
+        case .failed(let error):
+            log("Setup failed: \(error)")
+            transition(isReceiver ? .waitingForDevice : .failed(Self.setupFailedMessage))
+        }
+        if retriesWhileWaiting { scheduleRetry() }
     }
 
-    private func probeReceiver(retrying: Bool) async {
-        await enableReceiverNotifications()
-        if !retrying || slotPIDs.isEmpty {
-            if !(await readPairedDevices()), await requestSlotAnnouncements() {
-                log("Receiver announced its paired devices")
-            }
-        }
-        guard canWork, session == nil else { return }
-
-        let knownSlots = mxSlots
-        let slots = knownSlots.isEmpty ? (UInt8(1)...6).filter { !otherDeviceSlots.contains($0) } : knownSlots
-        for slot in slots {
-            guard canWork else { return }
-            guard session == nil else { return }
-            let device = HIDPPDevice(client: client, index: slot)
-            do {
-                let version = try await device.protocolVersion(timeout: probeTimeout)
-                guard version.major >= 2 else {
-                    log("Slot \(slot): HID++ \(version.major).\(version.minor) device, skipping")
-                    otherDeviceSlots.insert(slot)
-                    continue
-                }
-                guard let name = try? await device.name() else {
-                    log("Slot \(slot): could not read the device name")
-                    continue
-                }
-                guard MXVertical.matches(name: name) else {
-                    log("Slot \(slot): \(name), skipping")
-                    otherDeviceSlots.insert(slot)
-                    continue
-                }
-                log("Slot \(slot): \(name)")
-                switch await connect(index: slot) {
-                case .configured, .asleep, .closed:
-                    return
-                case .unreachable(let error):
-                    log("Slot \(slot) stopped answering: \(error)")
-                case .failed(let error):
-                    log("Slot \(slot): setup failed: \(error)")
-                }
-            } catch HIDPPError.transportClosed {
-                return
-            } catch let error as HIDPPError where error.meansDeviceUnreachable {
-                continue
-            } catch {
-                log("Slot \(slot): \(error)")
-            }
-        }
-        guard canWork, session == nil else { return }
-        if !retrying { log("No MX Vertical is answering on the receiver yet") }
-        transition(.waitingForDevice)
-        // The receiver announces the mouse when it wakes (0x41). Poll only when we know which
-        // slot to ask, or when the receiver can't send notifications.
-        if !mxSlots.isEmpty || !notificationsEnabled {
-            scheduleRetry()
-        }
+    private static var setupFailedMessage: String {
+        NSLocalizedString("The mouse didn't answer HID++ requests. Try clicking a button to wake it, then choose Reconnect.", comment: "Connection status shown when setup fails")
     }
 
     private enum ConnectOutcome {
@@ -463,27 +528,46 @@ public final class MXVerticalController {
         /// Nothing answered; no session was created.
         case unreachable(Error)
         case failed(Error)
+        /// Not a supported mouse (terminal).
+        case unsupported
         case closed
     }
 
-    private func connect(index: UInt8) async -> ConnectOutcome {
-        let candidate = DeviceSession(device: HIDPPDevice(client: client, index: index), connection: kind.connection)
+    private func connect() async -> ConnectOutcome {
+        let candidate = DeviceSession(
+            device: HIDPPDevice(client: client, index: address.index),
+            connection: kind.connection,
+            address: address,
+            transportPID: transportPID,
+            fallbackName: fallbackName,
+            kindHint: kindHint
+        )
+        let snapshot: DeviceSnapshot
         do {
-            let snapshot = try await candidate.start()
-            if isReceiver, !MXVertical.matches(name: snapshot.name) {
-                otherDeviceSlots.insert(index)
-                throw HIDPPError.notMXVertical(snapshot.name)
-            }
-            guard canWork else { return .closed }
-            adopt(candidate)
-            log("Connected to \(snapshot.name) (HID++ \(snapshot.protocolVersion), \(snapshot.controls.count) controls)")
+            snapshot = try await candidate.start(pingTimeout: isReceiver ? tuning.probeTimeout : nil)
         } catch HIDPPError.transportClosed {
             return .closed
+        } catch HIDPPError.unsupportedDevice(let reason, let partial) {
+            guard canWork else { return .closed }
+            becomeUnsupported(reason, partial: partial)
+            return .unsupported
         } catch let error as HIDPPError where error.meansDeviceUnreachable {
             return .unreachable(error)
         } catch {
-            return .failed(error)
+            return canWork ? .failed(error) : .closed
         }
+        guard canWork else { return .closed }
+        adopt(candidate)
+        lastDeviceID = snapshot.identity?.deviceID(at: address)
+        log("Connected to \(snapshot.name) (HID++ \(snapshot.protocolVersion), \(snapshot.controls.count) controls)")
+
+        // Pulled before anything is diverted, so no event is ever anonymous.
+        let configuration = hub?.endpointDidIdentify(self, snapshot: snapshot) ?? .native
+        guard session === candidate, canWork else { return .closed }
+        desiredDiversion = configuration.divert
+        desiredRawXY = configuration.rawXY
+        configuredDPI = configuration.dpi
+        updateDesiredDPI(configuration.dpi.map { snapshot.dpi?.nearest(to: $0) ?? $0 }, chosenByDevice: false)
 
         do {
             try await applyDesiredDiversion(to: candidate, force: true)
@@ -501,17 +585,28 @@ public final class MXVerticalController {
             return .asleep
         } catch {
             if session === candidate { dropSession() }
-            return .failed(error)
+            return canWork ? .failed(error) : .closed
         }
     }
 
+    private func becomeUnsupported(_ reason: UnsupportedReason, partial: DeviceSnapshot?) {
+        let name = partial?.name ?? "The device"
+        log("\(name): not supported (\(reason.message)); leaving it alone")
+        cancelRetry()
+        transition(.unsupported(reason, partial))
+    }
+
     private func reconfigure() async {
-        guard canWork else { return }
+        guard canWork, !isUnsupported else { return }
         guard let session else {
             await probe(retrying: state == .waitingForDevice)
             return
         }
-        if isReceiver { await enableReceiverNotifications() }
+        if isReceiver, linkWasLost {
+            linkWasLost = false
+            await hub?.endpointNeedsReceiverNotifications(self)
+            guard self.session === session, canWork else { return }
+        }
         do {
             try await applyDesiredDiversion(to: session, force: true)
             guard self.session === session, canWork else { return }
@@ -536,45 +631,39 @@ public final class MXVerticalController {
         }
     }
 
-    /// Connects to a slot the receiver announced (link-up) or that sent a report. Moves the
-    /// session when the MX Vertical was re-paired to another slot.
-    private func connectAnnounced(_ slot: UInt8) async {
-        guard canWork else { return }
-        if reconnectDelay > 0 {
-            try? await Task.sleep(nanoseconds: Self.nanoseconds(reconnectDelay))
+    /// Connects to a slot the receiver announced (link-up) or that sent a report.
+    private func connectAnnounced() async {
+        guard canWork, !isUnsupported else { return }
+        if tuning.reconnectDelay > 0 {
+            try? await Task.sleep(nanoseconds: Self.nanoseconds(tuning.reconnectDelay))
             guard canWork else { return }
         }
-        if let current = session {
-            if current.device.index == slot { return }
-            if case .connected = state, (try? await current.device.protocolVersion(timeout: probeTimeout)) != nil {
-                log("Another MX Vertical came up on slot \(slot); staying on slot \(current.device.index)")
-                return
-            }
-            guard canWork, session === current else { return }
-            log("The MX Vertical moved from slot \(current.device.index) to slot \(slot)")
-            dropSession()
-        }
-        switch await connect(index: slot) {
-        case .configured, .asleep, .closed:
+        guard session == nil else { return }
+        switch await connect() {
+        case .configured, .asleep, .closed, .unsupported:
             return
         case .unreachable(let error):
-            log("Slot \(slot) isn't answering yet: \(error)")
+            log("Slot \(address.index) isn't answering yet: \(error)")
             transition(.waitingForDevice)
             scheduleRetry()
         case .failed(let error):
-            log("Slot \(slot): \(error)")
+            log("Slot \(address.index): \(error)")
             if session == nil { transition(.waitingForDevice) }
         }
     }
 
     private func applyDesiredDiversion(to session: DeviceSession, force: Bool) async throws {
-        let failures = try await session.applyDiversion(desiredDiversion, rawXY: desiredRawXY, force: force)
+        let wanted = desiredDiversion
+        let rawXY = desiredRawXY
+        let failures = try await HIDPPClient.$lane.withValue(.interactive) {
+            try await session.applyDiversion(wanted, rawXY: rawXY, force: force)
+        }
         log("Diverted controls: \(Self.describe(session.divertedControls))")
-        if !desiredRawXY.isEmpty || !session.rawXYControls.isEmpty {
+        if !rawXY.isEmpty || !session.rawXYControls.isEmpty {
             log("Raw XY controls: \(Self.describe(session.rawXYControls))")
         }
         let configurable = Set(session.snapshot?.configurableControls.map(\.cid) ?? [])
-        let unsupported = desiredRawXY.intersection(configurable).subtracting(session.rawXYControls).subtracting(failures.keys)
+        let unsupported = rawXY.intersection(configurable).subtracting(session.rawXYControls).subtracting(failures.keys)
         if !unsupported.isEmpty {
             log("Controls without raw XY support (diverted only): \(Self.describe(unsupported))")
         }
@@ -591,7 +680,10 @@ public final class MXVerticalController {
             return
         }
         do {
-            if let applied = try await session.setDPI(desired) {
+            let applied = try await HIDPPClient.$lane.withValue(.interactive) {
+                try await session.setDPI(desired)
+            }
+            if let applied {
                 log("Pointer speed: \(applied) DPI")
             }
         } catch let error as HIDPPError where error.meansDeviceUnreachable || error == .transportClosed {
@@ -601,7 +693,7 @@ public final class MXVerticalController {
         }
     }
 
-    /// After a (re)connect: keeps a speed chosen with the mouse's top button, or re-applies
+    /// After a (re)connect: keeps a speed chosen with the mouse's own button, or re-applies
     /// `desiredDPI` when the mouse forgot it.
     ///
     /// A speed that is neither `desiredDPI`, the mouse's default, nor `lastKnown` (what this
@@ -625,7 +717,7 @@ public final class MXVerticalController {
         if dpi.current == desired { return }
         if dpi.current != dpi.defaultValue, dpi.current != lastKnown {
             log("Keeping pointer speed \(dpi.current) DPI chosen on the mouse")
-            desiredDPI = dpi.current
+            updateDesiredDPI(dpi.current, chosenByDevice: true)
             return
         }
         try await applyDesiredDPI(to: session)
@@ -638,7 +730,7 @@ public final class MXVerticalController {
         guard adopting, let desired = desiredDPI, desired == desiredBeforeRead,
               let current = session.snapshot?.dpi?.current, current != desired else { return }
         log("Pointer speed changed on the mouse to \(current) DPI")
-        desiredDPI = current
+        updateDesiredDPI(current, chosenByDevice: true)
     }
 
     /// Runs a non-link operation against the connected session and publishes the result.
@@ -655,68 +747,23 @@ public final class MXVerticalController {
             guard self.session === session else { return }
             becameUnreachable(session, error)
         } catch {
+            guard canWork else { return }
             log("Could not \(action): \(error)")
         }
-    }
-
-    /// HID++ 1.0 register 0x00: enable wireless (0x000100) and software-present (0x000800) notifications.
-    private func enableReceiverNotifications() async {
-        let write = HIDPPMessage.receiverRegisterWrite(0x00, parameters: [0x00, 0x09, 0x00])
-        do {
-            _ = try await client.send(write, timeout: probeTimeout)
-            notificationsEnabled = true
-        } catch {
-            log("Receiver notifications unavailable: \(error)")
-        }
-    }
-
-    /// Unifying receivers list their pairings in register 0xB5, sub-registers 0x20...0x25:
-    /// [sub-register, destination ID, report interval, wireless PID (big-endian), ...].
-    /// Reading them doesn't wake any device. Returns false when no slot could be read
-    /// (Bolt receivers use a different layout; the MX Vertical pairs over Unifying only).
-    private func readPairedDevices() async -> Bool {
-        guard case .receiver(.unifying) = kind else { return false }
-        var listed = false
-        for slot in UInt8(1)...6 {
-            let subRegister = 0x20 + slot - 1
-            do {
-                let reply = try await client.send(.receiverLongRegisterRead(0xB5, parameters: [subRegister]), timeout: probeTimeout)
-                guard reply.parameters[0] == subRegister else { continue }
-                listed = true
-                let pid = UInt16(reply.parameters[3]) << 8 | UInt16(reply.parameters[4])
-                if pid != 0 { slotPIDs[slot] = pid }
-            } catch HIDPPError.hidpp10(let code) where code == 0x01 || code == 0x02 {
-                return false // Register not supported.
-            } catch HIDPPError.hidpp10 {
-                continue // Empty slot.
-            } catch {
-                return listed
-            }
-        }
-        return listed
-    }
-
-    /// Register 0x02 = 0x02 makes the receiver send a 0x41 notification for every paired device.
-    private func requestSlotAnnouncements() async -> Bool {
-        heardAnnouncement = false
-        do {
-            _ = try await client.send(.receiverRegisterWrite(0x02, parameters: [0x02, 0x00, 0x00]), timeout: probeTimeout)
-        } catch {
-            return false
-        }
-        announcementsRequestedAt = Date()
-        if announcementWait > 0 {
-            try? await Task.sleep(nanoseconds: Self.nanoseconds(announcementWait))
-        }
-        return heardAnnouncement
     }
 
     // MARK: Session lifecycle
 
     private func adopt(_ new: DeviceSession) {
         replaceSession(with: new)
-        new.onButtonEvent = { [weak self] event in self?.onButtonEvent?(event) }
-        new.onPointerDelta = { [weak self] dx, dy in self?.onPointerDelta?(dx, dy) }
+        new.onButtonEvent = { [weak self] event in
+            guard let self else { return }
+            self.hub?.endpoint(self, didEmit: event)
+        }
+        new.onSourcedPointerDelta = { [weak self] delta in
+            guard let self else { return }
+            self.hub?.endpoint(self, didMove: delta)
+        }
         new.onReconfigurationNeeded = { [weak self] in
             self?.scheduleReconfigure("Mouse reported a reconnect")
         }
@@ -730,6 +777,7 @@ public final class MXVerticalController {
             old.releaseAll()
             old.onButtonEvent = nil
             old.onPointerDelta = nil
+            old.onSourcedPointerDelta = nil
             old.onReconfigurationNeeded = nil
             old.onBatteryChange = nil
         }
@@ -753,133 +801,42 @@ public final class MXVerticalController {
     /// until it powers off), release anything held, and retry with backoff.
     private func becameUnreachable(_ session: DeviceSession, _ error: Error) {
         log("The mouse isn't answering (\(error)); will retry")
+        linkWasLost = true
         session.releaseAll()
         session.invalidateAppliedState()
         if let snapshot = session.snapshot { transition(.asleep(snapshot)) }
         scheduleRetry()
     }
 
-    private func transportClosed() {
-        let wasShutDown = isShutDown
-        stopAllWork()
-        dropSession()
-        if !wasShutDown { log("The HID connection closed") }
-        state = .failed("Disconnected")
-    }
-
     // MARK: Events
-
-    private func handle(_ message: HIDPPMessage) {
-        guard !isShutDown else { return }
-        if isReceiver {
-            let slot = message.deviceIndex
-            guard (1...6).contains(slot) else { return }
-            switch message.subID {
-            case 0x41:
-                handleConnectionNotification(message)
-                return
-            case 0x40:
-                handleDisconnectionNotification(message)
-                return
-            default:
-                break
-            }
-        }
-        if let session, session.handle(message) {
-            if case .asleep = state { scheduleReconfigure("The mouse is sending reports again") }
-            return
-        }
-        noteActivity(from: message)
-    }
 
     /// A report from the mouse while it isn't configured means it's awake: act on it now
     /// instead of waiting for the next retry.
     private func noteActivity(from message: HIDPPMessage) {
         // Late replies and errors for our own requests carry our software ID or an error sub-ID.
         guard message.softwareID == 0, message.subID != 0x8F, message.subID != 0xFF else { return }
+        guard message.deviceIndex == address.index else { return }
         switch state {
         case .waitingForDevice, .asleep, .failed: break
-        case .probing, .connected: return
+        case .probing, .connected, .unsupported: return
         }
         guard !isWorkingOnLink else { return }
-        if isReceiver {
-            let slot = message.deviceIndex
-            guard !otherDeviceSlots.contains(slot) else { return }
-            if let session {
-                guard session.device.index == slot else { return }
-            } else {
-                log("Slot \(slot) sent a report; checking for an MX Vertical there")
-                scheduleConnect(slot)
-                return
-            }
-        } else if message.deviceIndex != 0xFF {
+        if isReceiver, session == nil {
+            log("Slot \(address.index) sent a report; checking the device there")
+            scheduleConnect()
             return
         }
         scheduleReconfigure("The mouse sent a report; reconfiguring")
     }
 
-    /// HID++ 1.0 device-connection notification: params[0] bit 6 set = link lost,
-    /// params[1...2] = wireless PID (little-endian).
-    private func handleConnectionNotification(_ message: HIDPPMessage) {
-        let slot = message.deviceIndex
-        let linkUp = message.parameters[0] & 0x40 == 0
-        let wirelessPID = UInt16(message.parameters[2]) << 8 | UInt16(message.parameters[1])
-        heardAnnouncement = true
-        if wirelessPID != 0 {
-            slotPIDs[slot] = wirelessPID
-            if wirelessPID == MXVertical.wirelessProductID { otherDeviceSlots.remove(slot) }
-        }
-
-        if let session, session.device.index == slot {
-            if linkUp {
-                if isEchoOfAnnouncementRequest { return }
-                session.invalidateAppliedState()
-                scheduleReconfigure("Slot \(slot) link restored")
-            } else {
-                log("Slot \(slot) link lost")
-                session.releaseAll()
-                if let snapshot = session.snapshot { transition(.asleep(snapshot)) }
-            }
-            return
-        }
-
-        let mightBeMX = wirelessPID == MXVertical.wirelessProductID || (wirelessPID == 0 && !otherDeviceSlots.contains(slot))
-        guard linkUp, mightBeMX else { return }
-        log(String(format: "Slot %d connected (wireless PID %04X)", slot, wirelessPID))
-        scheduleConnect(slot)
-    }
-
-    /// HID++ 1.0 device-disconnection notification; address bit 1 = un-paired.
-    private func handleDisconnectionNotification(_ message: HIDPPMessage) {
-        let slot = message.deviceIndex
-        guard message.address & 0x02 != 0 else { return }
-        slotPIDs[slot] = nil
-        otherDeviceSlots.remove(slot)
-        guard let session, session.device.index == slot else { return }
-        log("The MX Vertical in slot \(slot) was unpaired")
-        dropSession()
-        transition(.waitingForDevice)
-    }
-
-    private func scheduleConnect(_ slot: UInt8) {
+    private func scheduleConnect() {
         cancelRetry()
-        enqueue(.connect(slot)) { await $0.connectAnnounced(slot) }
-    }
-
-    /// Receivers answer an announcement request with a 0x41 for every paired device, including
-    /// the one we just configured. Those aren't real reconnects.
-    private var isEchoOfAnnouncementRequest: Bool {
-        guard case .connected = state, let requested = announcementsRequestedAt, let configuredAt else { return false }
-        return configuredAt > requested && Date().timeIntervalSince(requested) < 2
+        enqueue(.connect) { await $0.connectAnnounced() }
     }
 
     // MARK: Helpers
 
     private var canWork: Bool { !isShutDown && !client.isClosed }
-
-    private var mxSlots: [UInt8] {
-        slotPIDs.filter { $0.value == MXVertical.wirelessProductID }.keys.sorted()
-    }
 
     private var isReceiver: Bool {
         if case .receiver = kind { return true }
@@ -906,14 +863,221 @@ public final class MXVerticalController {
     }
 
     private func log(_ text: String) {
-        onLog?(text)
+        hub?.endpoint(self, log: text)
     }
 
-    private static func nanoseconds(_ interval: TimeInterval) -> UInt64 {
+    static func nanoseconds(_ interval: TimeInterval) -> UInt64 {
         UInt64(max(0, interval) * 1_000_000_000)
     }
 
     static func describe(_ cids: Set<UInt16>) -> String {
         cids.isEmpty ? "none" : cids.sorted().map { String(format: "0x%04X", $0) }.joined(separator: ", ")
+    }
+}
+
+// MARK: - Legacy facade
+
+/// The single-mouse controller of Upright 2.x, kept so `DeviceManager` and `upright-probe`
+/// build unchanged until they move to `HIDPPLink` (Wave 4). A facade over a private hub:
+///
+/// - Every mouse on the interface is served (there is no name gate any more); each gets the
+///   one desired diversion, raw XY set and pointer speed set here.
+/// - `state` and `snapshot` follow the primary endpoint (connected, else asleep, else probing,
+///   else waiting, lowest slot first). Unsupported devices are never primary; with no other
+///   endpoint the state is `.probing` during discovery and `.waitingForDevice` afterwards.
+/// - Events from every endpoint are delivered stamped `.unassigned`, as before.
+/// - `cycleDPI` and `switchToHost` act on the primary endpoint.
+///
+/// Its `State` has no `.unsupported` case, so code switching over it exhaustively keeps
+/// compiling; `EndpointController.State` is the multi-device state.
+@MainActor
+public final class MXVerticalController {
+    public enum State: Hashable, Sendable {
+        case probing
+        /// No mouse is answering yet (off, asleep, or paired elsewhere). Retried automatically.
+        case waitingForDevice
+        case connected(DeviceSnapshot)
+        /// The mouse stopped answering; it is reconfigured as soon as it answers again.
+        case asleep(DeviceSnapshot)
+        /// The device can't be used right now. `.failed("Disconnected")` (transport closed) is terminal.
+        case failed(String)
+    }
+
+    /// The hub behind the facade (link number 0).
+    public let link: HIDPPLink
+    public var client: HIDPPClient { link.client }
+    public var kind: TransportKind { link.kind }
+
+    public private(set) var state: State = .probing {
+        didSet {
+            guard state != oldValue else { return }
+            onStateChange?(state)
+        }
+    }
+    public private(set) var desiredDiversion: Set<UInt16> = []
+    public private(set) var desiredRawXY: Set<UInt16> = []
+    /// The pointer speed kept across reconnects; see `EndpointController.desiredDPI`.
+    public private(set) var desiredDPI: Int? {
+        didSet { if desiredDPI != oldValue { onDesiredDPIChange?(desiredDPI) } }
+    }
+    /// Set by `shutdown()` or when the transport closes. No further work runs afterwards.
+    public var isShutDown: Bool { link.isShutDown || link.isClosed }
+
+    public var onStateChange: ((State) -> Void)?
+    public var onButtonEvent: ((ButtonEvent) -> Void)?
+    /// Raw movement (dx, dy) while a raw-XY control is held.
+    public var onPointerDelta: ((Int, Int) -> Void)?
+    /// `desiredDPI` changed: set through the API, by `cycleDPI`, or adopted from the mouse.
+    public var onDesiredDPIChange: ((Int?) -> Void)?
+    public var onLog: ((String) -> Void)?
+
+    public var probeTimeout: TimeInterval {
+        get { link.tuning.probeTimeout }
+        set { link.tuning.probeTimeout = newValue }
+    }
+    public var reconnectDelay: TimeInterval {
+        get { link.tuning.reconnectDelay }
+        set { link.tuning.reconnectDelay = newValue }
+    }
+    public var retryBaseDelay: TimeInterval {
+        get { link.tuning.retryBaseDelay }
+        set { link.tuning.retryBaseDelay = newValue }
+    }
+    public var retryMaxDelay: TimeInterval {
+        get { link.tuning.retryMaxDelay }
+        set { link.tuning.retryMaxDelay = newValue }
+    }
+    public var batteryRefreshInterval: TimeInterval {
+        get { link.tuning.batteryRefreshInterval }
+        set { link.tuning.batteryRefreshInterval = newValue }
+    }
+    public var announcementWait: TimeInterval {
+        get { link.tuning.announcementWait }
+        set { link.tuning.announcementWait = newValue }
+    }
+
+    public init(transport: HIDPPTransport, kind: TransportKind) {
+        link = HIDPPLink(transport: transport, kind: kind, link: 0)
+        link.configurationProvider = { [weak self] _, _ in
+            guard let self else { return .native }
+            return EndpointConfiguration(divert: self.desiredDiversion, rawXY: self.desiredRawXY, dpi: self.desiredDPI)
+        }
+        link.onEndpointChange = { [weak self] _, _ in self?.recomputeState() }
+        link.onEndpointRemoved = { [weak self] _, _ in self?.recomputeState() }
+        link.onDiscoveryChange = { [weak self] in self?.recomputeState() }
+        link.onButtonEvent = { [weak self] event in
+            var event = event
+            event.source = .unassigned
+            self?.onButtonEvent?(event)
+        }
+        link.onPointerDelta = { [weak self] delta in self?.onPointerDelta?(delta.dx, delta.dy) }
+        link.onAnyDesiredDPIChange = { [weak self] _, dpi in self?.desiredDPI = dpi }
+        link.onLog = { [weak self] _, text in self?.onLog?(text) }
+    }
+
+    public var snapshot: DeviceSnapshot? { primary?.snapshot }
+
+    public func start() {
+        link.start()
+        recomputeState()
+    }
+
+    /// Re-applies configuration (after the Mac wakes, or on request).
+    public func refresh() {
+        link.refresh()
+    }
+
+    public func setDesiredDiversion(_ cids: Set<UInt16>) {
+        guard cids != desiredDiversion else { return }
+        desiredDiversion = cids
+        link.orderedEndpoints.forEach { $0.setDesiredDiversion(cids) }
+    }
+
+    /// Controls that should report raw movement (through `onPointerDelta`) while held; they
+    /// are diverted as well.
+    public func setDesiredRawXY(_ cids: Set<UInt16>) {
+        guard cids != desiredRawXY else { return }
+        desiredRawXY = cids
+        link.orderedEndpoints.forEach { $0.setDesiredRawXY(cids) }
+    }
+
+    public func setDPI(_ value: Int) {
+        setDesiredDPI(value)
+    }
+
+    public func setDesiredDPI(_ value: Int?) {
+        desiredDPI = value.map { snapshot?.dpi?.nearest(to: $0) ?? $0 }
+        link.orderedEndpoints.forEach { $0.setDesiredDPI(value) }
+    }
+
+    public func cycleDPI(presets: [Int] = []) {
+        primary?.cycleDPI(presets: presets)
+    }
+
+    public func refreshDPI() {
+        link.orderedEndpoints.forEach { $0.refreshDPI() }
+    }
+
+    public func refreshDeviceInfo() {
+        link.refreshDeviceInfo(at: nil)
+    }
+
+    public func switchToHost(_ index: Int) {
+        guard let primary else {
+            onLog?("No connected mouse to switch")
+            return
+        }
+        primary.switchToHost(index)
+    }
+
+    /// Hands every diverted button back to its mouse without waiting for replies. Terminal.
+    public func shutdown() {
+        link.shutdown()
+        recomputeState()
+    }
+
+    public func waitUntilIdle() async {
+        await link.waitUntilIdle()
+    }
+
+    // MARK: Primary endpoint
+
+    private var primary: EndpointController? {
+        var best: (endpoint: EndpointController, rank: Int)?
+        for endpoint in link.orderedEndpoints {
+            guard let rank = Self.rank(endpoint.state) else { continue }
+            if best == nil || rank > best!.rank { best = (endpoint, rank) }
+        }
+        return best?.endpoint
+    }
+
+    private static func rank(_ state: EndpointController.State) -> Int? {
+        switch state {
+        case .connected: return 5
+        case .asleep: return 4
+        case .probing: return 3
+        case .waitingForDevice: return 2
+        case .failed: return 1
+        case .unsupported: return nil
+        }
+    }
+
+    private func recomputeState() {
+        if link.isClosed {
+            state = .failed("Disconnected")
+            return
+        }
+        guard let primary else {
+            state = !link.isStarted || link.isDiscovering ? .probing : .waitingForDevice
+            return
+        }
+        switch primary.state {
+        case .probing: state = .probing
+        case .waitingForDevice: state = .waitingForDevice
+        case .connected(let snapshot): state = .connected(snapshot)
+        case .asleep(let snapshot): state = .asleep(snapshot)
+        case .failed(let message): state = .failed(message)
+        case .unsupported: state = .waitingForDevice
+        }
     }
 }
