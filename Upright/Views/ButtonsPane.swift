@@ -9,8 +9,9 @@ struct ButtonsPane: View {
     @EnvironmentObject private var devices: DeviceManager
     @EnvironmentObject private var permissions: PermissionsMonitor
 
-    /// nil edits the global table; otherwise the app profile with this bundle ID.
-    @State private var profileBundleID: String?
+    /// nil edits the global table; otherwise the app profile with this bundle ID. A snapshot
+    /// export can start the pane on an app profile (`DemoMode.snapshotProfileBundleID`).
+    @State private var profileBundleID: String? = DemoMode.isExporting ? DemoMode.snapshotProfileBundleID : nil
     @State private var confirmation: Confirmation?
     @State private var highlightedControl: UInt16?
     @State private var highlightGeneration = 0
