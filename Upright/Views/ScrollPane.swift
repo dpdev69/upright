@@ -24,6 +24,7 @@ struct ScrollPane: View {
                             .fixedSize(horizontal: false, vertical: true)
                     }
                 }
+                .snapshotAnchor("scroll.reverseVertical")
                 Toggle(isOn: binding(\.reverseHorizontal)) {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Reverse horizontal scrolling")
@@ -58,6 +59,7 @@ struct ScrollPane: View {
                 } label: {
                     Text("Speed")
                 }
+                .snapshotAnchor("scroll.speed")
 
                 Toggle(isOn: binding(\.smoothScrolling)) {
                     VStack(alignment: .leading, spacing: 2) {
@@ -70,15 +72,16 @@ struct ScrollPane: View {
                             .foregroundStyle(.secondary)
                     }
                 }
+                .snapshotAnchor("scroll.smooth")
             } header: {
                 Text("Feel")
             }
 
             Section {
-                Toggle(isOn: binding(\.onlyWhileMXVerticalConnected)) {
+                Toggle(isOn: binding(\.onlyWhileMouseConnected)) {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Only while the MX Vertical is connected")
-                        Text("macOS doesn’t say which mouse a scroll came from. With this off, every mouse wheel is changed, but trackpads never are.")
+                        Text("Only while a Logitech mouse is connected")
+                        Text("Applies to every mouse wheel. macOS doesn’t say which mouse a scroll came from. Trackpads are never changed.")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                             .fixedSize(horizontal: false, vertical: true)
@@ -129,9 +132,9 @@ struct ScrollPane: View {
                 }
             )
         }
-        if settings.onlyWhileMXVerticalConnected, devices.snapshot == nil {
+        if settings.onlyWhileMouseConnected, !devices.summary.anyPresent {
             return AnyView(
-                Label("Paused until the MX Vertical connects.", systemImage: "pause.circle")
+                Label("Paused until a Logitech mouse connects.", systemImage: "pause.circle")
                     .foregroundStyle(.secondary)
             )
         }

@@ -1,6 +1,7 @@
 import SwiftUI
 
-/// One remappable button in the global table: what it is, what it does, and a picker to change that.
+/// One remappable button in a model's global table: what it is, what it does, and a picker to
+/// change that. `control` carries the model's own wording (`ControlDescriptor(cid:model:)`).
 struct ButtonRow: View {
     let control: ControlDescriptor
     @Binding var action: ButtonAction
@@ -8,10 +9,15 @@ struct ButtonRow: View {
     var isHighlighted = false
     var note: Text?
 
+    @Environment(\.actionTarget) private var target
+
     var body: some View {
         ControlRowLayout(control: control, isHighlighted: isHighlighted, note: note) {
             if showsAccessibilityWarning && action.requiresAccessibility {
                 AccessibilityWarningIcon()
+            }
+            if !target.supports(action) {
+                UnsupportedActionIcon(deviceName: target.deviceName)
             }
             ActionPicker(selection: $action)
         }
@@ -28,11 +34,16 @@ struct AppOverrideRow: View {
     var isHighlighted = false
     var note: Text?
 
+    @Environment(\.actionTarget) private var target
+
     var body: some View {
         ControlRowLayout(control: control, isHighlighted: isHighlighted, note: note) {
             if let current = override {
                 if showsAccessibilityWarning && current.requiresAccessibility {
                     AccessibilityWarningIcon()
+                }
+                if !target.supports(current) {
+                    UnsupportedActionIcon(deviceName: target.deviceName)
                 }
                 ActionPicker(selection: Binding(
                     get: { override ?? current },
@@ -106,5 +117,25 @@ struct AccessibilityWarningIcon: View {
             .foregroundStyle(.orange)
             .help("Needs Accessibility access. Until then this button keeps its normal behavior.")
             .accessibilityLabel(Text("Needs Accessibility access"))
+    }
+}
+
+/// Shown next to a device action the mouse being set up can't carry out (an Easy-Switch channel
+/// it doesn't have, a speed outside its range, or pointer speed on a mouse without it).
+struct UnsupportedActionIcon: View {
+    let deviceName: String?
+
+    var body: some View {
+        Image(systemName: "exclamationmark.circle")
+            .foregroundStyle(.orange)
+            .help(help)
+            .accessibilityLabel(Text(help))
+    }
+
+    private var help: String {
+        if let deviceName {
+            return String(localized: "\(deviceName) can’t do this, so the button does nothing on it.")
+        }
+        return String(localized: "This mouse can’t do this, so the button does nothing on it.")
     }
 }

@@ -47,7 +47,7 @@ struct PermissionsPane: View {
                     title: String(localized: "Input Monitoring"),
                     symbolName: "keyboard.badge.eye",
                     tint: .purple,
-                    explanation: String(localized: "Only needed if macOS hides the mouse from Upright, which can happen over Bluetooth. Upright then shows the MX Vertical as blocked and its buttons keep their normal behavior until you allow it."),
+                    explanation: String(localized: "Only needed if macOS hides a mouse from Upright, which can happen over Bluetooth. Upright then shows it as blocked and its buttons keep their normal behavior until you allow it."),
                     state: inputMonitoringState
                 ) {
                     // Prompts while undecided, otherwise opens System Settings; never both at once.
@@ -56,10 +56,13 @@ struct PermissionsPane: View {
                         permissions.requestInputMonitoring()
                     }
                 }
+                if !devices.blockedInterfaces.isEmpty {
+                    BlockedInterfaceList(names: devices.blockedInterfaces)
+                }
             }
 
             Section {
-                Label("Upright never reads what you type. It only listens to the HID++ channel of Logitech receivers and MX Vertical mice, and only posts the actions you assign.", systemImage: "lock.shield")
+                Label("Upright never reads what you type. It only listens to the HID++ channel of Logitech receivers and supported Logitech mice, and only posts the actions you assign.", systemImage: "lock.shield")
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             } header: {
@@ -71,8 +74,30 @@ struct PermissionsPane: View {
 
     private var inputMonitoringState: PermissionState {
         if permissions.inputMonitoring == .granted { return .granted }
-        if devices.status == .accessDenied { return .required }
+        if devices.needsInputMonitoring { return .required }
         return .optional
+    }
+}
+
+/// The interfaces macOS refused to open, by name.
+private struct BlockedInterfaceList: View {
+    let names: [String]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("macOS is blocking:")
+                .font(.callout.weight(.medium))
+            ForEach(names, id: \.self) { name in
+                Label {
+                    Text(verbatim: name)
+                } icon: {
+                    Image(systemName: "lock.slash")
+                        .foregroundStyle(.orange)
+                }
+                .font(.callout)
+            }
+        }
+        .accessibilityElement(children: .combine)
     }
 }
 

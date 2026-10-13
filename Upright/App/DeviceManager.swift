@@ -174,7 +174,7 @@ final class DeviceManager: ObservableObject {
             ?? registry.records.lazy.compactMap(reported).first
             ?? rememberedControls?(model).flatMap { $0.isEmpty ? nil : $0 }
             ?? DeviceCatalog.model(model)?.controlOrder
-            ?? (model == .mxVertical ? KnownControl.mxVerticalDefaults : [])
+            ?? []
         return DeviceCatalog.sortedControls(cids, for: model).map { ControlDescriptor(cid: $0, model: model) }
     }
 

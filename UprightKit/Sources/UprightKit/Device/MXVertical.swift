@@ -41,42 +41,8 @@ public enum TransportKind: Hashable, Sendable {
     }
 }
 
-/// Identification data for the Logitech MX Vertical. Product IDs match those published by
-/// Solaar and the Linux hid-logitech-dj driver.
+/// Display name of the original model. Device identification lives in `DeviceCatalog` and
+/// `InterfaceClassifier`.
 public enum MXVertical {
-    public static let vendorID = 0x046D
-    public static let usbProductID = 0xC08A
-    public static let bluetoothProductID = 0xB020
-    /// The "wireless PID" a receiver reports for an MX Vertical in one of its slots.
-    public static let wirelessProductID: UInt16 = 0x407B
-
-    /// The MX Vertical pairs over Unifying or Bluetooth only. Bolt receivers are still watched
-    /// (harmlessly) so a future Bolt-capable model, or a mislabeled one, is picked up.
-    public static let receiverProductIDs: [Int: ConnectionKind] = [
-        0xC52B: .unifying,
-        0xC532: .unifying,
-        0xC548: .bolt,
-    ]
-
-    /// Classifies a Logitech HID interface by vendor and product ID.
-    public static func classify(vendorID: Int, productID: Int) -> TransportKind? {
-        guard vendorID == Self.vendorID else { return nil }
-        if let receiver = receiverProductIDs[productID] { return .receiver(receiver) }
-        switch productID {
-        case usbProductID: return .direct(.usb)
-        case bluetoothProductID: return .direct(.bluetooth)
-        default: return nil
-        }
-    }
-
-    public static func matches(name: String) -> Bool {
-        name.lowercased().contains("mx vertical")
-    }
-
     public static let displayName = "MX Vertical"
-}
-
-extension KnownControl {
-    /// The MX Vertical's remappable buttons, shown before a mouse has been detected.
-    public static let mxVerticalDefaults: [UInt16] = [back, forward, dpiSwitch, middleClick]
 }

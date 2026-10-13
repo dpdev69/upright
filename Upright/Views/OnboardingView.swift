@@ -176,25 +176,123 @@ private struct StatusRow: View {
 private struct ConnectStep: View {
     @EnvironmentObject private var devices: DeviceManager
 
+    /// Mice Upright serves or is identifying, in list order. Unsupported devices aren't offered.
+    private var mice: [DeviceRegistry.Record] {
+        devices.records.filter { $0.role != .unsupported && $0.snapshot != nil }
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             StepHeader(
-                title: "Connect your MX Vertical",
-                message: "Plug in the Unifying receiver, connect the USB cable, or pair the mouse over Bluetooth. Then click a mouse button to wake it."
+                title: "Connect your Logitech mouse",
+                message: "Plug in its receiver, connect the USB cable, or pair the mouse over Bluetooth. Then click a mouse button to wake it. Upright works with several mice at once."
             )
             GroupBox {
-                DeviceHeader()
-                    .padding(6)
+                VStack(alignment: .leading, spacing: 10) {
+                    if mice.isEmpty {
+                        SearchingRow()
+                    } else {
+                        ForEach(mice) { record in
+                            DetectedMouseRow(record: record)
+                        }
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(6)
             }
-            if devices.status == .accessDenied {
+            if devices.needsInputMonitoring {
                 InputMonitoringCallout()
-            } else if devices.snapshot == nil {
-                Text("You can continue without the mouse; Upright connects as soon as it appears.")
+            } else if !devices.summary.anyPresent {
+                Text("You can continue without a mouse; Upright connects as soon as one appears.")
                     .font(.callout)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
+    }
+}
+
+/// The icon tile shared by the rows of the connect step.
+private struct MouseTile: View {
+    let isPresent: Bool
+
+    var body: some View {
+        Image(systemName: isPresent ? "computermouse.fill" : "computermouse")
+            .font(.system(size: 30, weight: .regular))
+            .symbolRenderingMode(.hierarchical)
+            .foregroundStyle(.tint)
+            .frame(width: 52, height: 52)
+            .background(Circle().fill(.quaternary))
+            .accessibilityHidden(true)
+    }
+}
+
+/// Shown while no mouse has identified: what the interfaces are doing (searching, connecting,
+/// waiting for a mouse to wake).
+private struct SearchingRow: View {
+    @EnvironmentObject private var devices: DeviceManager
+
+    var body: some View {
+        HStack(spacing: 14) {
+            MouseTile(isPresent: false)
+            VStack(alignment: .leading, spacing: 3) {
+                Text(devices.status.title)
+                    .font(.title3.weight(.semibold))
+                HStack(spacing: 6) {
+                    StatusDot(indicator: devices.status.indicator)
+                    Text(devices.status.subtitle)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(2)
+                }
+                .font(.callout)
+            }
+            Spacer(minLength: 0)
+        }
+        .accessibilityElement(children: .combine)
+    }
+}
+
+/// A mouse Upright found: its name, how it connects and its battery.
+private struct DetectedMouseRow: View {
+    let record: DeviceRegistry.Record
+
+    var body: some View {
+        HStack(spacing: 14) {
+            MouseTile(isPresent: true)
+            VStack(alignment: .leading, spacing: 3) {
+                Text(verbatim: record.displayName)
+                    .font(.title3.weight(.semibold))
+                HStack(spacing: 6) {
+                    StatusDot(indicator: record.isConnected ? .good : .pending)
+                    Text(subtitle)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(2)
+                }
+                .font(.callout)
+            }
+            Spacer(minLength: 0)
+            if let battery = record.snapshot?.battery {
+                Label {
+                    Text(verbatim: (battery.isApproximate ? "~" : "") + percent(battery.percentage))
+                } icon: {
+                    Image(systemName: battery.symbolName)
+                }
+                .font(.callout)
+                .foregroundStyle(battery.percentage <= 10 && !battery.isCharging ? Color.red : Color.secondary)
+            }
+        }
+        .accessibilityElement(children: .combine)
+    }
+
+    private var subtitle: String {
+        if record.isConnected {
+            return String(localized: "Connected via \(record.connection.title)")
+        }
+        return String(localized: "Asleep — move the mouse to wake it")
+    }
+
+    private func percent(_ value: Int) -> String {
+        (Double(value) / 100).formatted(.percent.precision(.fractionLength(0)))
     }
 }
 
@@ -254,21 +352,25 @@ private struct SetupStep: View {
                 message: "You can change any button later in Settings, and set different actions for individual apps."
             )
 
+            targetLine
+
             VStack(spacing: 8) {
                 ChoiceCard(
                     title: "Keep mouse defaults",
-                    detail: "Back and Forward work as mouse buttons 4 and 5; the top button changes pointer speed.",
+                    detail: String(localized: "Every button keeps the behavior the mouse gives it. Nothing is remapped."),
                     isSelected: choice == .mouseDefaults
                 ) { apply(.mouseDefaults) }
-                ChoiceCard(
-                    title: "Suggested",
-                    detail: "Back and Forward navigate in apps (⌘[ and ⌘]); the top button opens Mission Control.",
-                    isSelected: choice == .suggested
-                ) { apply(.suggested) }
+                if !suggested.isEmpty {
+                    ChoiceCard(
+                        title: "Suggested",
+                        detail: suggestedDetail,
+                        isSelected: choice == .suggested
+                    ) { apply(.suggested) }
+                }
             }
 
             if choice == .suggested, !permissions.isAccessibilityTrusted {
-                Label("Back and Forward start working once Accessibility access is allowed.", systemImage: "exclamationmark.triangle.fill")
+                Label("Mapped buttons start working once Accessibility access is allowed.", systemImage: "exclamationmark.triangle.fill")
                     .font(.callout)
                     .foregroundStyle(.orange)
                     .fixedSize(horizontal: false, vertical: true)
@@ -278,28 +380,85 @@ private struct SetupStep: View {
         }
     }
 
-    private var choice: Choice {
-        Self.suggested.allSatisfy { model.mappings[$0.key] == $0.value } ? .suggested : .mouseDefaults
+    /// The model this step sets up: the connected mouse's (`selectedModel` follows it).
+    private var target: ModelKey { model.selectedModel }
+
+    /// Names the mouse being set up, with a picker when mice of different models are connected.
+    @ViewBuilder
+    private var targetLine: some View {
+        let models = model.connectedModels
+        if models.count > 1 {
+            Picker("Set up", selection: $model.selectedModel) {
+                ForEach(models, id: \.self) { key in
+                    Text(verbatim: model.modelName(key)).tag(key)
+                }
+            }
+            .pickerStyle(.menu)
+            .fixedSize()
+        } else if devices.summary.anyPresent {
+            Text("Setting up your \(model.modelName(target)). Other mice keep their own setup.")
+                .font(.callout)
+                .foregroundStyle(.secondary)
+        } else {
+            Text("No mouse is connected yet, so this sets up the \(model.modelName(target)). Other mice keep their own setup.")
+                .font(.callout)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
     }
 
-    private func apply(_ choice: Choice) {
-        var mappings = model.mappings
-        for (cid, action) in Self.suggested {
-            switch choice {
-            case .suggested:
-                mappings[cid] = action
-            case .mouseDefaults:
-                if mappings[cid] == action { mappings[cid] = .deviceDefault }
+    /// The suggested mappings for the target model's buttons.
+    private var suggested: [UInt16: ButtonAction] {
+        ButtonMappings.suggested(for: target, controls: model.controls(for: target).map(\.cid)).mappedControls
+    }
+
+    private var choice: Choice {
+        let table = model.profiles(for: target).global
+        let wanted = suggested
+        return !wanted.isEmpty && wanted.allSatisfy { table[$0.key] == $0.value } ? .suggested : .mouseDefaults
+    }
+
+    /// Describes what Suggested does on this model, from the table it would apply.
+    private var suggestedDetail: String {
+        let table = suggested
+        var parts: [String] = []
+        if table[KnownControl.back] != nil, table[KnownControl.forward] != nil {
+            parts.append(String(localized: "Back and Forward navigate in apps (⌘[ and ⌘])."))
+        }
+        let others = table.keys.filter { $0 != KnownControl.back && $0 != KnownControl.forward }.sorted()
+        for cid in others {
+            guard let action = table[cid] else { continue }
+            let name = ControlDescriptor(cid: cid, model: target).name
+            if action == .system(.missionControl) {
+                parts.append(String(localized: "\(name) opens Mission Control."))
+            } else {
+                parts.append(String(localized: "\(name): \(action.title)."))
             }
         }
-        model.mappings = mappings
+        if table[KnownControl.back] != nil, table[KnownControl.forward] == nil {
+            parts.insert(String(localized: "\(ControlDescriptor(cid: KnownControl.back, model: target).name): \(ButtonAction.system(.navigateBack).title)."), at: 0)
+        } else if table[KnownControl.forward] != nil, table[KnownControl.back] == nil {
+            parts.insert(String(localized: "\(ControlDescriptor(cid: KnownControl.forward, model: target).name): \(ButtonAction.system(.navigateForward).title)."), at: 0)
+        }
+        return parts.joined(separator: " ")
     }
 
-    /// Back/Forward navigate, the top button opens Mission Control (what Upright 1.x shipped with).
-    private static var suggested: [UInt16: ButtonAction] { ButtonMappings.legacyDefaults.mappedControls }
+    /// Changes only the target model's global table; no other model's setup is touched.
+    private func apply(_ choice: Choice) {
+        var profiles = model.profiles(for: target)
+        for (cid, action) in suggested {
+            switch choice {
+            case .suggested:
+                profiles.global[cid] = action
+            case .mouseDefaults:
+                if profiles.global[cid] == action { profiles.global[cid] = .deviceDefault }
+            }
+        }
+        model.setProfiles(profiles, for: target)
+    }
 }
 
-/// Live feedback for the last button the mouse reported to Upright.
+/// Live feedback for the last button a mouse reported to Upright.
 private struct TryItLine: View {
     @EnvironmentObject private var model: AppModel
     @EnvironmentObject private var devices: DeviceManager
@@ -312,11 +471,11 @@ private struct TryItLine: View {
                 .foregroundStyle(pressed == nil ? Color.secondary : Color.green)
                 .accessibilityHidden(true)
             if let pressed {
-                Text("\(ControlDescriptor(cid: pressed.cid).name): \(model.effectiveMappings[pressed.cid].title)")
+                Text(description(of: pressed))
                     .id(pressed.date)
                     .transition(.opacity)
-            } else if devices.snapshot == nil {
-                Text("Connect the mouse to try a button.")
+            } else if !devices.summary.anyPresent {
+                Text("Connect a mouse to try a button.")
             } else {
                 Text("Try it: press a remapped button.")
             }
@@ -331,11 +490,20 @@ private struct TryItLine: View {
     private var pressed: AppModel.PressedControl? {
         model.lastPressedControl.flatMap { $0.date >= shownSince ? $0 : nil }
     }
+
+    /// For example "MX Master 3S: Back Button → ⌘[".
+    private func description(of press: AppModel.PressedControl) -> String {
+        let key = press.model ?? model.selectedModel
+        let device = model.record(press.source)?.displayName ?? model.modelName(key)
+        let control = ControlDescriptor(cid: press.cid, model: key).name
+        let action = model.effectiveMappings(model: key)[press.cid].title
+        return String(localized: "\(device): \(control) → \(action)")
+    }
 }
 
 private struct ChoiceCard: View {
     let title: LocalizedStringKey
-    let detail: LocalizedStringKey
+    let detail: String
     let isSelected: Bool
     let action: () -> Void
 
@@ -347,7 +515,7 @@ private struct ChoiceCard: View {
                     .font(.title3)
                 VStack(alignment: .leading, spacing: 3) {
                     Text(title).font(.headline)
-                    Text(detail)
+                    Text(verbatim: detail)
                         .font(.callout)
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
