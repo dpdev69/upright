@@ -1,0 +1,462 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0188E8C7443C1EB6906B170B /* ButtonsPane.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D6D974FB15FA4A97BDCF386 /* ButtonsPane.swift */; };
+		01CC78E876CECDBC21DA1288 /* Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = 855AD2FC9A58EBF0A8281695 /* Components.swift */; };
+		02CEE6AAE604C0FA78EEDEB3 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F53FBF5620FAA73BC3A99CB /* AppModel.swift */; };
+		107352CE355BADB90B696A61 /* ButtonStateTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F675652F8DAE79063657B71 /* ButtonStateTracker.swift */; };
+		111E5A423C212EA716AB42E5 /* MXVertical.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CF538CC41DE88392458B6B7 /* MXVertical.swift */; };
+		1F98199E19123E88F4B47AD4 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AB3759151C30F6EE5A20245 /* SettingsView.swift */; };
+		4719E0F8795C5E135ADD642C /* HIDPPDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48CE66058B517B9B436403BE /* HIDPPDevice.swift */; };
+		5B95B2F21BE064E361B692FE /* GeneralPane.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8021A393EB09A242A06E549 /* GeneralPane.swift */; };
+		5D7C4185D945ADDBC6BFEDFB /* HIDPPError.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3CD83B2323D740C78867EFB /* HIDPPError.swift */; };
+		710BA006A086BEA07860130A /* HIDPPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19138CCF2A062D83821F2ED7 /* HIDPPClient.swift */; };
+		7394E1C710027A6C2E9CD8C5 /* RemapEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 169D6EC9F98C734C0473CB6A /* RemapEngine.swift */; };
+		7F65C76EFB8E46BF1DB35DE9 /* MenuBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83D545EF65625567F7C5502B /* MenuBarView.swift */; };
+		80E184D21965D5C2B3DACFE7 /* IOKitHID.swift in Sources */ = {isa = PBXBuildFile; fileRef = D392257AFB5E408CF65C3A21 /* IOKitHID.swift */; };
+		8302EA4B40F0498D9E5C451E /* SystemActionPerformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A0269D1C24A78737E3350B3 /* SystemActionPerformer.swift */; };
+		84D11A058F3AD7D53E57B4E0 /* UprightApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B969D8B5009543D641EEB50B /* UprightApp.swift */; };
+		8796844D3AD85FE77E41719F /* ButtonRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB591826E3750807BA440035 /* ButtonRow.swift */; };
+		89F2E072AC3D5D153D254964 /* KeyCombo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12AD4FC3D5D5D7249968FD4D /* KeyCombo.swift */; };
+		99FF7DD0022D48A1794D8ED5 /* HIDPPFeature.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D4B622CA2C5E33ACBBC7BD4 /* HIDPPFeature.swift */; };
+		A11D6D25E1D0A3D84B15D586 /* DevicePane.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B4B7B7A3E5BFFBC9AF33601 /* DevicePane.swift */; };
+		A4D2FA9F7076A35DB00A872F /* ShortcutRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14F79AC6294C781265A79167 /* ShortcutRecorder.swift */; };
+		A7035ECB836DDB1F70ECE23E /* ButtonMappings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7ED7F195DD6A0AC6DD7483E5 /* ButtonMappings.swift */; };
+		B0237D3616875AAE4DBEE4A3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DCE498C0536AFA6C6A77EB68 /* Assets.xcassets */; };
+		B32E2975128C916881502231 /* AboutPane.swift in Sources */ = {isa = PBXBuildFile; fileRef = 997C24297E913D6E1AF25808 /* AboutPane.swift */; };
+		BCB6FA3AB36A66E5B1CD0A1F /* MXVerticalController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37ED4DF59948372259E16DD /* MXVerticalController.swift */; };
+		BD4020CC5205950150BA67A4 /* DeviceSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52C8EAB4A319611D97F9C903 /* DeviceSession.swift */; };
+		C69B7BCA3584AB53157039F3 /* PermissionsMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51200E3EC13ECE6FE38D7322 /* PermissionsMonitor.swift */; };
+		CE1C711802458CB28A80E18E /* SettingsWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DEEC269F06A06FB9D38D923 /* SettingsWindowController.swift */; };
+		D3DE6B0E55B6D2EA66152E25 /* ButtonAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25B2A52D2FDCC0F9A423B44C /* ButtonAction.swift */; };
+		D72C7E2A0D4A7CFDC52101D0 /* LoginItemController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D2E8581C7E341B8E8C64551 /* LoginItemController.swift */; };
+		DEB5E15C91640D0637A58055 /* HIDPPMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18CF8794D3FF839EF8C8EFBA /* HIDPPMessage.swift */; };
+		E48470EA377FC68CF5E7C7AA /* DeviceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAE0AE15A05BBAD2A85FEFE6 /* DeviceManager.swift */; };
+		E558C6CD8E37F67D67E4171A /* HIDPPTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBDFFF771C0DE11E7DF89756 /* HIDPPTransport.swift */; };
+		EF3CCA4C17E4D19DCF2CA16C /* ReprogControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAFB14D061409F22E0F35A67 /* ReprogControls.swift */; };
+		FFC048A19AF99992CDA594FB /* PermissionsPane.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9903C83138439330FB350894 /* PermissionsPane.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		ECAA87B73D9E19BFC82527C2 /* Upright.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Upright.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		0AB3759151C30F6EE5A20245 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		12AD4FC3D5D5D7249968FD4D /* KeyCombo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyCombo.swift; sourceTree = "<group>"; };
+		14F79AC6294C781265A79167 /* ShortcutRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutRecorder.swift; sourceTree = "<group>"; };
+		169D6EC9F98C734C0473CB6A /* RemapEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemapEngine.swift; sourceTree = "<group>"; };
+		18CF8794D3FF839EF8C8EFBA /* HIDPPMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HIDPPMessage.swift; sourceTree = "<group>"; };
+		19138CCF2A062D83821F2ED7 /* HIDPPClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HIDPPClient.swift; sourceTree = "<group>"; };
+		1A0269D1C24A78737E3350B3 /* SystemActionPerformer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemActionPerformer.swift; sourceTree = "<group>"; };
+		25B2A52D2FDCC0F9A423B44C /* ButtonAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonAction.swift; sourceTree = "<group>"; };
+		2F53FBF5620FAA73BC3A99CB /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
+		3DEEC269F06A06FB9D38D923 /* SettingsWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsWindowController.swift; sourceTree = "<group>"; };
+		48CE66058B517B9B436403BE /* HIDPPDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HIDPPDevice.swift; sourceTree = "<group>"; };
+		4D6D974FB15FA4A97BDCF386 /* ButtonsPane.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonsPane.swift; sourceTree = "<group>"; };
+		51200E3EC13ECE6FE38D7322 /* PermissionsMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsMonitor.swift; sourceTree = "<group>"; };
+		52C8EAB4A319611D97F9C903 /* DeviceSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceSession.swift; sourceTree = "<group>"; };
+		5B4B7B7A3E5BFFBC9AF33601 /* DevicePane.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePane.swift; sourceTree = "<group>"; };
+		5D4B622CA2C5E33ACBBC7BD4 /* HIDPPFeature.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HIDPPFeature.swift; sourceTree = "<group>"; };
+		6F675652F8DAE79063657B71 /* ButtonStateTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonStateTracker.swift; sourceTree = "<group>"; };
+		7CF538CC41DE88392458B6B7 /* MXVertical.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MXVertical.swift; sourceTree = "<group>"; };
+		7ED7F195DD6A0AC6DD7483E5 /* ButtonMappings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonMappings.swift; sourceTree = "<group>"; };
+		83D545EF65625567F7C5502B /* MenuBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarView.swift; sourceTree = "<group>"; };
+		855AD2FC9A58EBF0A8281695 /* Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Components.swift; sourceTree = "<group>"; };
+		8D2E8581C7E341B8E8C64551 /* LoginItemController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginItemController.swift; sourceTree = "<group>"; };
+		9903C83138439330FB350894 /* PermissionsPane.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsPane.swift; sourceTree = "<group>"; };
+		997C24297E913D6E1AF25808 /* AboutPane.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutPane.swift; sourceTree = "<group>"; };
+		AAFB14D061409F22E0F35A67 /* ReprogControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReprogControls.swift; sourceTree = "<group>"; };
+		B969D8B5009543D641EEB50B /* UprightApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UprightApp.swift; sourceTree = "<group>"; };
+		BBDFFF771C0DE11E7DF89756 /* HIDPPTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HIDPPTransport.swift; sourceTree = "<group>"; };
+		C3CD83B2323D740C78867EFB /* HIDPPError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HIDPPError.swift; sourceTree = "<group>"; };
+		D37ED4DF59948372259E16DD /* MXVerticalController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MXVerticalController.swift; sourceTree = "<group>"; };
+		D392257AFB5E408CF65C3A21 /* IOKitHID.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOKitHID.swift; sourceTree = "<group>"; };
+		DCE498C0536AFA6C6A77EB68 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		EAE0AE15A05BBAD2A85FEFE6 /* DeviceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceManager.swift; sourceTree = "<group>"; };
+		EB591826E3750807BA440035 /* ButtonRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonRow.swift; sourceTree = "<group>"; };
+		F8021A393EB09A242A06E549 /* GeneralPane.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralPane.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		C18F88D444D8FE65E18D39E9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		04430153E1DE0DB0D216974D /* UprightKit */ = {
+			isa = PBXGroup;
+			children = (
+				B0E84EB2939EC35580300BA1 /* Device */,
+				4BB2F5C6306E7D4E76E7C776 /* HIDPP */,
+				C110137C9980F9208BE059DC /* Mapping */,
+				6B774AC9BDF0D0197E7F0032 /* Platform */,
+			);
+			name = UprightKit;
+			path = UprightKit/Sources/UprightKit;
+			sourceTree = "<group>";
+		};
+		2AC8BA37DAC32D5437812408 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				ECAA87B73D9E19BFC82527C2 /* Upright.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		4BB2F5C6306E7D4E76E7C776 /* HIDPP */ = {
+			isa = PBXGroup;
+			children = (
+				19138CCF2A062D83821F2ED7 /* HIDPPClient.swift */,
+				48CE66058B517B9B436403BE /* HIDPPDevice.swift */,
+				C3CD83B2323D740C78867EFB /* HIDPPError.swift */,
+				5D4B622CA2C5E33ACBBC7BD4 /* HIDPPFeature.swift */,
+				18CF8794D3FF839EF8C8EFBA /* HIDPPMessage.swift */,
+				BBDFFF771C0DE11E7DF89756 /* HIDPPTransport.swift */,
+				AAFB14D061409F22E0F35A67 /* ReprogControls.swift */,
+			);
+			path = HIDPP;
+			sourceTree = "<group>";
+		};
+		4EAE695AD1F489F78EA3E1C6 = {
+			isa = PBXGroup;
+			children = (
+				6789D1B8EF9F7EB51290750B /* Upright */,
+				04430153E1DE0DB0D216974D /* UprightKit */,
+				2AC8BA37DAC32D5437812408 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		6789D1B8EF9F7EB51290750B /* Upright */ = {
+			isa = PBXGroup;
+			children = (
+				8B02C8C5C5C5ECA8AE59EE78 /* App */,
+				FD4294A9F45E2FA3D5CE9D6B /* Views */,
+				DCE498C0536AFA6C6A77EB68 /* Assets.xcassets */,
+			);
+			path = Upright;
+			sourceTree = "<group>";
+		};
+		6B774AC9BDF0D0197E7F0032 /* Platform */ = {
+			isa = PBXGroup;
+			children = (
+				D392257AFB5E408CF65C3A21 /* IOKitHID.swift */,
+			);
+			path = Platform;
+			sourceTree = "<group>";
+		};
+		8B02C8C5C5C5ECA8AE59EE78 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				2F53FBF5620FAA73BC3A99CB /* AppModel.swift */,
+				EAE0AE15A05BBAD2A85FEFE6 /* DeviceManager.swift */,
+				8D2E8581C7E341B8E8C64551 /* LoginItemController.swift */,
+				51200E3EC13ECE6FE38D7322 /* PermissionsMonitor.swift */,
+				1A0269D1C24A78737E3350B3 /* SystemActionPerformer.swift */,
+				B969D8B5009543D641EEB50B /* UprightApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		B0E84EB2939EC35580300BA1 /* Device */ = {
+			isa = PBXGroup;
+			children = (
+				6F675652F8DAE79063657B71 /* ButtonStateTracker.swift */,
+				52C8EAB4A319611D97F9C903 /* DeviceSession.swift */,
+				7CF538CC41DE88392458B6B7 /* MXVertical.swift */,
+				D37ED4DF59948372259E16DD /* MXVerticalController.swift */,
+			);
+			path = Device;
+			sourceTree = "<group>";
+		};
+		C110137C9980F9208BE059DC /* Mapping */ = {
+			isa = PBXGroup;
+			children = (
+				25B2A52D2FDCC0F9A423B44C /* ButtonAction.swift */,
+				7ED7F195DD6A0AC6DD7483E5 /* ButtonMappings.swift */,
+				12AD4FC3D5D5D7249968FD4D /* KeyCombo.swift */,
+				169D6EC9F98C734C0473CB6A /* RemapEngine.swift */,
+			);
+			path = Mapping;
+			sourceTree = "<group>";
+		};
+		FD4294A9F45E2FA3D5CE9D6B /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				997C24297E913D6E1AF25808 /* AboutPane.swift */,
+				EB591826E3750807BA440035 /* ButtonRow.swift */,
+				4D6D974FB15FA4A97BDCF386 /* ButtonsPane.swift */,
+				855AD2FC9A58EBF0A8281695 /* Components.swift */,
+				5B4B7B7A3E5BFFBC9AF33601 /* DevicePane.swift */,
+				F8021A393EB09A242A06E549 /* GeneralPane.swift */,
+				83D545EF65625567F7C5502B /* MenuBarView.swift */,
+				9903C83138439330FB350894 /* PermissionsPane.swift */,
+				0AB3759151C30F6EE5A20245 /* SettingsView.swift */,
+				3DEEC269F06A06FB9D38D923 /* SettingsWindowController.swift */,
+				14F79AC6294C781265A79167 /* ShortcutRecorder.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		5DFEB6D9E3A64E398B49AA95 /* Upright */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FF064009BFBAE8E986428C4F /* Build configuration list for PBXNativeTarget "Upright" */;
+			buildPhases = (
+				C4D5163706E5908DC9E032F3 /* Sources */,
+				C18F88D444D8FE65E18D39E9 /* Frameworks */,
+				4FDAD6DB49035FA75C21467D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Upright;
+			productName = Upright;
+			productReference = ECAA87B73D9E19BFC82527C2 /* Upright.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		46F86FAA6BBF9AC94A7E4595 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					5DFEB6D9E3A64E398B49AA95 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = A1806D8FE767B99D399E13F3 /* Build configuration list for PBXProject "Upright" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 4EAE695AD1F489F78EA3E1C6;
+			productRefGroup = 2AC8BA37DAC32D5437812408 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				5DFEB6D9E3A64E398B49AA95 /* Upright */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		4FDAD6DB49035FA75C21467D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B0237D3616875AAE4DBEE4A3 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		C4D5163706E5908DC9E032F3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B32E2975128C916881502231 /* AboutPane.swift in Sources */,
+				02CEE6AAE604C0FA78EEDEB3 /* AppModel.swift in Sources */,
+				D3DE6B0E55B6D2EA66152E25 /* ButtonAction.swift in Sources */,
+				A7035ECB836DDB1F70ECE23E /* ButtonMappings.swift in Sources */,
+				8796844D3AD85FE77E41719F /* ButtonRow.swift in Sources */,
+				107352CE355BADB90B696A61 /* ButtonStateTracker.swift in Sources */,
+				0188E8C7443C1EB6906B170B /* ButtonsPane.swift in Sources */,
+				01CC78E876CECDBC21DA1288 /* Components.swift in Sources */,
+				E48470EA377FC68CF5E7C7AA /* DeviceManager.swift in Sources */,
+				A11D6D25E1D0A3D84B15D586 /* DevicePane.swift in Sources */,
+				BD4020CC5205950150BA67A4 /* DeviceSession.swift in Sources */,
+				5B95B2F21BE064E361B692FE /* GeneralPane.swift in Sources */,
+				710BA006A086BEA07860130A /* HIDPPClient.swift in Sources */,
+				4719E0F8795C5E135ADD642C /* HIDPPDevice.swift in Sources */,
+				5D7C4185D945ADDBC6BFEDFB /* HIDPPError.swift in Sources */,
+				99FF7DD0022D48A1794D8ED5 /* HIDPPFeature.swift in Sources */,
+				DEB5E15C91640D0637A58055 /* HIDPPMessage.swift in Sources */,
+				E558C6CD8E37F67D67E4171A /* HIDPPTransport.swift in Sources */,
+				80E184D21965D5C2B3DACFE7 /* IOKitHID.swift in Sources */,
+				89F2E072AC3D5D153D254964 /* KeyCombo.swift in Sources */,
+				D72C7E2A0D4A7CFDC52101D0 /* LoginItemController.swift in Sources */,
+				111E5A423C212EA716AB42E5 /* MXVertical.swift in Sources */,
+				BCB6FA3AB36A66E5B1CD0A1F /* MXVerticalController.swift in Sources */,
+				7F65C76EFB8E46BF1DB35DE9 /* MenuBarView.swift in Sources */,
+				C69B7BCA3584AB53157039F3 /* PermissionsMonitor.swift in Sources */,
+				FFC048A19AF99992CDA594FB /* PermissionsPane.swift in Sources */,
+				7394E1C710027A6C2E9CD8C5 /* RemapEngine.swift in Sources */,
+				EF3CCA4C17E4D19DCF2CA16C /* ReprogControls.swift in Sources */,
+				1F98199E19123E88F4B47AD4 /* SettingsView.swift in Sources */,
+				CE1C711802458CB28A80E18E /* SettingsWindowController.swift in Sources */,
+				A4D2FA9F7076A35DB00A872F /* ShortcutRecorder.swift in Sources */,
+				8302EA4B40F0498D9E5C451E /* SystemActionPerformer.swift in Sources */,
+				84D11A058F3AD7D53E57B4E0 /* UprightApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		D48F58F8CA231B2301441318 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		41EC14BFA61A85B336E4F999 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Upright;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_LSUIElement = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2026 Upright contributors. Released under the MIT License.";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = io.github.upright.Upright;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		6AFE22E70BE079CBB63426F8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+		8668ED08E8535986A57FA16B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Upright;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_LSUIElement = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2026 Upright contributors. Released under the MIT License.";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = io.github.upright.Upright;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A1806D8FE767B99D399E13F3 /* Build configuration list for PBXProject "Upright" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D48F58F8CA231B2301441318 /* Debug */,
+				6AFE22E70BE079CBB63426F8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		FF064009BFBAE8E986428C4F /* Build configuration list for PBXNativeTarget "Upright" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				41EC14BFA61A85B336E4F999 /* Debug */,
+				8668ED08E8535986A57FA16B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 46F86FAA6BBF9AC94A7E4595 /* Project object */;
+}
