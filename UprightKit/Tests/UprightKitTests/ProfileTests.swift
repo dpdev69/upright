@@ -18,7 +18,7 @@ final class ProfileTests: XCTestCase {
         return profiles
     }
 
-    func testEffectiveMappingsFallBackToGlobalPerButton() {
+    func testEffectiveMappingsFallBackToGlobalPerButton() async {
         let effective = profiles.effectiveMappings(forBundleID: safari)
         XCTAssertEqual(effective[KnownControl.back], .system(.previousTab))
         XCTAssertEqual(effective[KnownControl.forward], .system(.navigateForward))
@@ -27,17 +27,17 @@ final class ProfileTests: XCTestCase {
         XCTAssertEqual(effective.divertedControls(accessibilityGranted: true), [KnownControl.back, KnownControl.forward])
     }
 
-    func testUnknownOrDisabledAppsUseGlobal() {
+    func testUnknownOrDisabledAppsUseGlobal() async {
         XCTAssertEqual(profiles.effectiveMappings(forBundleID: nil), .legacyDefaults)
         XCTAssertEqual(profiles.effectiveMappings(forBundleID: "com.example.unknown"), .legacyDefaults)
         XCTAssertEqual(profiles.effectiveMappings(forBundleID: xcode), .legacyDefaults)
     }
 
-    func testBundleIDMatchingIgnoresCase() {
+    func testBundleIDMatchingIgnoresCase() async {
         XCTAssertEqual(profiles.effectiveMappings(forBundleID: "COM.APPLE.SAFARI")[KnownControl.back], .system(.previousTab))
     }
 
-    func testAddRemoveAndUpsertKeepOneProfilePerApp() {
+    func testAddRemoveAndUpsertKeepOneProfilePerApp() async {
         var profiles = self.profiles
         profiles.addApp(bundleID: safari, displayName: "Other Name")
         XCTAssertEqual(profiles.apps.count, 2)
@@ -53,7 +53,7 @@ final class ProfileTests: XCTestCase {
         XCTAssertTrue(profiles.apps.isEmpty)
     }
 
-    func testDuplicateProfilesInStoredDataAreMerged() throws {
+    func testDuplicateProfilesInStoredDataAreMerged() async throws {
         let json = #"{"schemaVersion":2,"global":{"actions":{}},"apps":[{"bundleID":"a","displayName":"A","isEnabled":true,"overrides":{}},{"bundleID":"A","displayName":"A2","isEnabled":true,"overrides":{}}]}"#
         let report = MappingDecodingReport()
         let decoded = try MappingStore.decoder(report: report).decode(MappingProfiles.self, from: Data(json.utf8))
@@ -62,7 +62,7 @@ final class ProfileTests: XCTestCase {
         XCTAssertEqual(report.issues.count, 1)
     }
 
-    func testAllActiveActionsIgnoreDisabledProfiles() {
+    func testAllActiveActionsIgnoreDisabledProfiles() async {
         let actions = profiles.allActiveActions
         XCTAssertTrue(actions.contains(.system(.previousTab)))
         XCTAssertFalse(actions.contains(.system(.undo)))
@@ -70,7 +70,7 @@ final class ProfileTests: XCTestCase {
 
     // MARK: Switching profiles mid-press
 
-    func testReleaseMatchesPressAcrossProfileSwitch() {
+    func testReleaseMatchesPressAcrossProfileSwitch() async {
         let performer = RecordingPerformer()
         let engine = RemapEngine(mappings: profiles.effectiveMappings(forBundleID: safari), performer: performer)
 
@@ -83,7 +83,7 @@ final class ProfileTests: XCTestCase {
         XCTAssertEqual(performer.log.map(\.1), [.down, .up])
     }
 
-    func testButtonNativeInOldAppDoesNotFireInNewApp() {
+    func testButtonNativeInOldAppDoesNotFireInNewApp() async {
         let performer = RecordingPerformer()
         let engine = RemapEngine(mappings: profiles.effectiveMappings(forBundleID: safari), performer: performer)
 
@@ -102,7 +102,7 @@ final class ProfileTests: XCTestCase {
         XCTAssertEqual(performer.log.map(\.1), [.down, .up])
     }
 
-    func testSwitchKeepsPressedControlsUntilRelease() {
+    func testSwitchKeepsPressedControlsUntilRelease() async {
         let engine = RemapEngine(mappings: profiles.effectiveMappings(forBundleID: nil), performer: RecordingPerformer())
         engine.handle(ButtonEvent(cid: KnownControl.dpiSwitch, phase: .press))
         engine.mappings = profiles.effectiveMappings(forBundleID: safari)
