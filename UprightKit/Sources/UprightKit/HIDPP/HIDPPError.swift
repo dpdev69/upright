@@ -12,8 +12,6 @@ public enum HIDPPError: Error, Equatable, Sendable, CustomStringConvertible {
     /// The endpoint answered but isn't a mouse Upright can serve. Terminal: no retry, no writes.
     /// `partial` is what was learned before the gate failed (nil when too little was read).
     case unsupportedDevice(UnsupportedReason, partial: DeviceSnapshot?)
-    /// Superseded by `unsupportedDevice`; kept until the endpoint controller stops using it.
-    case notMXVertical(String)
 
     public var description: String {
         switch self {
@@ -36,8 +34,6 @@ public enum HIDPPError: Error, Equatable, Sendable, CustomStringConvertible {
         case .unsupportedDevice(let reason, let partial):
             guard let name = partial?.name, !name.isEmpty else { return "Unsupported device: \(reason.message)." }
             return "“\(name)” is not supported: \(reason.message)."
-        case .notMXVertical(let name):
-            return "Found “\(name)”, which is not an MX Vertical."
         }
     }
 

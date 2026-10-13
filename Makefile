@@ -24,7 +24,12 @@ verify:
 dmg: app
 	scripts/make_dmg.sh $(APP) dist/Upright.dmg
 
-## Talk to a connected MX Vertical from the terminal. Pass ARGS=--divert to watch button events.
+## Talk to connected Logitech mice from the terminal: prints each mouse's identity, HID++ features and controls,
+## every line prefixed with its device, e.g. [MX Master 3S · Bolt slot 2].
+##   make probe ARGS=--all                 also read interfaces Upright doesn't use (keyboards, Lightspeed receivers, unknown mice)
+##   make probe ARGS=--divert              watch button events of every mouse (Ctrl-C restores the buttons)
+##   make probe ARGS='--divert="bolt slot 2"'  the same for the mice whose label contains that text
+##   make probe ARGS=--help                all options
 probe:
 	swift run --package-path UprightKit upright-probe $(ARGS)
 
