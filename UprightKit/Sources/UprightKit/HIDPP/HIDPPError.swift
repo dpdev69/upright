@@ -9,6 +9,10 @@ public enum HIDPPError: Error, Equatable, Sendable, CustomStringConvertible {
     case featureNotSupported(UInt16)
     case unsupportedProtocol(major: UInt8, minor: UInt8)
     case malformedResponse
+    /// The endpoint answered but isn't a mouse Upright can serve. Terminal: no retry, no writes.
+    /// `partial` is what was learned before the gate failed (nil when too little was read).
+    case unsupportedDevice(UnsupportedReason, partial: DeviceSnapshot?)
+    /// Superseded by `unsupportedDevice`; kept until the endpoint controller stops using it.
     case notMXVertical(String)
 
     public var description: String {
@@ -29,9 +33,18 @@ public enum HIDPPError: Error, Equatable, Sendable, CustomStringConvertible {
             return "The device speaks HID++ \(major).\(minor); HID++ 2.0 or newer is required."
         case .malformedResponse:
             return "The device sent a response that could not be decoded."
+        case .unsupportedDevice(let reason, let partial):
+            guard let name = partial?.name, !name.isEmpty else { return "Unsupported device: \(reason.message)." }
+            return "“\(name)” is not supported: \(reason.message)."
         case .notMXVertical(let name):
             return "Found “\(name)”, which is not an MX Vertical."
         }
+    }
+
+    /// Why the device can't be served, for `unsupportedDevice`.
+    public var unsupportedReason: UnsupportedReason? {
+        if case .unsupportedDevice(let reason, _) = self { return reason }
+        return nil
     }
 
     /// True when the device isn't answering right now: a timeout, a report that couldn't be

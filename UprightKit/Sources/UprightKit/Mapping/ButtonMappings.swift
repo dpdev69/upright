@@ -20,6 +20,24 @@ public struct ButtonMappings: Codable, Hashable, Sendable {
         KnownControl.dpiSwitch: .system(.missionControl),
     ])
 
+    /// The onboarding template for a model with these controls. The MX Vertical keeps what
+    /// Upright 1.x shipped (`legacyDefaults`); any other model gets `suggested(forControls:)`.
+    public static func suggested(for model: ModelKey, controls: [UInt16]) -> ButtonMappings {
+        model == .mxVertical ? legacyDefaults : suggested(forControls: controls)
+    }
+
+    /// Back → ⌘[ and Forward → ⌘] when the mouse has those buttons, Mission Control on a gesture
+    /// button (0xC3, else 0xD0); every other control stays native.
+    public static func suggested(forControls controls: [UInt16]) -> ButtonMappings {
+        var table: [UInt16: ButtonAction] = [:]
+        if controls.contains(KnownControl.back) { table[KnownControl.back] = .system(.navigateBack) }
+        if controls.contains(KnownControl.forward) { table[KnownControl.forward] = .system(.navigateForward) }
+        if let gesture = [KnownControl.gestureButton, KnownControl.multiPlatformGesture].first(where: controls.contains) {
+            table[gesture] = .system(.missionControl)
+        }
+        return ButtonMappings(table)
+    }
+
     public subscript(cid: UInt16) -> ButtonAction {
         get { actions[cid] ?? .deviceDefault }
         set { actions[cid] = newValue == .deviceDefault ? nil : newValue }

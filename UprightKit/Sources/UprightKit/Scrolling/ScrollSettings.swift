@@ -13,22 +13,33 @@ public struct ScrollSettings: Codable, Hashable, Sendable {
     }
     /// Experimental: turns each wheel notch into a short eased run of pixel scrolls.
     public var smoothScrolling: Bool
-    /// Only rewrite scrolling while an MX Vertical is connected. Events don't say which mouse sent
-    /// them, so with this off every mouse wheel is affected.
-    public var onlyWhileMXVerticalConnected: Bool
+    /// Only rewrite scrolling while a supported Logitech mouse is connected or asleep. Events
+    /// don't say which mouse sent them, so either way every mouse wheel is affected; this only
+    /// decides whether Upright steps aside when no supported mouse is around.
+    ///
+    /// Saved as `onlyWhileMXVerticalConnected` (see `CodingKeys`): the name predates support for
+    /// other mice and must not change, or existing saves would lose the setting.
+    public var onlyWhileMouseConnected: Bool
+
+    /// The old Swift name of `onlyWhileMouseConnected`.
+    @available(*, deprecated, renamed: "onlyWhileMouseConnected")
+    public var onlyWhileMXVerticalConnected: Bool {
+        get { onlyWhileMouseConnected }
+        set { onlyWhileMouseConnected = newValue }
+    }
 
     public init(
         reverseVertical: Bool = false,
         reverseHorizontal: Bool = false,
         speed: Double = 1,
         smoothScrolling: Bool = false,
-        onlyWhileMXVerticalConnected: Bool = true
+        onlyWhileMouseConnected: Bool = true
     ) {
         self.reverseVertical = reverseVertical
         self.reverseHorizontal = reverseHorizontal
         self.speed = Self.clampedSpeed(speed)
         self.smoothScrolling = smoothScrolling
-        self.onlyWhileMXVerticalConnected = onlyWhileMXVerticalConnected
+        self.onlyWhileMouseConnected = onlyWhileMouseConnected
     }
 
     /// True when any setting changes wheel events, i.e. when an event tap is worth installing.
@@ -44,7 +55,9 @@ public struct ScrollSettings: Codable, Hashable, Sendable {
     }
 
     private enum CodingKeys: String, CodingKey {
-        case reverseVertical, reverseHorizontal, speed, smoothScrolling, onlyWhileMXVerticalConnected
+        case reverseVertical, reverseHorizontal, speed, smoothScrolling
+        /// The stored key keeps its pre-multi-mouse name.
+        case onlyWhileMouseConnected = "onlyWhileMXVerticalConnected"
     }
 
     /// Missing or unreadable keys fall back to their defaults, so older or newer saves still load.
@@ -58,7 +71,7 @@ public struct ScrollSettings: Codable, Hashable, Sendable {
             reverseHorizontal: value(.reverseHorizontal, false),
             speed: value(.speed, 1.0),
             smoothScrolling: value(.smoothScrolling, false),
-            onlyWhileMXVerticalConnected: value(.onlyWhileMXVerticalConnected, true)
+            onlyWhileMouseConnected: value(.onlyWhileMouseConnected, true)
         )
     }
 }
