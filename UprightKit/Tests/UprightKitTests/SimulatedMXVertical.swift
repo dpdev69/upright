@@ -62,7 +62,7 @@ final class SimulatedMXVertical: HIDPPTransport, @unchecked Sendable {
     static let featureVersions: [UInt16: UInt8] = [0x0003: 4, 0x1B04: 4]
 
     /// 400 through 4000 in steps of 50, as getSensorDpiList encodes it.
-    static let dpiList: [UInt16] = [400, 0xE000 | 50, 4000]
+    static let dpiList: [UInt16] = [400, UInt16(0xE000) | 50, 4000]
     static let defaultDPI = 1000
     static let serialNumber = "1234ABCD5678"
     static let hostNames: [String?] = ["Work MacBook Pro", nil, "Gaming PC with a very long host name"]

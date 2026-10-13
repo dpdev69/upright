@@ -3,9 +3,12 @@ import XCTest
 
 final class DeviceFeatureParsingTests: XCTestCase {
     private func bytes(_ values: [UInt16]) -> [UInt8] { values.flatMap(\.bigEndianBytes) }
+    /// Top three bits set marks a step in getSensorDpiList. Typed explicitly because Swift 6.0
+    /// infers `0xE000 | 50` as Int inside an array literal argument.
+    private let stepFlag: UInt16 = 0xE000
 
     func testDPIListWithRange() {
-        let parsed = DPIInfo.parseList(bytes([400, 0xE000 | 50, 4000, 0, 0]))
+        let parsed = DPIInfo.parseList(bytes([400, stepFlag | 50, 4000, 0, 0]))
         XCTAssertEqual(parsed.step, 50)
         XCTAssertEqual(parsed.values.first, 400)
         XCTAssertEqual(parsed.values.last, 4000)
@@ -20,12 +23,12 @@ final class DeviceFeatureParsingTests: XCTestCase {
     }
 
     func testDPIListMixingValuesAndRanges() {
-        let parsed = DPIInfo.parseList(bytes([200, 0xE000 | 100, 600, 1000, 0xE000 | 500, 2000]))
+        let parsed = DPIInfo.parseList(bytes([200, stepFlag | 100, 600, 1000, stepFlag | 500, 2000]))
         XCTAssertEqual(parsed.values, [200, 300, 400, 500, 600, 1000, 1500, 2000])
     }
 
     func testDPIListIgnoresMalformedRanges() {
-        XCTAssertEqual(DPIInfo.parseList(bytes([0xE000 | 50, 4000])).values, [])
+        XCTAssertEqual(DPIInfo.parseList(bytes([stepFlag | 50, 4000])).values, [])
         XCTAssertEqual(DPIInfo.parseList(bytes([400, 0xE000, 4000])).values, [400])
         XCTAssertEqual(DPIInfo.parseList([0x01]).values, [])
     }
