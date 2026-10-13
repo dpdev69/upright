@@ -63,9 +63,14 @@ public struct ControlInfo: Hashable, Sendable, Identifiable {
     /// movement while held instead of moving the cursor.
     public var supportsRawXY: Bool { additionalFlags & 0x01 != 0 }
 
-    /// Controls Upright offers for remapping: physical, divertable, and not a primary click.
+    /// Solaar's `mse` flag: a mouse button. With no device kind to go by, one such control is
+    /// what makes a device count as a pointer (D2).
+    public var isMouseButton: Bool { flags.contains(.mouseButton) }
+
+    /// Controls Upright offers for remapping: physical, divertable, and never a primary click
+    /// (`ControlCatalog.neverDivert`), even when a device flags one as divertable.
     public var isConfigurable: Bool {
-        flags.contains(.divertable) && !flags.contains(.virtual) && !KnownControl.primaryClicks.contains(cid)
+        flags.contains(.divertable) && !flags.contains(.virtual) && !ControlCatalog.neverDivert.contains(cid)
     }
 }
 
