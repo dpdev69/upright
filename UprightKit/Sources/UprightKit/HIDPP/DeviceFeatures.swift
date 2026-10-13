@@ -180,6 +180,51 @@ public struct DeviceFeatures {
         _ = try await device.call(.adjustableDPI, function: 3, parameters: [0] + clamped.bigEndianBytes)
     }
 
+    // MARK: Identity (0x0005, 0x0003)
+
+    /// Who the device is: its kind (0x0005 getDeviceType, unless `kind` is given), unit and model
+    /// IDs (0x0003 getEntityCount) and, from 0x0003 version 4, its serial number. `transportPID` is
+    /// the receiver's wireless PID or the interface's product ID; it keys the model when 0x0003
+    /// lists no model IDs.
+    ///
+    /// A part the device lacks or refuses stays empty, so this never fails on a working device;
+    /// a device that stops answering (or a closed transport) still throws.
+    public func identity(name: String, kind: DeviceKind? = nil, transportPID: UInt16? = nil) async throws -> DeviceIdentity {
+        var resolvedKind = kind ?? .unknown
+        if kind == nil, try await has(.deviceName) {
+            resolvedKind = try await optional { try await deviceKind() } ?? .unknown
+        }
+        var ids: (unitID: UInt32?, modelIDs: ModelIDs, extendedModelID: UInt8?)?
+        var serial: String?
+        if try await has(.deviceFirmwareVersion) {
+            ids = try await optional { try await firmwareIDs() }
+            if let version = try await optional({ try await device.featureVersion(for: .deviceFirmwareVersion) }), version >= 4 {
+                serial = try await optional { try await serialNumber() }
+            }
+        }
+        return DeviceIdentity(
+            name: name,
+            kind: resolvedKind,
+            unitID: ids?.unitID,
+            serialNumber: serial,
+            modelIDs: ids?.modelIDs ?? ModelIDs(),
+            extendedModelID: ids?.extendedModelID,
+            transportPID: transportPID
+        )
+    }
+
+    /// getDeviceType (0x0005 fn 2).
+    public func deviceKind() async throws -> DeviceKind {
+        let reply = try await device.call(.deviceName, function: 2)
+        return DeviceKind(hidpp20: reply[0])
+    }
+
+    /// The unit ID, model IDs and extended model ID from getEntityCount (0x0003 fn 0).
+    /// Nil when the reply is too short to hold them.
+    public func firmwareIDs() async throws -> (unitID: UInt32?, modelIDs: ModelIDs, extendedModelID: UInt8?)? {
+        DeviceIdentity.parseFirmwareIDs(try await device.call(.deviceFirmwareVersion, function: 0))
+    }
+
     // MARK: 0x0003
 
     /// Every firmware entity (getEntityCount, then getFwInfo per entity).
@@ -233,6 +278,24 @@ public struct DeviceFeatures {
             names.append(name.isEmpty ? nil : name)
         }
         return names
+    }
+
+    // MARK: Helpers
+
+    private func has(_ feature: HIDPPFeature) async throws -> Bool {
+        try await optional { try await device.featureIndex(for: feature) } != nil
+    }
+
+    /// Runs an optional read: device errors and missing features give nil, but a device that
+    /// stopped answering (or a closed transport) still throws.
+    private func optional<T>(_ body: () async throws -> T?) async throws -> T? {
+        do {
+            return try await body()
+        } catch let error as HIDPPError where error.meansDeviceUnreachable || error == .transportClosed {
+            throw error
+        } catch {
+            return nil
+        }
     }
 
     /// setCurrentHost (fn 1), sent without waiting: the device leaves right away and never answers.

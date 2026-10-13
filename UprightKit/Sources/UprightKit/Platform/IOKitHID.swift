@@ -31,73 +31,107 @@ enum IOKitReturn {
     static let notPermitted = IOReturn(bitPattern: 0xE00002E2)
 }
 
-/// Basic facts about a HID interface, read from its IORegistry properties.
-public struct HIDInterfaceInfo: Hashable, Sendable {
-    public var vendorID: Int
-    public var productID: Int
-    public var product: String
-    public var transport: String
-    public var locationID: Int
-    public var primaryUsagePage: Int
-    public var primaryUsage: Int
-    public var serialNumber: String
-
-    init(device: IOHIDDevice) {
+extension HIDInterfaceDescriptor {
+    /// Reads the descriptor from a matched device's IORegistry properties.
+    public init(device: IOHIDDevice) {
         func int(_ key: String) -> Int {
             (IOHIDDeviceGetProperty(device, key as CFString) as? NSNumber)?.intValue ?? 0
         }
         func string(_ key: String) -> String {
             (IOHIDDeviceGetProperty(device, key as CFString) as? String) ?? ""
         }
-        vendorID = int(kIOHIDVendorIDKey)
-        productID = int(kIOHIDProductIDKey)
-        product = string(kIOHIDProductKey)
-        transport = string(kIOHIDTransportKey)
-        locationID = int(kIOHIDLocationIDKey)
-        primaryUsagePage = int(kIOHIDPrimaryUsagePageKey)
-        primaryUsage = int(kIOHIDPrimaryUsageKey)
-        serialNumber = string(kIOHIDSerialNumberKey)
+        self.init(
+            vendorID: int(kIOHIDVendorIDKey),
+            productID: int(kIOHIDProductIDKey),
+            transport: string(kIOHIDTransportKey),
+            usagePage: int(kIOHIDPrimaryUsagePageKey),
+            usage: int(kIOHIDPrimaryUsageKey),
+            locationID: int(kIOHIDLocationIDKey),
+            serial: string(kIOHIDSerialNumberKey),
+            registryID: Self.registryEntryID(of: device),
+            productName: string(kIOHIDProductKey)
+        )
     }
 
-    public var summary: String {
-        String(format: "%@ [%04X:%04X] via %@, usage %04X:%04X", product, vendorID, productID, transport, primaryUsagePage, primaryUsage)
-    }
-
-    /// Receivers and the USB cable publish a dedicated vendor-page HID++ interface.
-    public var isVendorHIDPP: Bool {
-        primaryUsagePage == 0xFF00 || primaryUsagePage == 0xFF43
-    }
-
-    public func isSamePhysicalDevice(as other: HIDInterfaceInfo) -> Bool {
-        locationID != 0 && vendorID == other.vendorID && productID == other.productID && locationID == other.locationID
-    }
-
-    /// Bluetooth publishes the mouse and its HID++ collection as one interface. USB and
-    /// receivers also publish a dedicated vendor-page interface, which is the one to use when
-    /// both show up for the same device. Returns nil when `info` should not be opened,
-    /// otherwise the keys of open twins it supersedes (to be closed first).
-    public static func twinsToReplace<Key>(adding info: HIDInterfaceInfo, open: [Key: HIDInterfaceInfo]) -> [Key]? {
-        guard info.locationID != 0 else { return [] }
-        let twins = open.filter { $0.value.isSamePhysicalDevice(as: info) }
-        if info.isVendorHIDPP {
-            if twins.values.contains(where: \.isVendorHIDPP) { return nil }
-            return twins.filter { !$0.value.isVendorHIDPP }.map(\.key)
-        }
-        return twins.isEmpty ? [] : nil
+    /// The IORegistry entry ID of the device's service: unique per interface, 0 when unavailable.
+    static func registryEntryID(of device: IOHIDDevice) -> UInt64 {
+        let service = IOHIDDeviceGetService(device)
+        guard service != 0 else { return 0 }
+        var entryID: UInt64 = 0
+        guard IORegistryEntryGetRegistryEntryID(service, &entryID) == KERN_SUCCESS else { return 0 }
+        return entryID
     }
 }
 
-/// Watches for Logitech HID interfaces that carry HID++ (vendor usage pages 0xFF00 on USB
-/// receivers and wired devices, 0xFF43 on Bluetooth Low Energy devices).
+/// Basic facts about a HID interface, read from its IORegistry properties.
+///
+/// A thin wrapper over `HIDInterfaceDescriptor`, which holds the values and drives
+/// `InterfaceClassifier`. The accessors keep the names earlier callers used.
+public struct HIDInterfaceInfo: Hashable, Sendable {
+    public var descriptor: HIDInterfaceDescriptor
+
+    public init(descriptor: HIDInterfaceDescriptor) {
+        self.descriptor = descriptor
+    }
+
+    init(device: IOHIDDevice) {
+        descriptor = HIDInterfaceDescriptor(device: device)
+    }
+
+    public var vendorID: Int { descriptor.vendorID }
+    public var productID: Int { descriptor.productID }
+    public var product: String { descriptor.productName }
+    public var transport: String { descriptor.transport }
+    public var locationID: Int { descriptor.locationID }
+    public var primaryUsagePage: Int { descriptor.usagePage }
+    public var primaryUsage: Int { descriptor.usage }
+    public var serialNumber: String { descriptor.serial }
+    public var registryID: UInt64 { descriptor.registryID }
+
+    public var summary: String { descriptor.summary }
+
+    /// Receivers and the USB cable publish a dedicated vendor-page HID++ interface.
+    public var isVendorHIDPP: Bool { descriptor.isVendorHIDPP }
+
+    /// Whether Upright opens this interface, and as what.
+    public var interfaceClass: InterfaceClass { InterfaceClassifier.classify(descriptor) }
+
+    public func isSamePhysicalDevice(as other: HIDInterfaceInfo) -> Bool {
+        InterfaceClassifier.isSamePhysicalDevice(descriptor, other.descriptor)
+    }
+
+    /// See `InterfaceClassifier.twinsToReplace`.
+    public static func twinsToReplace<Key: Hashable>(adding info: HIDInterfaceInfo, open: [Key: HIDInterfaceInfo]) -> [Key]? {
+        InterfaceClassifier.twinsToReplace(adding: info.descriptor, open: open.mapValues(\.descriptor))
+    }
+}
+
+/// Watches for Logitech HID interfaces that may carry HID++: the vendor usage pages (0xFF00 on
+/// USB receivers and wired devices, 0xFF43 on Bluetooth Low Energy devices) and every Logitech
+/// mouse interface (Bluetooth mice carry HID++ inside their mouse interface). The criteria live
+/// in `InterfaceClassifier.matchCriteria`.
+///
+/// Every match is classified with `InterfaceClassifier.classify`. Interfaces it ignores (a
+/// receiver's boot-mouse interface, a Lightspeed receiver, a keyboard, a mouse that isn't HID++)
+/// are never passed to `onMatch`; `onIgnored` reports each one once, with the reason, so the
+/// owner can log it. Set `deliversIgnoredInterfaces` to see them anyway (`upright-probe --all`).
+/// Callers still ask `HIDDeviceMonitor.interfaceClass(for:)` what an accepted device is, and use
+/// `InterfaceClassifier.twinsToReplace` to pick between interfaces of one device.
 public final class HIDDeviceMonitor {
     public var onMatch: ((IOHIDDevice) -> Void)?
     public var onRemove: ((IOHIDDevice) -> Void)?
+    /// An interface the classifier ignores, with the reason. Called once per matched interface.
+    public var onIgnored: ((HIDInterfaceInfo, String) -> Void)?
+    /// When true, ignored interfaces are delivered through `onMatch` as well.
+    public var deliversIgnoredInterfaces = false
 
     private let manager: IOHIDManager
     /// macOS publishes two IOHIDDevice objects for one Bluetooth mouse. Opening both
     /// interleaves HID++ replies, so the second match for the same device is ignored.
     private var chosen: [String: IOHIDDevice] = [:]
     private var ignored: Set<IOHIDDevice> = []
+    /// Interfaces the classifier turned away: never delivered, so their removal isn't either.
+    private var skipped: Set<IOHIDDevice> = []
     private var isRunning = false
 
     public init() {
@@ -116,25 +150,18 @@ public final class HIDDeviceMonitor {
     public func start() -> IOReturn {
         isRunning = true
         // Receivers and the USB cable publish a dedicated HID++ interface (usage page
-        // 0xFF00 or 0xFF43). Bluetooth does not: the MX Vertical is one mouse interface
-        // (usage page 0x01) that also carries the HID++ collection. Matching only the
-        // vendor page leaves that mouse unmatched, so its buttons are never remapped.
-        let matching: [[String: Any]] = [
-            [kIOHIDVendorIDKey: MXVertical.vendorID, kIOHIDDeviceUsagePageKey: 0xFF00],
-            [kIOHIDVendorIDKey: MXVertical.vendorID, kIOHIDDeviceUsagePageKey: 0xFF43],
-            [
-                kIOHIDVendorIDKey: MXVertical.vendorID,
-                kIOHIDProductIDKey: Int(MXVertical.bluetoothProductID),
-                kIOHIDDeviceUsagePageKey: kHIDPage_GenericDesktop,
-                kIOHIDDeviceUsageKey: kHIDUsage_GD_Mouse,
-            ],
-            [
-                kIOHIDVendorIDKey: MXVertical.vendorID,
-                kIOHIDProductIDKey: Int(MXVertical.usbProductID),
-                kIOHIDDeviceUsagePageKey: kHIDPage_GenericDesktop,
-                kIOHIDDeviceUsageKey: kHIDUsage_GD_Mouse,
-            ],
-        ]
+        // 0xFF00 or 0xFF43). Bluetooth mice do not: a Bluetooth MX mouse is one mouse
+        // interface (usage page 0x01) that also carries the HID++ collection. Matching only
+        // the vendor pages leaves those mice unmatched, so their buttons are never remapped.
+        // No product IDs here: which Logitech interfaces to open is decided by the classifier.
+        let matching: [[String: Any]] = InterfaceClassifier.matchCriteria.map { criterion in
+            var entry: [String: Any] = [
+                kIOHIDVendorIDKey: criterion.vendorID,
+                kIOHIDDeviceUsagePageKey: criterion.usagePage,
+            ]
+            if let usage = criterion.usage { entry[kIOHIDDeviceUsageKey] = usage }
+            return entry
+        }
         IOHIDManagerSetDeviceMatchingMultiple(manager, matching as CFArray)
 
         let context = Unmanaged.passUnretained(self).toOpaque()
@@ -160,10 +187,17 @@ public final class HIDDeviceMonitor {
         IOHIDManagerClose(manager, IOOptionBits(kIOHIDOptionsTypeNone))
         chosen.removeAll()
         ignored.removeAll()
+        skipped.removeAll()
     }
 
     private func deliverMatch(_ device: IOHIDDevice) {
-        let key = identity(for: device)
+        let descriptor = HIDInterfaceDescriptor(device: device)
+        if case .ignored(let reason) = InterfaceClassifier.classify(descriptor), !deliversIgnoredInterfaces {
+            skipped.insert(device)
+            onIgnored?(HIDInterfaceInfo(descriptor: descriptor), reason)
+            return
+        }
+        let key = InterfaceClassifier.identityKey(descriptor)
         if let existing = chosen[key] {
             switch HIDInterfaceChoicePolicy.choose(
                 alreadyOpen: true,
@@ -189,6 +223,7 @@ public final class HIDDeviceMonitor {
     }
 
     private func deliverRemoval(_ device: IOHIDDevice) {
+        if skipped.remove(device) != nil { return }
         if ignored.remove(device) != nil { return }
         let key = chosen.first { $0.value == device }?.key
         chosen = chosen.filter { $0.value != device }
@@ -204,20 +239,23 @@ public final class HIDDeviceMonitor {
         return (raw as NSSet).contains(device)
     }
 
-    /// Same physical interface: serial when the device has one, otherwise location and usage.
+    /// Same physical interface: serial when the device has one, otherwise location, otherwise
+    /// the registry entry (see `InterfaceClassifier.identityKey`).
     private func identity(for device: IOHIDDevice) -> String {
-        let info = HIDInterfaceInfo(device: device)
-        if !info.serialNumber.isEmpty {
-            return "\(info.vendorID):\(info.productID):\(info.primaryUsagePage):\(info.primaryUsage):\(info.serialNumber)"
-        }
-        return "\(info.vendorID):\(info.productID):\(info.primaryUsagePage):\(info.primaryUsage):loc\(info.locationID)"
+        InterfaceClassifier.identityKey(HIDInterfaceDescriptor(device: device))
     }
 
     public static func info(for device: IOHIDDevice) -> HIDInterfaceInfo {
         HIDInterfaceInfo(device: device)
     }
 
-    /// Devices that currently match, including ones already present when monitoring started.
+    /// What Upright does with `device`: open it as a receiver or a direct mouse, or ignore it.
+    public static func interfaceClass(for device: IOHIDDevice) -> InterfaceClass {
+        InterfaceClassifier.classify(HIDInterfaceDescriptor(device: device))
+    }
+
+    /// Devices that currently match the criteria (before classification), including ones already
+    /// present when monitoring started.
     public func currentDevices() -> [HIDInterfaceInfo] {
         guard let raw = IOHIDManagerCopyDevices(manager) else { return [] }
         return (raw as NSSet).allObjects.map { HIDInterfaceInfo(device: $0 as! IOHIDDevice) }

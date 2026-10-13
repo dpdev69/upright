@@ -88,7 +88,7 @@ final class MappingPersistenceTests: XCTestCase {
     }
 
     func testUnknownSystemActionFromNewerVersionIsSkipped() throws {
-        let json = #"{"schemaVersion":3,"global":{"actions":{"83":{"system":{"_0":"teleport"}},"86":{"warp":{"_0":{}}},"253":{"system":{"_0":"missionControl"}}}},"apps":[{"bundleID":"com.example","overrides":{"83":{"system":{"_0":"copy"}}}},{"nope":true},{"bundleID":"com.example.b","overrides":{"83":{"hologram":{}}}}]}"#
+        let json = #"{"schemaVersion":4,"global":{"actions":{"83":{"system":{"_0":"teleport"}},"86":{"warp":{"_0":{}}},"253":{"system":{"_0":"missionControl"}}}},"apps":[{"bundleID":"com.example","overrides":{"83":{"system":{"_0":"copy"}}}},{"nope":true},{"bundleID":"com.example.b","overrides":{"83":{"hologram":{}}}}]}"#
         let report = MappingDecodingReport()
         let decoded = try MappingStore.decoder(report: report).decode(MappingProfiles.self, from: Data(json.utf8))
         XCTAssertEqual(decoded.global, ButtonMappings([KnownControl.dpiSwitch: .system(.missionControl)]))
@@ -201,7 +201,7 @@ final class MappingPersistenceTests: XCTestCase {
         ]))
         let data = try MappingStore.exportData(profiles)
         let text = String(decoding: data, as: UTF8.self)
-        XCTAssertTrue(text.contains("\"schemaVersion\" : 2"), text)
+        XCTAssertTrue(text.contains("\"schemaVersion\" : 3"), text)
         XCTAssertTrue(text.contains("\n"))
         XCTAssertTrue(text.contains("https://example.com/path"))
         XCTAssertEqual(try MappingStore.importData(data), profiles)
