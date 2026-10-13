@@ -1,3 +1,5 @@
+import AppKit
+@preconcurrency import ObjectiveC
 import SwiftUI
 
 enum StatusIndicator {
@@ -50,10 +52,102 @@ struct BatteryLabel: View {
     let battery: BatteryStatus
 
     var body: some View {
-        Label("\(battery.percentage)%", systemImage: battery.symbolName)
+        Label(battery.levelText, systemImage: battery.symbolName)
             .labelStyle(.titleAndIcon)
-            .foregroundStyle(battery.percentage <= 10 && !battery.isCharging ? Color.red : Color.secondary)
-            .help(battery.isCharging ? "Charging" : "Battery level")
+            .foregroundStyle(battery.isLow ? Color.red : Color.secondary)
+            .help(battery.isCharging ? String(localized: "Charging") : String(localized: "Battery level"))
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(battery.accessibilityDescription)
+    }
+}
+
+extension BatteryStatus {
+    private static let percentFormatter: NumberFormatter = {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .percent
+        formatter.maximumFractionDigits = 0
+        return formatter
+    }()
+
+    /// The level as the user's locale writes percentages.
+    var percentText: String {
+        Self.percentFormatter.string(from: NSNumber(value: Double(percentage) / 100)) ?? "\(percentage)%"
+    }
+
+    /// "80%", or "~50%" when the mouse only reports a coarse level.
+    var levelText: String {
+        isApproximate ? "~" + percentText : percentText
+    }
+
+    var isLow: Bool { percentage <= 10 && !isCharging }
+
+    /// For example "Battery about 50%, charging".
+    var accessibilityDescription: String {
+        var text = isApproximate
+            ? String(localized: "Battery about \(percentText)")
+            : String(localized: "Battery \(percentText)")
+        if isCharging { text += ", " + String(localized: "charging") }
+        return text
+    }
+}
+
+/// Reports the NSWindow hosting a SwiftUI view (nil until the view is in a window).
+struct WindowReader: NSViewRepresentable {
+    let onChange: (NSWindow?) -> Void
+
+    func makeNSView(context: Context) -> WindowReaderView {
+        let view = WindowReaderView()
+        view.onChange = onChange
+        return view
+    }
+
+    func updateNSView(_ view: WindowReaderView, context: Context) {
+        view.onChange = onChange
+    }
+
+    final class WindowReaderView: NSView {
+        var onChange: ((NSWindow?) -> Void)?
+
+        override func viewDidMoveToWindow() {
+            super.viewDidMoveToWindow()
+            onChange?(window)
+        }
+    }
+}
+
+/// A row-style button for custom lists (the menu bar panel): highlights on hover and draws a
+/// focus ring when reached with the keyboard.
+struct RowButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        RowButtonBody(configuration: configuration)
+    }
+
+    private struct RowButtonBody: View {
+        let configuration: ButtonStyleConfiguration
+        @Environment(\.isFocused) private var isFocused
+        @Environment(\.isEnabled) private var isEnabled
+        @State private var hovering = false
+
+        var body: some View {
+            configuration.label
+                .padding(.horizontal, 8)
+                .padding(.vertical, 5)
+                .contentShape(Rectangle())
+                .background(
+                    RoundedRectangle(cornerRadius: 5, style: .continuous)
+                        .fill(fill)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 5, style: .continuous)
+                        .strokeBorder(Color.accentColor, lineWidth: isFocused ? 2 : 0)
+                )
+                .onHover { hovering = $0 && isEnabled }
+        }
+
+        private var fill: Color {
+            if configuration.isPressed { return Color.primary.opacity(0.14) }
+            return hovering ? Color.primary.opacity(0.08) : .clear
+        }
     }
 }
 
@@ -169,5 +263,40 @@ struct EmptyStateView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 24)
+    }
+}
+
+/// Holds notification observers and an optional local event monitor, and removes them when it
+/// goes away. Owners keep one as a `let`, so their own deinit has nothing isolated to touch.
+/// Not thread-safe: use it from the main actor only (its deinit runs wherever the last
+/// reference is released, after which nothing else can reach it).
+final class ListenerTokens: @unchecked Sendable {
+    private var observers: [NSObjectProtocol] = []
+    private var monitor: Any?
+
+    var hasMonitor: Bool { monitor != nil }
+
+    func addObserver(_ token: NSObjectProtocol) {
+        observers.append(token)
+    }
+
+    func removeObservers() {
+        observers.forEach(NotificationCenter.default.removeObserver)
+        observers.removeAll()
+    }
+
+    func setMonitor(_ token: Any?) {
+        removeMonitor()
+        monitor = token
+    }
+
+    func removeMonitor() {
+        if let monitor { NSEvent.removeMonitor(monitor) }
+        monitor = nil
+    }
+
+    deinit {
+        removeMonitor()
+        removeObservers()
     }
 }

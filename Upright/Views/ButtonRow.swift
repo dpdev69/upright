@@ -1,13 +1,72 @@
 import SwiftUI
 
-/// One remappable button: what it is, what it does, and a picker to change that.
+/// One remappable button in the global table: what it is, what it does, and a picker to change that.
 struct ButtonRow: View {
     let control: ControlDescriptor
     @Binding var action: ButtonAction
     let showsAccessibilityWarning: Bool
+    var isHighlighted = false
+    var note: Text?
 
-    @State private var isRecording = false
-    @State private var wantsShortcut = false
+    var body: some View {
+        ControlRowLayout(control: control, isHighlighted: isHighlighted, note: note) {
+            if showsAccessibilityWarning && action.requiresAccessibility {
+                AccessibilityWarningIcon()
+            }
+            ActionPicker(selection: $action)
+        }
+    }
+}
+
+/// A button in an app profile: either inherits the global action or overrides it.
+struct AppOverrideRow: View {
+    let control: ControlDescriptor
+    /// nil inherits the global mapping.
+    @Binding var override: ButtonAction?
+    let globalAction: ButtonAction
+    let showsAccessibilityWarning: Bool
+    var isHighlighted = false
+    var note: Text?
+
+    var body: some View {
+        ControlRowLayout(control: control, isHighlighted: isHighlighted, note: note) {
+            if let current = override {
+                if showsAccessibilityWarning && current.requiresAccessibility {
+                    AccessibilityWarningIcon()
+                }
+                ActionPicker(selection: Binding(
+                    get: { override ?? current },
+                    set: { override = $0 }
+                ))
+                Button {
+                    override = nil
+                } label: {
+                    Image(systemName: "arrow.uturn.backward")
+                }
+                .buttonStyle(.borderless)
+                .help("Use the global action again")
+                .accessibilityLabel(Text("Use Global Action"))
+            } else {
+                Text("Global: \(globalAction.title)")
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .help(globalAction.helpText)
+                Button("Override") {
+                    override = globalAction
+                }
+                .help("Give this button a different action in this app")
+            }
+        }
+    }
+}
+
+/// Icon, name and detail of a control, with trailing content. Briefly tinted while highlighted
+/// (the button was just pressed).
+struct ControlRowLayout<Trailing: View>: View {
+    let control: ControlDescriptor
+    let isHighlighted: Bool
+    var note: Text?
+    @ViewBuilder let trailing: () -> Trailing
 
     var body: some View {
         HStack(spacing: 12) {
@@ -17,85 +76,35 @@ struct ButtonRow: View {
                 Text(control.detail)
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                if let note {
+                    note
+                        .font(.caption)
+                        .foregroundStyle(.orange)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
+            .layoutPriority(1)
             Spacer(minLength: 12)
-
-            if showsAccessibilityWarning && action.requiresAccessibility {
-                Image(systemName: "exclamationmark.triangle.fill")
-                    .foregroundStyle(.orange)
-                    .help("Needs Accessibility access. Until then this button keeps its normal behavior.")
-            }
-
-            if case .keyCombo(let combo) = action {
-                ShortcutRecorder(combo: combo, isRecording: $isRecording) { action = .keyCombo($0) }
-            } else if wantsShortcut {
-                ShortcutRecorder(combo: nil, isRecording: $isRecording) { action = .keyCombo($0) }
-            }
-
-            ActionMenu(action: $action) {
-                wantsShortcut = true
-                isRecording = true
-            }
-            .frame(width: 190)
+            trailing()
         }
         .padding(.vertical, 3)
-        .onChange(of: isRecording) { recording in
-            if !recording { wantsShortcut = false }
-        }
+        .background(
+            RoundedRectangle(cornerRadius: 6, style: .continuous)
+                .fill(Color.accentColor.opacity(isHighlighted ? 0.18 : 0))
+                .padding(.horizontal, -6)
+        )
+        .animation(.easeOut(duration: 0.35), value: isHighlighted)
         .accessibilityElement(children: .contain)
         .accessibilityLabel(control.name)
     }
 }
 
-/// Pop-up menu listing every action, grouped like the system's own lists.
-struct ActionMenu: View {
-    @Binding var action: ButtonAction
-    let recordShortcut: () -> Void
-
+struct AccessibilityWarningIcon: View {
     var body: some View {
-        Menu {
-            Picker("Basic", selection: $action) {
-                Label("Default", systemImage: "computermouse").tag(ButtonAction.deviceDefault)
-                Label("Do Nothing", systemImage: "nosign").tag(ButtonAction.disabled)
-            }
-            .pickerStyle(.inline)
-            .labelsHidden()
-
-            ForEach(SystemAction.Category.allCases, id: \.self) { category in
-                Menu(category.rawValue) {
-                    Picker(category.rawValue, selection: $action) {
-                        ForEach(SystemAction.actions(in: category)) { system in
-                            Label(system.title, systemImage: system.symbolName).tag(ButtonAction.system(system))
-                        }
-                    }
-                    .pickerStyle(.inline)
-                    .labelsHidden()
-                }
-            }
-            Divider()
-            Button {
-                recordShortcut()
-            } label: {
-                Label("Keyboard Shortcut…", systemImage: "keyboard")
-            }
-        } label: {
-            Label(menuTitle, systemImage: action.symbolName)
-        }
-        .fixedSize(horizontal: false, vertical: true)
-        .help(helpText)
-    }
-
-    private var menuTitle: String {
-        if case .keyCombo = action { return "Keyboard Shortcut" }
-        return action.title
-    }
-
-    private var helpText: String {
-        switch action {
-        case .deviceDefault: return "The mouse handles this button itself"
-        case .disabled: return "The button is ignored"
-        case .system(let system): return system.title
-        case .keyCombo(let combo): return "Sends \(combo.displayString)"
-        }
+        Image(systemName: "exclamationmark.triangle.fill")
+            .foregroundStyle(.orange)
+            .help("Needs Accessibility access. Until then this button keeps its normal behavior.")
+            .accessibilityLabel(Text("Needs Accessibility access"))
     }
 }

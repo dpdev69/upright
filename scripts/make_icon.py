@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Renders Upright's app icon into Upright/Assets.xcassets/AppIcon.appiconset.
 
-Requires Pillow (`pip install pillow`). Run from the repository root:
+Requires Pillow (`pip install -r scripts/requirements.txt`). Run from the repository root:
 
     python3 scripts/make_icon.py
 """

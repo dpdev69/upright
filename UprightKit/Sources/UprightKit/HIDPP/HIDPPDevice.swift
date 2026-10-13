@@ -16,14 +16,25 @@ public final class HIDPPDevice {
     // MARK: Root feature (always at index 0)
 
     /// Root.getProtocolVersion. HID++ 1.0 devices reject it with "invalid sub-ID".
+    /// The reply echoes a ping byte; a mismatch means a late reply to an earlier ping, so ask again.
     public func protocolVersion(timeout: TimeInterval? = nil) async throws -> (major: UInt8, minor: UInt8) {
-        let ping: UInt8 = 0x5A
-        do {
-            let reply = try await client.call(deviceIndex: index, featureIndex: 0, function: 1, parameters: [0, 0, ping], timeout: timeout)
-            return (reply[0], reply[1])
-        } catch HIDPPError.hidpp10(0x01) {
-            return (1, 0)
+        for _ in 0..<2 {
+            let ping = Self.nextPing()
+            do {
+                let reply = try await client.call(deviceIndex: index, featureIndex: 0, function: 1, parameters: [0, 0, ping], timeout: timeout)
+                if reply[2] == ping { return (reply[0], reply[1]) }
+            } catch HIDPPError.hidpp10(0x01) {
+                return (1, 0)
+            }
         }
+        throw HIDPPError.malformedResponse
+    }
+
+    private static var lastPing: UInt8 = 0x59
+
+    private static func nextPing() -> UInt8 {
+        lastPing = lastPing == 0xFF ? 1 : lastPing + 1
+        return lastPing
     }
 
     /// Root.getFeature. Returns nil when the device lacks the feature.
@@ -80,14 +91,19 @@ public final class HIDPPDevice {
     }
 
     /// Battery via Unified Battery (0x1004) or Battery Status (0x1000), whichever exists.
-    public func battery() async -> BatteryStatus? {
-        if (try? await featureIndex(for: .unifiedBattery)) != nil,
-           let reply = try? await call(.unifiedBattery, function: 1) {
-            return BatteryStatus(unifiedBatteryParameters: reply)
+    /// `previous` fills in the level when a charging 0x1000 device reports level 0.
+    public func battery(previous: BatteryStatus? = nil) async -> BatteryStatus? {
+        if (try? await featureIndex(for: .unifiedBattery)) != nil {
+            // getCapabilities: [supported level flags, flags]; flags bit 1 = state of charge (%) supported.
+            let capabilities = try? await call(.unifiedBattery, function: 0)
+            let reportsPercentage = capabilities.map { $0[1] & 0x02 != 0 } ?? true
+            if let reply = try? await call(.unifiedBattery, function: 1) {
+                return BatteryStatus(unifiedBatteryParameters: reply, reportsPercentage: reportsPercentage)
+            }
         }
         if (try? await featureIndex(for: .batteryStatus)) != nil,
            let reply = try? await call(.batteryStatus, function: 0) {
-            return BatteryStatus(batteryStatusParameters: reply)
+            return BatteryStatus(batteryStatusParameters: reply, previous: previous)
         }
         return nil
     }
@@ -95,25 +111,66 @@ public final class HIDPPDevice {
 
 public struct BatteryStatus: Hashable, Sendable {
     public var percentage: Int
+    /// Charging, or full while on external power.
     public var isCharging: Bool
+    /// The device reports only a coarse level (critical / low / good / full), not a percentage.
+    public var isApproximate: Bool
 
-    public init(percentage: Int, isCharging: Bool) {
+    public init(percentage: Int, isCharging: Bool, isApproximate: Bool = false) {
         self.percentage = percentage
         self.isCharging = isCharging
+        self.isApproximate = isApproximate
     }
 
     /// 0x1000 getBatteryLevelStatus / broadcast: [level %, next level %, status].
-    init?(batteryStatusParameters p: [UInt8]) {
-        guard p.count >= 3, p[0] > 0 else { return nil }
-        percentage = Int(min(p[0], 100))
-        isCharging = [1, 2, 4].contains(p[2])
+    /// Status: 0 discharging, 1 recharging, 2 almost full, 3 full (on power), 4 slow recharge, 5-7 errors.
+    /// Some devices report level 0 while charging; the previous level is kept then.
+    init?(batteryStatusParameters p: [UInt8], previous: BatteryStatus? = nil) {
+        guard p.count >= 3 else { return nil }
+        isCharging = [1, 2, 3, 4].contains(p[2])
+        isApproximate = false
+        if p[0] > 0 {
+            percentage = Int(min(p[0], 100))
+        } else if p[2] == 3 {
+            percentage = 100
+        } else if let previous, isCharging {
+            percentage = previous.percentage
+            isApproximate = previous.isApproximate
+        } else {
+            return nil
+        }
     }
 
     /// 0x1004 getStatus / broadcast: [state of charge %, level flags, charging status, external power].
-    init?(unifiedBatteryParameters p: [UInt8]) {
+    /// Level flags: 1 critical, 2 low, 4 good, 8 full. Charging status: 0 discharging, 1 charging,
+    /// 2 slow charging, 3 complete (full, on power), 4 error.
+    init?(unifiedBatteryParameters p: [UInt8], reportsPercentage: Bool = true) {
         guard p.count >= 3 else { return nil }
-        percentage = Int(min(p[0], 100))
-        isCharging = [1, 2].contains(p[2])
+        isCharging = [1, 2, 3].contains(p[2])
+        if reportsPercentage, p[0] > 0 {
+            percentage = Int(min(p[0], 100))
+            isApproximate = false
+        } else if let level = Self.percentage(forLevelFlags: p[1]) {
+            percentage = level
+            isApproximate = true
+        } else if p[2] == 3 {
+            percentage = 100
+            isApproximate = true
+        } else if reportsPercentage {
+            percentage = 0
+            isApproximate = false
+        } else {
+            return nil
+        }
+    }
+
+    /// Representative percentages for 0x1004 level flags (the values Solaar uses).
+    static func percentage(forLevelFlags flags: UInt8) -> Int? {
+        if flags & 0x08 != 0 { return 90 }
+        if flags & 0x04 != 0 { return 50 }
+        if flags & 0x02 != 0 { return 20 }
+        if flags & 0x01 != 0 { return 5 }
+        return nil
     }
 
     public var symbolName: String {

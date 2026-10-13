@@ -81,4 +81,38 @@ final class HIDPPMessageTests: XCTestCase {
         XCTAssertEqual(HIDInterfaceChoicePolicy.choose(alreadyOpen: true, sameInterface: false, previousStillPresent: true), .ignore)
         XCTAssertEqual(HIDInterfaceChoicePolicy.choose(alreadyOpen: true, sameInterface: false, previousStillPresent: false), .replace)
     }
+
+    func testBatteryStatusParsing() {
+        // 0x1000: [level, next level, status]
+        XCTAssertEqual(BatteryStatus(batteryStatusParameters: [80, 50, 0]), BatteryStatus(percentage: 80, isCharging: false))
+        XCTAssertEqual(BatteryStatus(batteryStatusParameters: [100, 0, 3]), BatteryStatus(percentage: 100, isCharging: true))
+        XCTAssertEqual(BatteryStatus(batteryStatusParameters: [0, 0, 3]), BatteryStatus(percentage: 100, isCharging: true))
+        XCTAssertNil(BatteryStatus(batteryStatusParameters: [0, 0, 1]))
+        let previous = BatteryStatus(percentage: 42, isCharging: false)
+        XCTAssertEqual(BatteryStatus(batteryStatusParameters: [0, 0, 1], previous: previous), BatteryStatus(percentage: 42, isCharging: true))
+        XCTAssertNil(BatteryStatus(batteryStatusParameters: [0, 0, 0], previous: previous))
+
+        // 0x1004: [state of charge, level flags, charging status, external power]
+        XCTAssertEqual(BatteryStatus(unifiedBatteryParameters: [73, 0x04, 0, 0]), BatteryStatus(percentage: 73, isCharging: false))
+        XCTAssertEqual(BatteryStatus(unifiedBatteryParameters: [100, 0x08, 3, 1]), BatteryStatus(percentage: 100, isCharging: true))
+        XCTAssertEqual(BatteryStatus(unifiedBatteryParameters: [0, 0x02, 0, 0], reportsPercentage: false),
+                       BatteryStatus(percentage: 20, isCharging: false, isApproximate: true))
+        XCTAssertEqual(BatteryStatus(unifiedBatteryParameters: [55, 0x08, 1, 1], reportsPercentage: false),
+                       BatteryStatus(percentage: 90, isCharging: true, isApproximate: true))
+    }
+
+    func testErrorClassification() {
+        XCTAssertTrue(HIDPPError.timeout.meansDeviceUnreachable)
+        XCTAssertTrue(HIDPPError.sendFailed(-1).meansDeviceUnreachable)
+        XCTAssertTrue(HIDPPError.hidpp10(0x09).meansDeviceUnreachable)
+        XCTAssertFalse(HIDPPError.hidpp20(0x04).meansDeviceUnreachable)
+        XCTAssertTrue(HIDPPError.hidpp20(0x08).isBusy)
+        XCTAssertTrue(HIDPPError.hidpp10(0x07).isBusy)
+        XCTAssertFalse(HIDPPError.hidpp20(0x02).isBusy)
+    }
+
+    func testReceiverRegisterMessages() {
+        XCTAssertEqual(Array(HIDPPMessage.receiverRegisterWrite(0x02, parameters: [0x02]).bytes), [0x10, 0xFF, 0x80, 0x02, 0x02, 0x00, 0x00])
+        XCTAssertEqual(Array(HIDPPMessage.receiverLongRegisterRead(0xB5, parameters: [0x21]).bytes), [0x10, 0xFF, 0x83, 0xB5, 0x21, 0x00, 0x00])
+    }
 }

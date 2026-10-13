@@ -41,6 +41,26 @@
 		E558C6CD8E37F67D67E4171A /* HIDPPTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBDFFF771C0DE11E7DF89756 /* HIDPPTransport.swift */; };
 		EF3CCA4C17E4D19DCF2CA16C /* ReprogControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAFB14D061409F22E0F35A67 /* ReprogControls.swift */; };
 		FFC048A19AF99992CDA594FB /* PermissionsPane.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9903C83138439330FB350894 /* PermissionsPane.swift */; };
+		D9D0DEA6AAAE81C709F1E9CC /* FrontmostAppMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB6805FD19F67DDAFBA489A1 /* FrontmostAppMonitor.swift */; };
+		1FA2F930BAB36F416770F9EB /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 766EE0AB39B7FB46D7AA53A3 /* AppSettings.swift */; };
+		A609BD14043B7C53AD35630C /* ScrollController.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED3A2EC703AFF290EA168A0D /* ScrollController.swift */; };
+		2F102361EA32FCC27B986592 /* BatteryNotifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 267982B81F3F104CE213696C /* BatteryNotifier.swift */; };
+		80067A00AEB3B9A12B0DD488 /* PointerSpeedSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 333B39D7A2EF6B2C5B9269E3 /* PointerSpeedSection.swift */; };
+		7D59F1C3695CFF21D3F7AA6B /* ProfileSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9CF61A96E4BD0FF25F8C03C /* ProfileSection.swift */; };
+		F3E96D4C489DA58A86D70F03 /* ActionPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B18F9219D012141062A478C2 /* ActionPicker.swift */; };
+		22DC4ECD27A938134E4A7C1D /* ScrollPane.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F17795E759D21ED490959EC /* ScrollPane.swift */; };
+		702511A8EE98674E3C662BEA /* GestureEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = E362408D13E8224AD0601770 /* GestureEditor.swift */; };
+		62DA65C5FE1B769E669BD22B /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDA15D900CC353617466C3D8 /* OnboardingView.swift */; };
+		C83986A5A94C2A8A680FA538 /* GestureRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC1BC2079D9F95E2C057D6C1 /* GestureRecognizer.swift */; };
+		ED65B0BD97917F2499745ECD /* MappingProfiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94ED828840698FEAA23AE873 /* MappingProfiles.swift */; };
+		84E25632C8CCD97B523C4789 /* MappingStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C437667DE6EE25F7E57FF85 /* MappingStore.swift */; };
+		9955439AF3AC512E65B0A7E6 /* GestureSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76B4A8E1A747B6E1AD914A9B /* GestureSet.swift */; };
+		00344AC5F37AB10330195394 /* DeviceFeatures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 801D7DF769119657F298B63B /* DeviceFeatures.swift */; };
+		E8572AEDC53C5E8ADBA68D3E /* ScrollSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A4F3EFD5769C98EED2F7988 /* ScrollSettings.swift */; };
+		A900012B34EBACD73BE00081 /* SmoothScrollAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8711907D34CCCB90AF1554AE /* SmoothScrollAnimator.swift */; };
+		7F40D02201E6460F34A1FA7B /* ScrollTransform.swift in Sources */ = {isa = PBXBuildFile; fileRef = 633894E7919123114D99EA9A /* ScrollTransform.swift */; };
+		05B84C11DE61095A301EFB5E /* BatteryAlertPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D8569275370AADE73A85AA3 /* BatteryAlertPolicy.swift */; };
+		2D8F40A7CC1FD8C1ECE0B956 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 58500BF091140DDD7E749A27 /* Localizable.xcstrings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -79,6 +99,26 @@
 		EAE0AE15A05BBAD2A85FEFE6 /* DeviceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceManager.swift; sourceTree = "<group>"; };
 		EB591826E3750807BA440035 /* ButtonRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonRow.swift; sourceTree = "<group>"; };
 		F8021A393EB09A242A06E549 /* GeneralPane.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralPane.swift; sourceTree = "<group>"; };
+		FB6805FD19F67DDAFBA489A1 /* FrontmostAppMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrontmostAppMonitor.swift; sourceTree = "<group>"; };
+		766EE0AB39B7FB46D7AA53A3 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
+		ED3A2EC703AFF290EA168A0D /* ScrollController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollController.swift; sourceTree = "<group>"; };
+		267982B81F3F104CE213696C /* BatteryNotifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatteryNotifier.swift; sourceTree = "<group>"; };
+		333B39D7A2EF6B2C5B9269E3 /* PointerSpeedSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointerSpeedSection.swift; sourceTree = "<group>"; };
+		A9CF61A96E4BD0FF25F8C03C /* ProfileSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileSection.swift; sourceTree = "<group>"; };
+		B18F9219D012141062A478C2 /* ActionPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionPicker.swift; sourceTree = "<group>"; };
+		4F17795E759D21ED490959EC /* ScrollPane.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollPane.swift; sourceTree = "<group>"; };
+		E362408D13E8224AD0601770 /* GestureEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GestureEditor.swift; sourceTree = "<group>"; };
+		FDA15D900CC353617466C3D8 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		CC1BC2079D9F95E2C057D6C1 /* GestureRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GestureRecognizer.swift; sourceTree = "<group>"; };
+		94ED828840698FEAA23AE873 /* MappingProfiles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MappingProfiles.swift; sourceTree = "<group>"; };
+		0C437667DE6EE25F7E57FF85 /* MappingStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MappingStore.swift; sourceTree = "<group>"; };
+		76B4A8E1A747B6E1AD914A9B /* GestureSet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GestureSet.swift; sourceTree = "<group>"; };
+		801D7DF769119657F298B63B /* DeviceFeatures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceFeatures.swift; sourceTree = "<group>"; };
+		6A4F3EFD5769C98EED2F7988 /* ScrollSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollSettings.swift; sourceTree = "<group>"; };
+		8711907D34CCCB90AF1554AE /* SmoothScrollAnimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmoothScrollAnimator.swift; sourceTree = "<group>"; };
+		633894E7919123114D99EA9A /* ScrollTransform.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollTransform.swift; sourceTree = "<group>"; };
+		7D8569275370AADE73A85AA3 /* BatteryAlertPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatteryAlertPolicy.swift; sourceTree = "<group>"; };
+		58500BF091140DDD7E749A27 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -95,10 +135,12 @@
 		04430153E1DE0DB0D216974D /* UprightKit */ = {
 			isa = PBXGroup;
 			children = (
+				93D1E4B29D5CA3AE0EF64611 /* Battery */,
 				B0E84EB2939EC35580300BA1 /* Device */,
 				4BB2F5C6306E7D4E76E7C776 /* HIDPP */,
 				C110137C9980F9208BE059DC /* Mapping */,
 				6B774AC9BDF0D0197E7F0032 /* Platform */,
+				45899E710FE7DFADD7E85678 /* Scrolling */,
 			);
 			name = UprightKit;
 			path = UprightKit/Sources/UprightKit;
@@ -115,6 +157,7 @@
 		4BB2F5C6306E7D4E76E7C776 /* HIDPP */ = {
 			isa = PBXGroup;
 			children = (
+				801D7DF769119657F298B63B /* DeviceFeatures.swift */,
 				19138CCF2A062D83821F2ED7 /* HIDPPClient.swift */,
 				48CE66058B517B9B436403BE /* HIDPPDevice.swift */,
 				C3CD83B2323D740C78867EFB /* HIDPPError.swift */,
@@ -141,6 +184,7 @@
 				8B02C8C5C5C5ECA8AE59EE78 /* App */,
 				FD4294A9F45E2FA3D5CE9D6B /* Views */,
 				DCE498C0536AFA6C6A77EB68 /* Assets.xcassets */,
+				58500BF091140DDD7E749A27 /* Localizable.xcstrings */,
 			);
 			path = Upright;
 			sourceTree = "<group>";
@@ -157,9 +201,13 @@
 			isa = PBXGroup;
 			children = (
 				2F53FBF5620FAA73BC3A99CB /* AppModel.swift */,
+				766EE0AB39B7FB46D7AA53A3 /* AppSettings.swift */,
+				267982B81F3F104CE213696C /* BatteryNotifier.swift */,
 				EAE0AE15A05BBAD2A85FEFE6 /* DeviceManager.swift */,
+				FB6805FD19F67DDAFBA489A1 /* FrontmostAppMonitor.swift */,
 				8D2E8581C7E341B8E8C64551 /* LoginItemController.swift */,
 				51200E3EC13ECE6FE38D7322 /* PermissionsMonitor.swift */,
+				ED3A2EC703AFF290EA168A0D /* ScrollController.swift */,
 				1A0269D1C24A78737E3350B3 /* SystemActionPerformer.swift */,
 				B969D8B5009543D641EEB50B /* UprightApp.swift */,
 			);
@@ -182,7 +230,11 @@
 			children = (
 				25B2A52D2FDCC0F9A423B44C /* ButtonAction.swift */,
 				7ED7F195DD6A0AC6DD7483E5 /* ButtonMappings.swift */,
+				CC1BC2079D9F95E2C057D6C1 /* GestureRecognizer.swift */,
+				76B4A8E1A747B6E1AD914A9B /* GestureSet.swift */,
 				12AD4FC3D5D5D7249968FD4D /* KeyCombo.swift */,
+				94ED828840698FEAA23AE873 /* MappingProfiles.swift */,
+				0C437667DE6EE25F7E57FF85 /* MappingStore.swift */,
 				169D6EC9F98C734C0473CB6A /* RemapEngine.swift */,
 			);
 			path = Mapping;
@@ -192,18 +244,42 @@
 			isa = PBXGroup;
 			children = (
 				997C24297E913D6E1AF25808 /* AboutPane.swift */,
+				B18F9219D012141062A478C2 /* ActionPicker.swift */,
 				EB591826E3750807BA440035 /* ButtonRow.swift */,
 				4D6D974FB15FA4A97BDCF386 /* ButtonsPane.swift */,
 				855AD2FC9A58EBF0A8281695 /* Components.swift */,
 				5B4B7B7A3E5BFFBC9AF33601 /* DevicePane.swift */,
 				F8021A393EB09A242A06E549 /* GeneralPane.swift */,
+				E362408D13E8224AD0601770 /* GestureEditor.swift */,
 				83D545EF65625567F7C5502B /* MenuBarView.swift */,
+				FDA15D900CC353617466C3D8 /* OnboardingView.swift */,
 				9903C83138439330FB350894 /* PermissionsPane.swift */,
+				333B39D7A2EF6B2C5B9269E3 /* PointerSpeedSection.swift */,
+				A9CF61A96E4BD0FF25F8C03C /* ProfileSection.swift */,
+				4F17795E759D21ED490959EC /* ScrollPane.swift */,
 				0AB3759151C30F6EE5A20245 /* SettingsView.swift */,
 				3DEEC269F06A06FB9D38D923 /* SettingsWindowController.swift */,
 				14F79AC6294C781265A79167 /* ShortcutRecorder.swift */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		93D1E4B29D5CA3AE0EF64611 /* Battery */ = {
+			isa = PBXGroup;
+			children = (
+				7D8569275370AADE73A85AA3 /* BatteryAlertPolicy.swift */,
+			);
+			path = Battery;
+			sourceTree = "<group>";
+		};
+		45899E710FE7DFADD7E85678 /* Scrolling */ = {
+			isa = PBXGroup;
+			children = (
+				6A4F3EFD5769C98EED2F7988 /* ScrollSettings.swift */,
+				633894E7919123114D99EA9A /* ScrollTransform.swift */,
+				8711907D34CCCB90AF1554AE /* SmoothScrollAnimator.swift */,
+			);
+			path = Scrolling;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -265,6 +341,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B0237D3616875AAE4DBEE4A3 /* Assets.xcassets in Resources */,
+				2D8F40A7CC1FD8C1ECE0B956 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -276,17 +353,26 @@
 			buildActionMask = 2147483647;
 			files = (
 				B32E2975128C916881502231 /* AboutPane.swift in Sources */,
+				F3E96D4C489DA58A86D70F03 /* ActionPicker.swift in Sources */,
 				02CEE6AAE604C0FA78EEDEB3 /* AppModel.swift in Sources */,
+				1FA2F930BAB36F416770F9EB /* AppSettings.swift in Sources */,
+				05B84C11DE61095A301EFB5E /* BatteryAlertPolicy.swift in Sources */,
+				2F102361EA32FCC27B986592 /* BatteryNotifier.swift in Sources */,
 				D3DE6B0E55B6D2EA66152E25 /* ButtonAction.swift in Sources */,
 				A7035ECB836DDB1F70ECE23E /* ButtonMappings.swift in Sources */,
 				8796844D3AD85FE77E41719F /* ButtonRow.swift in Sources */,
-				107352CE355BADB90B696A61 /* ButtonStateTracker.swift in Sources */,
 				0188E8C7443C1EB6906B170B /* ButtonsPane.swift in Sources */,
+				107352CE355BADB90B696A61 /* ButtonStateTracker.swift in Sources */,
 				01CC78E876CECDBC21DA1288 /* Components.swift in Sources */,
+				00344AC5F37AB10330195394 /* DeviceFeatures.swift in Sources */,
 				E48470EA377FC68CF5E7C7AA /* DeviceManager.swift in Sources */,
 				A11D6D25E1D0A3D84B15D586 /* DevicePane.swift in Sources */,
 				BD4020CC5205950150BA67A4 /* DeviceSession.swift in Sources */,
+				D9D0DEA6AAAE81C709F1E9CC /* FrontmostAppMonitor.swift in Sources */,
 				5B95B2F21BE064E361B692FE /* GeneralPane.swift in Sources */,
+				702511A8EE98674E3C662BEA /* GestureEditor.swift in Sources */,
+				C83986A5A94C2A8A680FA538 /* GestureRecognizer.swift in Sources */,
+				9955439AF3AC512E65B0A7E6 /* GestureSet.swift in Sources */,
 				710BA006A086BEA07860130A /* HIDPPClient.swift in Sources */,
 				4719E0F8795C5E135ADD642C /* HIDPPDevice.swift in Sources */,
 				5D7C4185D945ADDBC6BFEDFB /* HIDPPError.swift in Sources */,
@@ -296,16 +382,26 @@
 				80E184D21965D5C2B3DACFE7 /* IOKitHID.swift in Sources */,
 				89F2E072AC3D5D153D254964 /* KeyCombo.swift in Sources */,
 				D72C7E2A0D4A7CFDC52101D0 /* LoginItemController.swift in Sources */,
+				ED65B0BD97917F2499745ECD /* MappingProfiles.swift in Sources */,
+				84E25632C8CCD97B523C4789 /* MappingStore.swift in Sources */,
+				7F65C76EFB8E46BF1DB35DE9 /* MenuBarView.swift in Sources */,
 				111E5A423C212EA716AB42E5 /* MXVertical.swift in Sources */,
 				BCB6FA3AB36A66E5B1CD0A1F /* MXVerticalController.swift in Sources */,
-				7F65C76EFB8E46BF1DB35DE9 /* MenuBarView.swift in Sources */,
+				62DA65C5FE1B769E669BD22B /* OnboardingView.swift in Sources */,
 				C69B7BCA3584AB53157039F3 /* PermissionsMonitor.swift in Sources */,
 				FFC048A19AF99992CDA594FB /* PermissionsPane.swift in Sources */,
+				80067A00AEB3B9A12B0DD488 /* PointerSpeedSection.swift in Sources */,
+				7D59F1C3695CFF21D3F7AA6B /* ProfileSection.swift in Sources */,
 				7394E1C710027A6C2E9CD8C5 /* RemapEngine.swift in Sources */,
 				EF3CCA4C17E4D19DCF2CA16C /* ReprogControls.swift in Sources */,
+				A609BD14043B7C53AD35630C /* ScrollController.swift in Sources */,
+				22DC4ECD27A938134E4A7C1D /* ScrollPane.swift in Sources */,
+				E8572AEDC53C5E8ADBA68D3E /* ScrollSettings.swift in Sources */,
+				7F40D02201E6460F34A1FA7B /* ScrollTransform.swift in Sources */,
 				1F98199E19123E88F4B47AD4 /* SettingsView.swift in Sources */,
 				CE1C711802458CB28A80E18E /* SettingsWindowController.swift in Sources */,
 				A4D2FA9F7076A35DB00A872F /* ShortcutRecorder.swift in Sources */,
+				A900012B34EBACD73BE00081 /* SmoothScrollAnimator.swift in Sources */,
 				8302EA4B40F0498D9E5C451E /* SystemActionPerformer.swift in Sources */,
 				84D11A058F3AD7D53E57B4E0 /* UprightApp.swift in Sources */,
 			);
@@ -344,6 +440,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
+				SWIFT_STRICT_CONCURRENCY = targeted;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -359,7 +456,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
-				ENABLE_HARDENED_RUNTIME = NO;
+				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Upright;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
@@ -369,6 +466,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = io.github.upright.Upright;
@@ -401,6 +499,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				SDKROOT = macosx;
+				SWIFT_STRICT_CONCURRENCY = targeted;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 			};
@@ -412,11 +511,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
-				ENABLE_HARDENED_RUNTIME = NO;
+				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Upright;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
@@ -426,6 +526,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = io.github.upright.Upright;

@@ -9,6 +9,13 @@ public struct KeyModifiers: OptionSet, Codable, Hashable, Sendable {
     public static let shift = KeyModifiers(rawValue: 1 << 2)
     public static let command = KeyModifiers(rawValue: 1 << 3)
 
+    public static let all: KeyModifiers = [.control, .option, .shift, .command]
+
+    /// Each modifier on its own, in the order macOS menus show them: ⌃⌥⇧⌘.
+    public var elements: [KeyModifiers] {
+        [.control, .option, .shift, .command].filter { contains($0) }
+    }
+
     /// Symbols in the order macOS menus show them: ⌃⌥⇧⌘.
     public var symbols: String {
         var result = ""
@@ -29,15 +36,54 @@ public struct KeyCombo: Codable, Hashable, Sendable {
 
     public init(keyCode: UInt16, modifiers: KeyModifiers = [], keyLabel: String? = nil) {
         self.keyCode = keyCode
-        self.modifiers = modifiers
-        self.keyLabel = keyLabel ?? KeyCode.label(for: keyCode) ?? "Key \(keyCode)"
+        self.modifiers = modifiers.intersection(.all)
+        self.keyLabel = keyLabel ?? Self.defaultLabel(for: keyCode)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case keyCode, modifiers, keyLabel
+    }
+
+    /// Only the key code is required; anything else missing or malformed falls back to a default.
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let keyCode = try container.decode(UInt16.self, forKey: .keyCode)
+        let modifiers = (try? container.decodeIfPresent(Int.self, forKey: .modifiers)).flatMap { $0 } ?? 0
+        let label = (try? container.decodeIfPresent(String.self, forKey: .keyLabel)).flatMap { $0 }
+        self.init(
+            keyCode: keyCode,
+            modifiers: KeyModifiers(rawValue: modifiers),
+            keyLabel: label?.isEmpty == false ? label : nil
+        )
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(keyCode, forKey: .keyCode)
+        try container.encode(modifiers.rawValue, forKey: .modifiers)
+        try container.encode(keyLabel, forKey: .keyLabel)
     }
 
     public var displayString: String { modifiers.symbols + keyLabel }
 
-    /// Arrow and navigation keys carry the function/numeric-pad flags on real keyboards;
+    /// Arrow, navigation and function keys carry extra flags on real keyboards;
     /// some system shortcuts (like switching Spaces) only fire when they're present.
     public var isNavigationKey: Bool { KeyCode.navigationKeys.contains(keyCode) }
+
+    /// Real keyboards set the Fn flag (NSEvent.ModifierFlags.function / CGEventFlags.maskSecondaryFn)
+    /// for F-keys, Help, Forward Delete, Home, End, Page Up, Page Down and the arrow keys.
+    public var carriesFunctionFlag: Bool {
+        KeyCode.navigationKeys.contains(keyCode) || KeyCode.functionKeys[keyCode] != nil || keyCode == KeyCode.help
+    }
+
+    /// Real keyboards set the numeric-pad flag for keypad keys and the arrow keys.
+    public var carriesNumericPadFlag: Bool {
+        KeyCode.arrowKeys.contains(keyCode) || KeyCode.keypadKeys.contains(keyCode)
+    }
+
+    private static func defaultLabel(for keyCode: UInt16) -> String {
+        KeyCode.label(for: keyCode) ?? "Key \(keyCode)"
+    }
 }
 
 /// Carbon virtual key codes (kVK_*) Upright refers to by name.
@@ -59,6 +105,7 @@ public enum KeyCode {
     public static let space: UInt16 = 0x31
     public static let delete: UInt16 = 0x33
     public static let escape: UInt16 = 0x35
+    public static let help: UInt16 = 0x72
     public static let forwardDelete: UInt16 = 0x75
     public static let home: UInt16 = 0x73
     public static let end: UInt16 = 0x77
@@ -69,7 +116,30 @@ public enum KeyCode {
     public static let downArrow: UInt16 = 0x7D
     public static let upArrow: UInt16 = 0x7E
 
-    static let navigationKeys: Set<UInt16> = [home, end, pageUp, pageDown, leftArrow, rightArrow, downArrow, upArrow, forwardDelete]
+    /// Modifier keys (left-hand variants), used to post real modifier presses around a shortcut.
+    public static let command: UInt16 = 0x37
+    public static let shift: UInt16 = 0x38
+    public static let option: UInt16 = 0x3A
+    public static let control: UInt16 = 0x3B
+
+    public static func modifierKey(for modifier: KeyModifiers) -> UInt16? {
+        switch modifier {
+        case .control: return control
+        case .option: return option
+        case .shift: return shift
+        case .command: return command
+        default: return nil
+        }
+    }
+
+    static let arrowKeys: Set<UInt16> = [leftArrow, rightArrow, downArrow, upArrow]
+    static let navigationKeys: Set<UInt16> = arrowKeys.union([home, end, pageUp, pageDown, forwardDelete])
+
+    /// kVK_ANSI_Keypad* codes.
+    static let keypadKeys: Set<UInt16> = [
+        0x41, 0x43, 0x45, 0x47, 0x4B, 0x4C, 0x4E, 0x51,
+        0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58, 0x59, 0x5B, 0x5C,
+    ]
 
     static let functionKeys: [UInt16: String] = [
         0x7A: "F1", 0x78: "F2", 0x63: "F3", 0x76: "F4", 0x60: "F5", 0x61: "F6",
@@ -96,6 +166,7 @@ public enum KeyCode {
         case space: return "Space"
         case delete: return "⌫"
         case escape: return "⎋"
+        case help: return "Help"
         case forwardDelete: return "⌦"
         case home: return "↖"
         case end: return "↘"
@@ -111,6 +182,6 @@ public enum KeyCode {
 
     /// Keys that never carry a label from the layout (so the recorder must use `label(for:)`).
     public static func isLayoutIndependent(_ keyCode: UInt16) -> Bool {
-        functionKeys[keyCode] != nil || [returnKey, tab, space, delete, escape].contains(keyCode) || navigationKeys.contains(keyCode)
+        functionKeys[keyCode] != nil || [returnKey, tab, space, delete, escape, help].contains(keyCode) || navigationKeys.contains(keyCode)
     }
 }

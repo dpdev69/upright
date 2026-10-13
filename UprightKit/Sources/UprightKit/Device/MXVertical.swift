@@ -9,10 +9,10 @@ public enum ConnectionKind: String, Hashable, Sendable {
 
     public var title: String {
         switch self {
-        case .usb: return "USB cable"
-        case .bluetooth: return "Bluetooth"
-        case .unifying: return "Unifying receiver"
-        case .bolt: return "Bolt receiver"
+        case .usb: return NSLocalizedString("USB cable", comment: "How the mouse connects to the Mac")
+        case .bluetooth: return NSLocalizedString("Bluetooth", comment: "How the mouse connects to the Mac")
+        case .unifying: return NSLocalizedString("Unifying receiver", comment: "How the mouse connects to the Mac")
+        case .bolt: return NSLocalizedString("Bolt receiver", comment: "How the mouse connects to the Mac")
         }
     }
 
@@ -48,6 +48,8 @@ public enum MXVertical {
     /// The "wireless PID" a receiver reports for an MX Vertical in one of its slots.
     public static let wirelessProductID: UInt16 = 0x407B
 
+    /// The MX Vertical pairs over Unifying or Bluetooth only. Bolt receivers are still watched
+    /// (harmlessly) so a future Bolt-capable model, or a mislabeled one, is picked up.
     public static let receiverProductIDs: [Int: ConnectionKind] = [
         0xC52B: .unifying,
         0xC532: .unifying,
@@ -102,24 +104,24 @@ public struct ControlDescriptor: Hashable, Sendable, Identifiable {
         self.cid = cid
         switch cid {
         case KnownControl.back:
-            name = "Back Button"
-            detail = "Lower thumb button"
+            name = NSLocalizedString("Back Button", comment: "Mouse control name")
+            detail = NSLocalizedString("Lower thumb button", comment: "Mouse control description")
             symbolName = "chevron.backward.circle"
         case KnownControl.forward:
-            name = "Forward Button"
-            detail = "Upper thumb button"
+            name = NSLocalizedString("Forward Button", comment: "Mouse control name")
+            detail = NSLocalizedString("Upper thumb button", comment: "Mouse control description")
             symbolName = "chevron.forward.circle"
         case KnownControl.dpiSwitch, KnownControl.dpiChange:
-            name = "Top Button"
-            detail = "Pointer-speed (DPI) button behind the wheel"
+            name = NSLocalizedString("Top Button", comment: "Mouse control name")
+            detail = NSLocalizedString("Pointer-speed (DPI) button behind the wheel", comment: "Mouse control description")
             symbolName = "speedometer"
         case KnownControl.middleClick:
-            name = "Wheel Click"
-            detail = "Press the scroll wheel"
+            name = NSLocalizedString("Wheel Click", comment: "Mouse control name")
+            detail = NSLocalizedString("Press the scroll wheel", comment: "Mouse control description")
             symbolName = "smallcircle.filled.circle"
         default:
-            name = String(format: "Control 0x%04X", cid)
-            detail = "Additional programmable control"
+            name = String(format: NSLocalizedString("Control 0x%04X", comment: "Mouse control name; %04X is its hexadecimal ID"), cid)
+            detail = NSLocalizedString("Additional programmable control", comment: "Mouse control description")
             symbolName = "button.programmable"
         }
     }

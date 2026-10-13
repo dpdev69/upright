@@ -1,0 +1,1249 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "…and %lld more." : {
+
+    },
+    "“Cycle Pointer Speed” steps through these speeds, and each one can be assigned to a button in Buttons. Speeds are rounded to the nearest one the mouse supports." : {
+
+    },
+    "%@ (off)" : {
+
+    },
+    "%@ battery is almost empty" : {
+
+    },
+    "%@ battery is low" : {
+
+    },
+    "%@ has its own button settings" : {
+
+    },
+    "%@ needs ⌘, ⌃ or ⌥ — or use a function key" : {
+
+    },
+    "%@, charging" : {
+
+    },
+    "%@, paused" : {
+
+    },
+    "%@: %@" : {
+      "comment" : "Gesture summary entry; direction and action name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@: %2$@"
+          }
+        }
+      }
+    },
+    "%1$@: skipped a link for control %2$d that uses “%3$@:” (only http, https and mailto links can be imported)" : {
+      "comment" : "Import report entry; %1$@ is “global” or an app’s bundle ID, %2$d a control number, %3$@ a URL scheme such as file"
+    },
+    "%lld DPI" : {
+
+    },
+    "%lld%% left. Charge it now to keep using it." : {
+
+    },
+    "%lld%% left. Charge it soon." : {
+
+    },
+    "⌃⌘Q locks the screen" : {
+
+    },
+    "⌘Q quits the frontmost app" : {
+
+    },
+    "⌘Space opens Spotlight" : {
+
+    },
+    "⌘Tab switches apps" : {
+
+    },
+    "⌘W closes the frontmost window" : {
+
+    },
+    "⌥⌘Esc opens Force Quit" : {
+
+    },
+    "About" : {
+
+    },
+    "Accessibility" : {
+
+    },
+    "Accessibility access is allowed" : {
+
+    },
+    "Accessibility access is not allowed yet" : {
+
+    },
+    "Accessibility access needed" : {
+
+    },
+    "Accessibility is off. If you already turned it on, macOS may have kept an outdated entry — Reset fixes that." : {
+
+    },
+    "Action" : {
+
+    },
+    "Activity" : {
+
+    },
+    "Activity log" : {
+
+    },
+    "Add" : {
+
+    },
+    "Add a profile with different actions for one app" : {
+
+    },
+    "Add a speed" : {
+
+    },
+    "Add App" : {
+
+    },
+    "Add Profile" : {
+
+    },
+    "Additional programmable control" : {
+      "comment" : "Mouse control description"
+    },
+    "After you switch Upright on in System Settings, this page updates by itself." : {
+
+    },
+    "All apps" : {
+
+    },
+    "All Apps (Global)" : {
+
+    },
+    "Allow Accessibility" : {
+
+    },
+    "Allow Accessibility…" : {
+
+    },
+    "Allow…" : {
+
+    },
+    "Allowed" : {
+
+    },
+    "App Exposé" : {
+      "comment" : "Built-in action name"
+    },
+    "Applies to tilt and Shift-scroll." : {
+
+    },
+    "Approve Upright in Login Items to finish turning this on." : {
+
+    },
+    "Asleep — move the mouse to wake it" : {
+
+    },
+    "Back" : {
+      "comment" : "Built-in action name"
+    },
+    "Back and Forward navigate in apps (⌘[ and ⌘]); the top button opens Mission Control." : {
+
+    },
+    "Back and Forward start working once Accessibility access is allowed." : {
+
+    },
+    "Back and Forward work as mouse buttons 4 and 5; the top button changes pointer speed." : {
+
+    },
+    "Back Button" : {
+      "comment" : "Mouse control name"
+    },
+    "Basic" : {
+
+    },
+    "Battery" : {
+
+    },
+    "Battery %@" : {
+
+    },
+    "Battery about %@" : {
+
+    },
+    "Battery level" : {
+
+    },
+    "Behavior" : {
+
+    },
+    "Bluetooth" : {
+      "comment" : "How the mouse connects to the Mac"
+    },
+    "Bolt receiver" : {
+      "comment" : "How the mouse connects to the Mac"
+    },
+    "Bootloader" : {
+      "comment" : "Kind of firmware entry"
+    },
+    "Built on public HID++ knowledge" : {
+
+    },
+    "Buttons" : {
+
+    },
+    "Buttons in %@" : {
+
+    },
+    "Buttons return to their defaults" : {
+
+    },
+    "Buttons without an override use the global action. Override with “Default” to leave a button to the mouse in this app only." : {
+
+    },
+    "Cancel" : {
+
+    },
+    "Channel %lld · %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Channel %1$lld · %2$@"
+          }
+        }
+      }
+    },
+    "Channel %lld of %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Channel %1$lld of %2$lld"
+          }
+        }
+      }
+    },
+    "charging" : {
+
+    },
+    "Charging" : {
+
+    },
+    "Check that you trust these actions, which open apps, links or shortcuts:" : {
+
+    },
+    "Choose" : {
+
+    },
+    "Choose a starting setup" : {
+
+    },
+    "Choose Another App…" : {
+
+    },
+    "Clear" : {
+
+    },
+    "Clear Overrides" : {
+
+    },
+    "Clear Overrides…" : {
+
+    },
+    "Clear the overrides for %@?" : {
+
+    },
+    "Clear this app’s overrides so every button uses the global action." : {
+
+    },
+    "Click" : {
+      "comment" : "Gesture slot: clicking the gesture button"
+    },
+    "Click to record a new shortcut" : {
+
+    },
+    "Click: %@" : {
+      "comment" : "Gesture summary entry; %@ is an action name"
+    },
+    "Command" : {
+
+    },
+    "Computer %lld" : {
+
+    },
+    "Configuration" : {
+
+    },
+    "Connect the mouse to change its pointer speed." : {
+
+    },
+    "Connect the mouse to try a button." : {
+
+    },
+    "Connect your MX Vertical" : {
+
+    },
+    "Connect your MX Vertical to see every button it reports. Changes are saved and applied as soon as it connects." : {
+
+    },
+    "connected" : {
+
+    },
+    "Connected via %@" : {
+
+    },
+    "connecting" : {
+
+    },
+    "Connecting via %@…" : {
+
+    },
+    "Connection" : {
+
+    },
+    "connection problem" : {
+
+    },
+    "Connection problem" : {
+
+    },
+    "Continue" : {
+
+    },
+    "Control" : {
+
+    },
+    "Control 0x%04X" : {
+      "comment" : "Mouse control name; %04X is its hexadecimal ID"
+    },
+    "Controls" : {
+
+    },
+    "Copy" : {
+      "comment" : "Built-in action name"
+    },
+    "Customize Buttons…" : {
+
+    },
+    "Cycle Pointer Speed" : {
+      "comment" : "Pointer speed action name"
+    },
+    "Default" : {
+      "comment" : "Button action name"
+    },
+    "Delete" : {
+
+    },
+    "Details" : {
+
+    },
+    "Details…" : {
+
+    },
+    "Device" : {
+
+    },
+    "Device index" : {
+
+    },
+    "Direction" : {
+
+    },
+    "Disconnected" : {
+
+    },
+    "Do Nothing" : {
+      "comment" : "Button action name"
+    },
+    "Done" : {
+
+    },
+    "Down" : {
+      "comment" : "Short gesture direction"
+    },
+    "Down Arrow" : {
+
+    },
+    "e.g. 1000" : {
+
+    },
+    "Easy-Switch" : {
+
+    },
+    "Edit mappings for" : {
+
+    },
+    "Edit Presets…" : {
+
+    },
+    "Editing" : {
+      "comment" : "Action category"
+    },
+    "End" : {
+
+    },
+    "Enter a number from %lld to %lld." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Enter a number from %1$lld to %2$lld."
+          }
+        }
+      }
+    },
+    "Enter a web address such as https://example.com, a mailto: link or an app link. File links aren’t supported." : {
+
+    },
+    "Escape" : {
+
+    },
+    "Every button does what the mouse does on its own. You can still change the actions below; they apply when you turn remapping back on." : {
+
+    },
+    "Every button goes back to what the mouse does on its own, and all app profiles are removed. Export first if you might want them back." : {
+
+    },
+    "Every button goes back to what the mouse does on its own. App profiles are kept." : {
+
+    },
+    "Every button in this app uses the global action again." : {
+
+    },
+    "Experimental" : {
+
+    },
+    "Export failed" : {
+
+    },
+    "Export…" : {
+
+    },
+    "Feel" : {
+
+    },
+    "Firmware" : {
+      "comment" : "Kind of firmware entry"
+    },
+    "Forward" : {
+      "comment" : "Built-in action name"
+    },
+    "Forward Button" : {
+      "comment" : "Mouse control name"
+    },
+    "Forward Delete" : {
+
+    },
+    "Four speeds spread across what this mouse supports" : {
+
+    },
+    "Full" : {
+
+    },
+    "General" : {
+
+    },
+    "Gestures" : {
+      "comment" : "Button action name"
+    },
+    "Gestures: %@" : {
+
+    },
+    "Gestures…" : {
+
+    },
+    "Give this button a different action in this app" : {
+
+    },
+    "Global: %@" : {
+
+    },
+    "Hardware" : {
+      "comment" : "Kind of firmware entry"
+    },
+    "HID++ features" : {
+
+    },
+    "HID++ version" : {
+
+    },
+    "Hold and move the mouse — %@" : {
+      "comment" : "Gesture button tooltip; %@ lists the assigned gestures"
+    },
+    "Hold and move the mouse; no gestures are assigned" : {
+      "comment" : "Gesture button tooltip"
+    },
+    "Hold the button and move the mouse to trigger a direction. Click it without moving to trigger Click." : {
+
+    },
+    "Home" : {
+
+    },
+    "How to connect" : {
+
+    },
+    "https://example.com" : {
+
+    },
+    "Import" : {
+
+    },
+    "Import failed" : {
+
+    },
+    "Import…" : {
+
+    },
+    "Importing replaces your current mappings and app profiles." : {
+
+    },
+    "In %@" : {
+
+    },
+    "In effect now: the %@ profile." : {
+
+    },
+    "In effect now: the global actions (%@ has no active profile)." : {
+
+    },
+    "In effect now: the global actions." : {
+
+    },
+    "Include ⌘, ⌃ or ⌥, or use a function key" : {
+
+    },
+    "Input Monitoring" : {
+
+    },
+    "Input Monitoring needed" : {
+
+    },
+    "Its overrides are deleted. The app goes back to using the global actions." : {
+
+    },
+    "Keep mouse defaults" : {
+
+    },
+    "Keep your buttons remapped from the moment you log in." : {
+
+    },
+    "Keyboard shortcut" : {
+
+    },
+    "Keyboard Shortcut" : {
+
+    },
+    "Keyboard Shortcut…" : {
+
+    },
+    "Left" : {
+      "comment" : "Short gesture direction"
+    },
+    "Left Arrow" : {
+
+    },
+    "Less" : {
+
+    },
+    "Let the Mouse Decide" : {
+
+    },
+    "libratbag" : {
+
+    },
+    "Linux hid-logitech-hidpp driver" : {
+
+    },
+    "Lock Screen" : {
+      "comment" : "Built-in action name"
+    },
+    "LogiOps" : {
+
+    },
+    "Low battery alerts" : {
+
+    },
+    "Lower thumb button" : {
+      "comment" : "Mouse control description"
+    },
+    "macOS doesn’t say which mouse a scroll came from. With this off, every mouse wheel is changed, but trackpads never are." : {
+
+    },
+    "macOS is blocking access" : {
+
+    },
+    "macOS is hiding the MX Vertical, so button remaps are not applied. Allow Upright under Privacy & Security → Input Monitoring. The top button keeps changing pointer speed until then." : {
+
+    },
+    "Mappings and app profiles" : {
+
+    },
+    "Mappings imported" : {
+
+    },
+    "Mappings imported with %lld skipped" : {
+
+    },
+    "Media" : {
+      "comment" : "Action category"
+    },
+    "Middle Click" : {
+      "comment" : "Built-in action name"
+    },
+    "Mission Control" : {
+      "comment" : "Built-in action name"
+    },
+    "More" : {
+
+    },
+    "mouse asleep" : {
+
+    },
+    "Mouse Button 4 (Back)" : {
+      "comment" : "Built-in action name"
+    },
+    "Mouse Button 5 (Forward)" : {
+      "comment" : "Built-in action name"
+    },
+    "Mouse Buttons" : {
+      "comment" : "Action category"
+    },
+    "Mouse found — click a button to wake it" : {
+
+    },
+    "Move Down" : {
+      "comment" : "Gesture direction name"
+    },
+    "Move Left" : {
+      "comment" : "Gesture direction name"
+    },
+    "Move Right" : {
+      "comment" : "Gesture direction name"
+    },
+    "Move Up" : {
+      "comment" : "Gesture direction name"
+    },
+    "Moves the mouse to Easy-Switch channel %lld; it disconnects from this Mac" : {
+      "comment" : "Action tooltip; %lld is the Easy-Switch channel number"
+    },
+    "Mute" : {
+      "comment" : "Built-in action name"
+    },
+    "Name" : {
+
+    },
+    "Navigation" : {
+      "comment" : "Action category"
+    },
+    "Needed" : {
+
+    },
+    "Needs Accessibility access" : {
+
+    },
+    "Needs Accessibility access. Until then this button keeps its normal behavior." : {
+
+    },
+    "needs Input Monitoring access" : {
+
+    },
+    "Next Tab" : {
+      "comment" : "Built-in action name"
+    },
+    "Next Track" : {
+      "comment" : "Built-in action name"
+    },
+    "No MX Vertical connected" : {
+
+    },
+    "None" : {
+
+    },
+    "not connected" : {
+
+    },
+    "Not connected" : {
+
+    },
+    "Not needed right now" : {
+
+    },
+    "Nothing yet." : {
+
+    },
+    "Notifies you when the mouse drops to 15% and again at 5%." : {
+
+    },
+    "OK" : {
+
+    },
+    "Only needed if macOS hides the mouse from Upright, which can happen over Bluetooth. Upright then shows the MX Vertical as blocked and its buttons keep their normal behavior until you allow it." : {
+
+    },
+    "Only while the MX Vertical is connected" : {
+
+    },
+    "Open %@" : {
+      "comment" : "Button action name; %@ is an app name"
+    },
+    "Open App…" : {
+
+    },
+    "Open at login" : {
+
+    },
+    "Open Login Items…" : {
+
+    },
+    "Open Settings…" : {
+
+    },
+    "Open URL" : {
+
+    },
+    "Open URL…" : {
+
+    },
+    "Open-source button remapping for the Logitech MX Vertical, without Logi Options+." : {
+
+    },
+    "Opens %@" : {
+      "comment" : "Button action tooltip; %@ is a URL"
+    },
+    "Opens %@ (%@)" : {
+      "comment" : "Button action tooltip; app name and bundle identifier",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Opens %1$@ (%2$@)"
+          }
+        }
+      }
+    },
+    "Opens a web page, a new email (mailto:) or an app link such as slack://." : {
+
+    },
+    "Opens button settings" : {
+
+    },
+    "Option" : {
+
+    },
+    "Other" : {
+      "comment" : "Kind of firmware entry"
+    },
+    "Override" : {
+
+    },
+    "Page Down" : {
+
+    },
+    "Page Up" : {
+
+    },
+    "Paste" : {
+      "comment" : "Built-in action name"
+    },
+    "Paused — mouse defaults" : {
+
+    },
+    "Paused until the MX Vertical connects." : {
+
+    },
+    "Permissions" : {
+
+    },
+    "Play / Pause" : {
+      "comment" : "Built-in action name"
+    },
+    "Plug in the Unifying receiver, connect the USB cable, or pair over Bluetooth. Then click a mouse button to wake it." : {
+
+    },
+    "Plug in the Unifying receiver, connect the USB cable, or pair the mouse over Bluetooth. Then click a mouse button to wake it." : {
+
+    },
+    "Pointer speed" : {
+
+    },
+    "Pointer Speed" : {
+
+    },
+    "Pointer Speed %lld DPI" : {
+      "comment" : "Action name; %lld is the sensor resolution in DPI"
+    },
+    "Pointer-speed (DPI) button behind the wheel" : {
+      "comment" : "Mouse control description"
+    },
+    "Press the scroll wheel" : {
+      "comment" : "Mouse control description"
+    },
+    "Previous Tab" : {
+      "comment" : "Built-in action name"
+    },
+    "Previous Track" : {
+      "comment" : "Built-in action name"
+    },
+    "Privacy" : {
+
+    },
+    "Profile" : {
+
+    },
+    "Quit Upright" : {
+
+    },
+    "Raw HID++ reports" : {
+
+    },
+    "Reapplied automatically" : {
+
+    },
+    "Receiver found — click a mouse button to wake it" : {
+
+    },
+    "Reconnect" : {
+
+    },
+    "Reconnect Mouse" : {
+
+    },
+    "Record Shortcut" : {
+
+    },
+    "Recorded %@" : {
+
+    },
+    "Recording" : {
+
+    },
+    "Recording shortcut. Type a key combination." : {
+
+    },
+    "Records a new shortcut" : {
+
+    },
+    "Redo" : {
+      "comment" : "Built-in action name"
+    },
+    "Released under the MIT License. Logitech, MX Vertical, Unifying, Bolt and Logi Options+ are trademarks of Logitech. Upright is not affiliated with or endorsed by Logitech." : {
+
+    },
+    "Remap buttons" : {
+
+    },
+    "Remappable" : {
+
+    },
+    "Remappable in Upright" : {
+
+    },
+    "Remapping" : {
+
+    },
+    "Remapping is off" : {
+
+    },
+    "Remapping is on" : {
+
+    },
+    "Remove %lld DPI" : {
+
+    },
+    "Remove every button action and app profile." : {
+
+    },
+    "Remove Profile" : {
+
+    },
+    "Remove Profile…" : {
+
+    },
+    "Remove the profile for %@?" : {
+
+    },
+    "Remove this preset" : {
+
+    },
+    "Required to post the keyboard shortcuts, media keys and clicks your buttons are mapped to, and to change scrolling. Mission Control, opening apps and links, pointer speed and “Do Nothing” work without it." : {
+
+    },
+    "Reset All" : {
+
+    },
+    "Reset all mappings?" : {
+
+    },
+    "Reset All…" : {
+
+    },
+    "Reset Permission" : {
+
+    },
+    "Resetting permission" : {
+
+    },
+    "Restore Defaults" : {
+
+    },
+    "Restore Defaults hands every button back to the mouse. App profiles are kept." : {
+
+    },
+    "Restore Defaults…" : {
+
+    },
+    "Restore the default button actions?" : {
+
+    },
+    "Return" : {
+
+    },
+    "Reverse horizontal scrolling" : {
+
+    },
+    "Reverse vertical scrolling" : {
+
+    },
+    "Right" : {
+      "comment" : "Short gesture direction"
+    },
+    "Right Arrow" : {
+
+    },
+    "Run “%@”" : {
+      "comment" : "Button action name; %@ is a Shortcuts.app shortcut name"
+    },
+    "Run Shortcut" : {
+
+    },
+    "Run Shortcut…" : {
+
+    },
+    "Running Apps" : {
+
+    },
+    "Runs a shortcut from the Shortcuts app by its exact name." : {
+
+    },
+    "Runs the shortcut “%@”" : {
+      "comment" : "Button action tooltip; %@ is a shortcut name"
+    },
+    "Save them to a file to back them up or move them to another Mac." : {
+
+    },
+    "Screenshot Selection" : {
+      "comment" : "Built-in action name"
+    },
+    "Scrolling" : {
+
+    },
+    "Scrolling speed" : {
+
+    },
+    "Sends %@" : {
+      "comment" : "Button action tooltip; %@ is a key combination such as ⌘C"
+    },
+    "Serial number" : {
+
+    },
+    "Set pointer speed to %lld DPI" : {
+
+    },
+    "Set to %lld DPI" : {
+
+    },
+    "Sets the pointer speed to %lld DPI (or the nearest speed the mouse supports)" : {
+      "comment" : "Action tooltip; %lld is the sensor resolution in DPI"
+    },
+    "Settings…" : {
+
+    },
+    "Shift" : {
+
+    },
+    "Shortcut cleared" : {
+
+    },
+    "Shortcut name" : {
+
+    },
+    "Show battery level in the menu bar" : {
+
+    },
+    "Show Desktop" : {
+      "comment" : "Built-in action name"
+    },
+    "Sleep and wake" : {
+
+    },
+    "Smooth scrolling" : {
+
+    },
+    "Solaar" : {
+
+    },
+    "Space" : {
+
+    },
+    "Space Left" : {
+      "comment" : "Built-in action name"
+    },
+    "Space Right" : {
+      "comment" : "Built-in action name"
+    },
+    "Speed" : {
+
+    },
+    "Speed Presets" : {
+
+    },
+    "Spotlight" : {
+      "comment" : "Built-in action name"
+    },
+    "Startup" : {
+
+    },
+    "Step %lld of %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Step %1$lld of %2$lld"
+          }
+        }
+      }
+    },
+    "Steps through the pointer-speed presets" : {
+      "comment" : "Pointer speed action tooltip"
+    },
+    "Stop reapplying a speed when the mouse reconnects" : {
+
+    },
+    "Suggested" : {
+
+    },
+    "Supported: %lld–%lld DPI · Default %lld DPI" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Supported: %1$lld–%2$lld DPI · Default %3$lld DPI"
+          }
+        }
+      }
+    },
+    "Switch" : {
+
+    },
+    "Switch the mouse to Computer %lld?" : {
+
+    },
+    "Switch to Computer %lld" : {
+      "comment" : "Action name; %lld is the Easy-Switch channel number"
+    },
+    "Switch…" : {
+
+    },
+    "Switching moves the mouse to another paired computer, and it disconnects from this Mac right away. Press the Easy-Switch button under the mouse to come back." : {
+
+    },
+    "System" : {
+      "comment" : "Action category"
+    },
+    "Tab" : {
+
+    },
+    "That app can’t have a profile" : {
+
+    },
+    "The button is ignored" : {
+      "comment" : "Button action tooltip"
+    },
+    "The file doesn’t contain any mappings Upright can use." : {
+      "comment" : "Import error"
+    },
+    "The file isn’t an Upright mappings file." : {
+      "comment" : "Import error"
+    },
+    "The mouse handles this button itself" : {
+      "comment" : "Button action tooltip"
+    },
+    "The mouse isn’t answering" : {
+
+    },
+    "The mouse will disconnect from this Mac. Press the Easy-Switch button under the mouse to come back." : {
+
+    },
+    "The MX Vertical didn't answer HID++ requests. Try clicking a button to wake it, then choose Reconnect." : {
+      "comment" : "Connection status shown when setup fails"
+    },
+    "The pointer moves while you gesture with this button." : {
+
+    },
+    "These are the buttons your mouse reports as remappable. “Default” leaves a button to the mouse: the thumb buttons go back and forward, and the top button switches pointer speed (DPI)." : {
+
+    },
+    "These entries couldn’t be used and were left out:" : {
+
+    },
+    "This is a macOS screenshot shortcut" : {
+
+    },
+    "This Mac" : {
+
+    },
+    "Top Button" : {
+      "comment" : "Mouse control name"
+    },
+    "Try it: press a remapped button." : {
+
+    },
+    "Turn On" : {
+
+    },
+    "Turn on Upright in System Settings → Privacy & Security → Accessibility. This step updates by itself once access is allowed. You can also skip it and allow access later." : {
+
+    },
+    "Turn the wheel down to move content up, independently of the trackpad’s Natural Scrolling." : {
+
+    },
+    "Turns each wheel notch into a short, eased glide." : {
+
+    },
+    "Type a shortcut, or press Escape to cancel" : {
+
+    },
+    "Type a shortcut. Escape cancels, Delete clears." : {
+
+    },
+    "Type shortcut…" : {
+
+    },
+    "Undo" : {
+      "comment" : "Built-in action name"
+    },
+    "Undo Import" : {
+
+    },
+    "Unifying receiver" : {
+      "comment" : "How the mouse connects to the Mac"
+    },
+    "Up" : {
+      "comment" : "Short gesture direction"
+    },
+    "Up Arrow" : {
+
+    },
+    "Upper thumb button" : {
+      "comment" : "Mouse control description"
+    },
+    "Upright" : {
+
+    },
+    "Upright applies this speed again whenever the mouse reconnects. The top button can still change it unless you remap that button." : {
+
+    },
+    "Upright couldn’t read a bundle identifier from it." : {
+
+    },
+    "Upright couldn’t start changing scrolling. Try turning a setting off and on again." : {
+
+    },
+    "Upright isn’t in your Applications folder. Move it there first: if this copy is moved or deleted, it won’t open at login." : {
+
+    },
+    "Upright Mappings.json" : {
+
+    },
+    "Upright needs Accessibility access to change scrolling. Until you allow it, scrolling works as usual." : {
+
+    },
+    "Upright needs Accessibility access to send keyboard shortcuts, media keys and clicks for your mouse buttons. It doesn't read what you type." : {
+
+    },
+    "Upright never reads what you type. It only listens to the HID++ channel of Logitech receivers and MX Vertical mice, and only posts the actions you assign." : {
+
+    },
+    "Upright only uses temporary button diversion, so nothing is written to the mouse’s memory. Turning the mouse off and on always restores its factory behavior." : {
+
+    },
+    "Upright sends keyboard shortcuts, media keys and clicks on behalf of your mouse. Until you allow it, mapped buttons keep their normal behavior." : {
+
+    },
+    "Upright talks to the mouse with the publicly documented HID++ 2.0 protocol, using temporary button diversion from the REPROG_CONTROLS_V4 feature (0x1B04). It does not include or depend on any Logitech software." : {
+
+    },
+    "URL" : {
+
+    },
+    "USB cable" : {
+      "comment" : "How the mouse connects to the Mac"
+    },
+    "Use Default" : {
+
+    },
+    "Use Global Action" : {
+
+    },
+    "Use Suggested" : {
+
+    },
+    "Use the global action again" : {
+
+    },
+    "Use this profile" : {
+
+    },
+    "Version %@ (%@)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Version %1$@ (%2$@)"
+          }
+        }
+      }
+    },
+    "Volume Down" : {
+      "comment" : "Built-in action name"
+    },
+    "Volume Up" : {
+      "comment" : "Built-in action name"
+    },
+    "Welcome to Upright" : {
+
+    },
+    "Wheel Click" : {
+      "comment" : "Mouse control name"
+    },
+    "When off, every button goes back to what the mouse does on its own." : {
+
+    },
+    "When Upright quits" : {
+
+    },
+    "While %@ is the frontmost app, its overrides replace the global actions." : {
+
+    },
+    "Windows & Spaces" : {
+      "comment" : "Action category"
+    },
+    "You can change any button later in Settings, and set different actions for individual apps." : {
+
+    },
+    "You can continue without the mouse; Upright connects as soon as it appears." : {
+
+    },
+    "Your mappings and app profiles now match the file. Your previous setup was saved; choose Undo Import to put it back." : {
+
+    },
+    "Your shortcuts" : {
+
+    }
+  },
+  "version" : "1.0"
+}
