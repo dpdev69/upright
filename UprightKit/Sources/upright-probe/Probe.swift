@@ -13,7 +13,7 @@ struct Probe {
             print("""
             usage: upright-probe [--divert]
 
-            Finds a Logitech MX Vertical (USB cable, Unifying/Bolt receiver, or Bluetooth),
+            Finds a Logitech MX Vertical (USB cable, Unifying receiver, or Bluetooth),
             prints its HID++ 2.0 feature table and REPROG_CONTROLS_V4 control list, then keeps
             listening for receiver and device notifications.
 
@@ -55,10 +55,10 @@ final class ProbeSession {
 
     func start() {
         monitor.onMatch = { [weak self] device in
-            Task { @MainActor in self?.attach(device) }
+            MainActorDelivery.run { self?.attach(device) }
         }
         monitor.onRemove = { [weak self] device in
-            Task { @MainActor in self?.detach(device) }
+            MainActorDelivery.run { self?.detach(device, removed: true) }
         }
         let result = monitor.start()
         print(String(format: "Watching for Logitech HID++ interfaces (IOHIDManagerOpen: 0x%08X)", UInt32(bitPattern: result)))
@@ -75,6 +75,13 @@ final class ProbeSession {
             print("· Ignoring \(info.summary)")
             return
         }
+        // Over USB the mouse publishes a vendor-page HID++ interface and a mouse interface.
+        // Opening both interleaves HID++ replies, so use one per physical device.
+        guard let superseded = HIDInterfaceInfo.twinsToReplace(adding: info, open: entries.mapValues(\.transport.info)) else {
+            print("· Ignoring twin interface \(info.summary)")
+            return
+        }
+        superseded.forEach { detach($0, removed: false) }
         print("→ Found \(info.summary)")
 
         let transport = IOKitHIDTransport(device: device)
@@ -103,11 +110,17 @@ final class ProbeSession {
         controller.start()
     }
 
-    private func detach(_ device: IOHIDDevice) {
+    private func detach(_ device: IOHIDDevice, removed: Bool) {
         guard let entry = entries.removeValue(forKey: device) else { return }
+        entry.controller.onStateChange = nil
         entry.controller.shutdown()
-        entry.transport.deviceRemoved()
-        print("← \(entry.transport.info.product) removed")
+        if removed {
+            entry.transport.deviceRemoved()
+            print("← \(entry.transport.info.product) removed")
+        } else {
+            entry.transport.close()
+            print("← \(entry.transport.info.product) closed in favor of its HID++ interface")
+        }
     }
 
     private func report(_ state: MXVerticalController.State, controller: MXVerticalController) {
@@ -126,7 +139,27 @@ final class ProbeSession {
               ✓ \(snapshot.name) over \(snapshot.connection.title), device index 0x\(String(format: "%02X", snapshot.deviceIndex)), HID++ \(snapshot.protocolVersion)
             """)
             if let battery = snapshot.battery {
-                print("    Battery: \(battery.percentage)%\(battery.isCharging ? " (charging)" : "")")
+                print("    Battery: \(battery.percentage)%\(battery.isApproximate ? " (approximate)" : "")\(battery.isCharging ? " (charging)" : "")")
+            }
+            for firmware in snapshot.firmware {
+                print("    \(firmware.kind.title): \(firmware.displayString)")
+            }
+            if let serial = snapshot.serialNumber {
+                print("    Serial number: \(serial)")
+            }
+            if let dpi = snapshot.dpi {
+                let supported = dpi.step.map { "\(dpi.minimum)–\(dpi.maximum) in steps of \($0)" }
+                    ?? dpi.supported.map(String.init).joined(separator: ", ")
+                print("    Pointer speed: \(dpi.current) DPI (default \(dpi.defaultValue); supported: \(supported.isEmpty ? "unknown" : supported))")
+            } else {
+                print("    Pointer speed: not adjustable over HID++ (no 0x2201)")
+            }
+            if let hosts = snapshot.hosts {
+                print("    Easy-Switch: channel \(hosts.current + 1) of \(hosts.count)")
+                for index in 0..<hosts.count {
+                    let name = hosts.name(at: index).map { "“\($0)”" } ?? "(no name)"
+                    print("      \(index == hosts.current ? "▸" : " ") \(index + 1): \(name)")
+                }
             }
             print("    Features:")
             for feature in snapshot.features {
@@ -135,8 +168,9 @@ final class ProbeSession {
             print("    Controls:")
             for control in snapshot.controls {
                 let marker = control.isConfigurable ? "*" : " "
+                let flags = control.flags.names + (control.supportsRawXY ? ["raw XY"] : [])
                 print(String(format: "     %@ CID 0x%04X  TID 0x%04X  %@  [%@]", marker, control.cid, control.taskID,
-                             ControlDescriptor(cid: control.cid).name, control.flags.names.joined(separator: ", ")))
+                             ControlDescriptor(cid: control.cid).name, flags.joined(separator: ", ")))
             }
             print("    (* = remappable by Upright)\n")
             if divertAll {

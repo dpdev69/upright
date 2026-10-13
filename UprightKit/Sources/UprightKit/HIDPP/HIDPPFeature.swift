@@ -7,6 +7,8 @@ public enum HIDPPFeature: UInt16, CaseIterable, Sendable {
     case deviceName = 0x0005
     case batteryStatus = 0x1000
     case unifiedBattery = 0x1004
+    case changeHost = 0x1814
+    case hostsInfo = 0x1815
     case reprogControlsV4 = 0x1B04
     case wirelessDeviceStatus = 0x1D4B
     case smartShift = 0x2110
@@ -21,6 +23,8 @@ public enum HIDPPFeature: UInt16, CaseIterable, Sendable {
         case .deviceName: return "Device Name"
         case .batteryStatus: return "Battery Status"
         case .unifiedBattery: return "Unified Battery"
+        case .changeHost: return "Easy-Switch"
+        case .hostsInfo: return "Hosts Info"
         case .reprogControlsV4: return "Reprog Controls v4"
         case .wirelessDeviceStatus: return "Wireless Device Status"
         case .smartShift: return "SmartShift"

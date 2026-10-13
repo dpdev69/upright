@@ -62,6 +62,29 @@ public struct HIDInterfaceInfo: Hashable, Sendable {
     public var summary: String {
         String(format: "%@ [%04X:%04X] via %@, usage %04X:%04X", product, vendorID, productID, transport, primaryUsagePage, primaryUsage)
     }
+
+    /// Receivers and the USB cable publish a dedicated vendor-page HID++ interface.
+    public var isVendorHIDPP: Bool {
+        primaryUsagePage == 0xFF00 || primaryUsagePage == 0xFF43
+    }
+
+    public func isSamePhysicalDevice(as other: HIDInterfaceInfo) -> Bool {
+        locationID != 0 && vendorID == other.vendorID && productID == other.productID && locationID == other.locationID
+    }
+
+    /// Bluetooth publishes the mouse and its HID++ collection as one interface. USB and
+    /// receivers also publish a dedicated vendor-page interface, which is the one to use when
+    /// both show up for the same device. Returns nil when `info` should not be opened,
+    /// otherwise the keys of open twins it supersedes (to be closed first).
+    public static func twinsToReplace<Key>(adding info: HIDInterfaceInfo, open: [Key: HIDInterfaceInfo]) -> [Key]? {
+        guard info.locationID != 0 else { return [] }
+        let twins = open.filter { $0.value.isSamePhysicalDevice(as: info) }
+        if info.isVendorHIDPP {
+            if twins.values.contains(where: \.isVendorHIDPP) { return nil }
+            return twins.filter { !$0.value.isVendorHIDPP }.map(\.key)
+        }
+        return twins.isEmpty ? [] : nil
+    }
 }
 
 /// Watches for Logitech HID interfaces that carry HID++ (vendor usage pages 0xFF00 on USB
@@ -75,6 +98,7 @@ public final class HIDDeviceMonitor {
     /// interleaves HID++ replies, so the second match for the same device is ignored.
     private var chosen: [String: IOHIDDevice] = [:]
     private var ignored: Set<IOHIDDevice> = []
+    private var isRunning = false
 
     public init() {
         manager = IOHIDManagerCreate(kCFAllocatorDefault, IOOptionBits(kIOHIDOptionsTypeNone))
@@ -85,8 +109,12 @@ public final class HIDDeviceMonitor {
     }
 
     /// Starts monitoring on the main run loop. Returns the IOHIDManagerOpen result.
+    ///
+    /// Callbacks are scheduled in the common run loop modes so devices keep being matched (and
+    /// reports keep arriving) while a menu is open or a modal panel runs.
     @discardableResult
     public func start() -> IOReturn {
+        isRunning = true
         // Receivers and the USB cable publish a dedicated HID++ interface (usage page
         // 0xFF00 or 0xFF43). Bluetooth does not: the MX Vertical is one mouse interface
         // (usage page 0x01) that also carries the HID++ collection. Matching only the
@@ -119,14 +147,16 @@ public final class HIDDeviceMonitor {
             Unmanaged<HIDDeviceMonitor>.fromOpaque(context).takeUnretainedValue().deliverRemoval(device)
         }, context)
 
-        IOHIDManagerScheduleWithRunLoop(manager, CFRunLoopGetMain(), CFRunLoopMode.defaultMode.rawValue)
+        IOHIDManagerScheduleWithRunLoop(manager, CFRunLoopGetMain(), CFRunLoopMode.commonModes.rawValue)
         return IOHIDManagerOpen(manager, IOOptionBits(kIOHIDOptionsTypeNone))
     }
 
     public func stop() {
+        guard isRunning else { return }
+        isRunning = false
         IOHIDManagerRegisterDeviceMatchingCallback(manager, nil, nil)
         IOHIDManagerRegisterDeviceRemovalCallback(manager, nil, nil)
-        IOHIDManagerUnscheduleFromRunLoop(manager, CFRunLoopGetMain(), CFRunLoopMode.defaultMode.rawValue)
+        IOHIDManagerUnscheduleFromRunLoop(manager, CFRunLoopGetMain(), CFRunLoopMode.commonModes.rawValue)
         IOHIDManagerClose(manager, IOOptionBits(kIOHIDOptionsTypeNone))
         chosen.removeAll()
         ignored.removeAll()
@@ -207,6 +237,10 @@ public final class HIDDeviceMonitor {
 
 /// HID++ over an IOHIDDevice that was matched by `HIDDeviceMonitor` (and is therefore
 /// already scheduled on the main run loop). Reports are delivered on the main thread.
+///
+/// The manager holds its own open on every matched device (balanced by `IOHIDManagerClose`).
+/// `open()` adds one more so permission failures surface per device; balance it with `close()`
+/// while the device is still present, or `deviceRemoved()` once IOKit has removed it.
 public final class IOKitHIDTransport: HIDPPTransport {
     public let device: IOHIDDevice
     public let info: HIDInterfaceInfo
@@ -243,6 +277,7 @@ public final class IOKitHIDTransport: HIDPPTransport {
         }, context)
     }
 
+    /// Closes a device that is still present (twin swap, re-matching, quitting).
     public func close() {
         guard isOpen else { return }
         isOpen = false
@@ -250,7 +285,8 @@ public final class IOKitHIDTransport: HIDPPTransport {
         IOHIDDeviceClose(device, IOOptionBits(kIOHIDOptionsTypeNone))
     }
 
-    /// Call when IOKit reports the device was removed.
+    /// Call when IOKit reports the device was removed. Unregisters the report callback without
+    /// calling `IOHIDDeviceClose`, which is unsafe on a device that is already gone.
     public func deviceRemoved() {
         if isOpen {
             isOpen = false

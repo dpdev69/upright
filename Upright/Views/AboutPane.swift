@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 struct AboutPane: View {
@@ -5,24 +6,31 @@ struct AboutPane: View {
         let info = Bundle.main.infoDictionary
         let short = info?["CFBundleShortVersionString"] as? String ?? "1.0"
         let build = info?["CFBundleVersion"] as? String ?? "1"
-        return "Version \(short) (\(build))"
+        return String(localized: "Version \(short) (\(build))")
     }
 
     var body: some View {
         Form {
             Section {
                 VStack(spacing: 10) {
-                    SymbolTile(systemName: "computermouse.fill", color: .blue, size: 72)
+                    Image(nsImage: NSApp.applicationIconImage)
+                        .resizable()
+                        .interpolation(.high)
+                        .frame(width: 96, height: 96)
+                        .accessibilityHidden(true)
                     Text("Upright")
                         .font(.largeTitle.weight(.semibold))
                     Text(version)
                         .foregroundStyle(.secondary)
+                        .textSelection(.enabled)
                     Text("Open-source button remapping for the Logitech MX Vertical, without Logi Options+.")
                         .multilineTextAlignment(.center)
                         .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 12)
+                .accessibilityElement(children: .combine)
             }
 
             Section {
@@ -46,7 +54,7 @@ struct AboutPane: View {
         .formStyle(.grouped)
     }
 
-    private func link(_ title: String, _ url: String) -> some View {
+    private func link(_ title: LocalizedStringKey, _ url: String) -> some View {
         Link(destination: URL(string: url)!) {
             HStack {
                 Text(title)

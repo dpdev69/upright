@@ -12,6 +12,9 @@ public final class HIDPPClient: @unchecked Sendable {
     /// Identifies our requests so replies can be told apart from device events (which use 0).
     public let softwareID: UInt8 = 0x0A
     public var defaultTimeout: TimeInterval = 2.0
+    /// How often a request the device answered with "busy" is sent again.
+    public var busyRetryLimit = 2
+    public var busyRetryDelay: TimeInterval = 0.05
 
     /// Invoked on the transport's delivery thread.
     public var onUnsolicited: ((HIDPPMessage) -> Void)?
@@ -35,8 +38,26 @@ public final class HIDPPClient: @unchecked Sendable {
         transport.onClose = { [weak self] in self?.close() }
     }
 
-    /// Sends `request` and waits for the matching reply.
+    /// Sends `request` and waits for the matching reply. Busy errors are retried a few times.
     public func send(_ request: HIDPPMessage, timeout: TimeInterval? = nil) async throws -> HIDPPMessage {
+        var attempt = 0
+        while true {
+            do {
+                return try await sendOnce(request, timeout: timeout)
+            } catch let error as HIDPPError where error.isBusy && attempt < busyRetryLimit {
+                attempt += 1
+                try? await Task.sleep(nanoseconds: UInt64(max(0, busyRetryDelay) * 1_000_000_000))
+            }
+        }
+    }
+
+    public var isClosed: Bool {
+        lock.lock()
+        defer { lock.unlock() }
+        return closed
+    }
+
+    private func sendOnce(_ request: HIDPPMessage, timeout: TimeInterval?) async throws -> HIDPPMessage {
         let id = UUID()
         return try await withCheckedThrowingContinuation { continuation in
             lock.lock()

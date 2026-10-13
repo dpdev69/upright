@@ -72,6 +72,18 @@ public struct HIDPPMessage: Equatable, Sendable, CustomStringConvertible {
         )
     }
 
+    // MARK: HID++ 1.0 receiver registers
+
+    /// Short register write (sub-ID 0x80) addressed to the receiver itself.
+    public static func receiverRegisterWrite(_ address: UInt8, parameters: [UInt8]) -> HIDPPMessage {
+        HIDPPMessage(reportID: .short, deviceIndex: 0xFF, subID: 0x80, address: address, parameters: parameters)
+    }
+
+    /// Long register read (sub-ID 0x83) addressed to the receiver itself.
+    public static func receiverLongRegisterRead(_ address: UInt8, parameters: [UInt8]) -> HIDPPMessage {
+        HIDPPMessage(reportID: .short, deviceIndex: 0xFF, subID: 0x83, address: address, parameters: parameters)
+    }
+
     // MARK: Response matching
 
     public enum ResponseMatch: Equatable, Sendable {

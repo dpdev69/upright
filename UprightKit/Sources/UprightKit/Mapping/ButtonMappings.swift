@@ -1,51 +1,164 @@
 import Foundation
 
 /// The user's button → action table, keyed by control ID.
+///
+/// `.deviceDefault` is never stored: a button without an entry is left to the mouse.
 public struct ButtonMappings: Codable, Hashable, Sendable {
-    /// JSON object keys must be strings, so CIDs are stored as decimal strings.
-    private var actions: [String: ButtonAction]
+    private var actions: [UInt16: ButtonAction]
 
     public init(_ actions: [UInt16: ButtonAction] = [:]) {
-        self.actions = Dictionary(uniqueKeysWithValues: actions.map { (String($0.key), $0.value) })
+        self.actions = actions.filter { $0.value != .deviceDefault }
     }
 
-    public static let defaults = ButtonMappings([
+    /// Fresh installs divert nothing: every button keeps its native behavior.
+    public static let defaults = ButtonMappings()
+
+    /// What Upright 1.x mapped out of the box. Users upgrading from it keep these.
+    public static let legacyDefaults = ButtonMappings([
         KnownControl.back: .system(.navigateBack),
         KnownControl.forward: .system(.navigateForward),
         KnownControl.dpiSwitch: .system(.missionControl),
     ])
 
     public subscript(cid: UInt16) -> ButtonAction {
-        get { actions[String(cid)] ?? .deviceDefault }
-        set { actions[String(cid)] = newValue == .deviceDefault ? nil : newValue }
+        get { actions[cid] ?? .deviceDefault }
+        set { actions[cid] = newValue == .deviceDefault ? nil : newValue }
     }
 
-    public var mappedControls: [UInt16: ButtonAction] {
-        Dictionary(uniqueKeysWithValues: actions.compactMap { key, value in UInt16(key).map { ($0, value) } })
-    }
+    public var mappedControls: [UInt16: ButtonAction] { actions }
+    public var isEmpty: Bool { actions.isEmpty }
 
     /// Controls the mouse should divert to Upright. Actions that need Accessibility are
     /// left on the mouse's native behavior until access is granted.
     public func divertedControls(accessibilityGranted: Bool) -> Set<UInt16> {
-        Set(mappedControls.filter { _, action in
+        Set(actions.filter { _, action in
             action.requiresDiversion && (accessibilityGranted || !action.requiresAccessibility)
         }.keys)
     }
 
-    // MARK: Persistence
-
-    public static let defaultsKey = "buttonMappings.v1"
-
-    public static func load(from defaults: UserDefaults) -> ButtonMappings {
-        guard let data = defaults.data(forKey: defaultsKey),
-              let mappings = try? JSONDecoder().decode(ButtonMappings.self, from: data) else {
-            return .defaults
-        }
-        return mappings
+    /// Diverted controls mapped to gestures: these also need the mouse's raw movement while held.
+    public func gestureControls(accessibilityGranted: Bool) -> Set<UInt16> {
+        divertedControls(accessibilityGranted: accessibilityGranted).filter { actions[$0]?.isGestures == true }
     }
 
-    public func save(to defaults: UserDefaults) {
-        guard let data = try? JSONEncoder().encode(self) else { return }
-        defaults.set(data, forKey: Self.defaultsKey)
+    /// Applies per-button overrides on top of this table. An override of `.deviceDefault`
+    /// hands the button back to the mouse.
+    public func applying(_ overrides: [UInt16: ButtonAction]) -> ButtonMappings {
+        var result = self
+        for (cid, action) in overrides { result[cid] = action }
+        return result
+    }
+
+    // MARK: Coding
+
+    private enum CodingKeys: String, CodingKey { case actions }
+
+    /// Decodes entry by entry: an unreadable entry (corrupt, or from a newer version) is skipped
+    /// and noted in the decoder's `MappingDecodingReport` instead of failing the whole table.
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        guard container.contains(.actions) else {
+            self.init()
+            return
+        }
+        let table = try container.nestedContainer(keyedBy: AnyCodingKey.self, forKey: .actions)
+        self.init(ActionTable.decode(from: table, report: decoder.mappingReport, context: "global"))
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        var table = container.nestedContainer(keyedBy: AnyCodingKey.self, forKey: .actions)
+        try ActionTable.encode(actions, to: &table)
+    }
+
+    // MARK: Legacy persistence
+
+    /// Where Upright 1.x stored its single mapping table. Read once for migration; see `MappingStore`.
+    public static let defaultsKey = "buttonMappings.v1"
+}
+
+/// Collects what tolerant decoding had to skip. Pass one in `userInfo[.mappingReport]`.
+public final class MappingDecodingReport: @unchecked Sendable {
+    private let lock = NSLock()
+    private var notes: [String] = []
+
+    public init() {}
+
+    public var issues: [String] {
+        lock.lock()
+        defer { lock.unlock() }
+        return notes
+    }
+
+    public var isClean: Bool { issues.isEmpty }
+
+    func note(_ issue: String) {
+        lock.lock()
+        notes.append(issue)
+        lock.unlock()
+    }
+}
+
+extension CodingUserInfoKey {
+    public static let mappingReport = CodingUserInfoKey(rawValue: "upright.mappingReport")!
+}
+
+extension Decoder {
+    var mappingReport: MappingDecodingReport? { userInfo[.mappingReport] as? MappingDecodingReport }
+}
+
+struct AnyCodingKey: CodingKey {
+    var stringValue: String
+    var intValue: Int?
+
+    init(_ string: String) { stringValue = string }
+    init?(stringValue: String) { self.stringValue = stringValue }
+    init?(intValue: Int) {
+        stringValue = String(intValue)
+        self.intValue = intValue
+    }
+}
+
+/// CID-keyed action tables are JSON objects with decimal-string keys.
+enum ActionTable {
+    static func decode(
+        from container: KeyedDecodingContainer<AnyCodingKey>,
+        report: MappingDecodingReport?,
+        context: String
+    ) -> [UInt16: ButtonAction] {
+        var result: [UInt16: ButtonAction] = [:]
+        for key in container.allKeys.sorted(by: { $0.stringValue < $1.stringValue }) {
+            guard let cid = UInt16(key.stringValue) else {
+                report?.note("\(context): skipped entry with invalid control ID “\(key.stringValue)”")
+                continue
+            }
+            do {
+                result[cid] = try container.decode(ButtonAction.self, forKey: key)
+            } catch {
+                report?.note("\(context): skipped unreadable action for control \(key.stringValue) (\(error.briefDescription))")
+            }
+        }
+        return result
+    }
+
+    static func encode(_ actions: [UInt16: ButtonAction], to container: inout KeyedEncodingContainer<AnyCodingKey>) throws {
+        for (cid, action) in actions {
+            try container.encode(action, forKey: AnyCodingKey(String(cid)))
+        }
+    }
+}
+
+extension Error {
+    /// A one-line description of a decoding error, for logs.
+    var briefDescription: String {
+        guard let error = self as? DecodingError else { return "\(self)" }
+        switch error {
+        case .dataCorrupted(let context), .keyNotFound(_, let context),
+             .typeMismatch(_, let context), .valueNotFound(_, let context):
+            let path = context.codingPath.map(\.stringValue).joined(separator: ".")
+            return path.isEmpty ? context.debugDescription : "\(path): \(context.debugDescription)"
+        @unknown default:
+            return "\(error)"
+        }
     }
 }

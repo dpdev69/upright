@@ -8,3 +8,6 @@ DerivedData/
 .swiftpm/
 dist/
 artifacts/
+*.zip
+xcuserdata/
+*.xcuserstate

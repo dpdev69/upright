@@ -1,3 +1,5 @@
+import Foundation
+
 /// A bidirectional channel to one HID++ capable HID interface (a receiver or a
 /// directly connected device). On macOS this is backed by IOKit; tests use a simulator.
 public protocol HIDPPTransport: AnyObject {
@@ -25,5 +27,24 @@ public enum HIDInterfaceChoicePolicy {
     public static func choose(alreadyOpen: Bool, sameInterface: Bool, previousStillPresent: Bool) -> HIDInterfaceChoice {
         guard alreadyOpen, !sameInterface else { return .use }
         return previousStillPresent ? .ignore : .replace
+    }
+}
+
+/// Runs HID callbacks on the main actor in arrival order, without a `Task` hop per report:
+/// synchronously when already on the main thread (IOKit delivers on the main run loop),
+/// otherwise through the serial main queue.
+public enum MainActorDelivery {
+    /// Carries the body across the dispatch hop. It is only ever called on the main actor.
+    private struct Delivery: @unchecked Sendable {
+        let body: @MainActor () -> Void
+    }
+
+    public static func run(_ body: @escaping @MainActor () -> Void) {
+        if Thread.isMainThread {
+            MainActor.assumeIsolated(body)
+        } else {
+            let delivery = Delivery(body: body)
+            DispatchQueue.main.async { MainActor.assumeIsolated(delivery.body) }
+        }
     }
 }

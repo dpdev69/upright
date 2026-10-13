@@ -24,9 +24,23 @@ final class DeviceManager: ObservableObject {
 
     @Published private(set) var status: Status = .searching
     @Published private(set) var log: [LogEntry] = []
-    @Published var logsTraffic = false
+    /// Raw HID++ traffic is only formatted (and its handler installed) while this is on.
+    @Published var logsTraffic = false {
+        didSet {
+            guard logsTraffic != oldValue else { return }
+            entries.values.forEach { installTrafficLogging(on: $0.controller) }
+        }
+    }
+
+    /// The pointer speed kept across reconnects (nil leaves the mouse's own setting alone).
+    /// Changes when set here, by Cycle Pointer Speed, or when the mouse's top button changed it
+    /// natively and `refreshDeviceInfo()` or a reconnect noticed. Persist it and restore it with
+    /// `setDesiredDPI`.
+    @Published private(set) var desiredDPI: Int?
 
     var onButtonEvent: ((ButtonEvent) -> Void)?
+    /// Raw movement (dx, dy) while a control set with `setDesiredRawXY` is held.
+    var onPointerDelta: ((Int, Int) -> Void)?
 
     private struct Entry {
         let transport: IOKitHIDTransport
@@ -37,11 +51,16 @@ final class DeviceManager: ObservableObject {
     private let monitor = HIDDeviceMonitor()
     private var entries: [IOHIDDevice: Entry] = [:]
     private var desiredDiversion: Set<UInt16> = []
+    private var desiredRawXY: Set<UInt16> = []
+    /// Only set when macOS actually refused access: IOHIDManagerOpen or a device open returned
+    /// "not permitted". An empty device list just means no mouse is connected.
     private var accessDenied = false
     private var failedRecoveries = 0
+    private var recoveryTask: Task<Void, Never>?
     private var nextLogID = 0
     private var observers: [NSObjectProtocol] = []
     private static let maxLogEntries = 400
+    private static let maxRecoveries = 3
 
     var snapshot: DeviceSnapshot? {
         switch status {
@@ -71,27 +90,20 @@ final class DeviceManager: ObservableObject {
 
     func start() {
         monitor.onMatch = { [weak self] device in
-            Task { @MainActor in self?.attach(device) }
+            MainActorDelivery.run { self?.attach(device) }
         }
         monitor.onRemove = { [weak self] device in
-            Task { @MainActor in self?.detach(device) }
+            MainActorDelivery.run { self?.detach(device, removed: true) }
         }
-        let result = monitor.start()
-        if result != kIOReturnSuccess {
-            append(String(format: "IOHIDManagerOpen returned 0x%08X", UInt32(bitPattern: result)))
-            if result == IOKitReturn.notPermitted || result == IOKitReturn.notPrivileged {
-                accessDenied = true
-            }
-        }
-        // When Input Monitoring is off, IOHIDManagerOpen still succeeds and then
-        // reports no devices. Treat that as a permission block, not a missing mouse.
-        noteInputMonitoring()
-        append("Watching for MX Vertical over USB, Unifying/Bolt receivers and Bluetooth")
+        // No Input Monitoring prompt here: the vendor HID++ interfaces usually open without it.
+        // The UI offers `requestInputMonitoringAccess()` when access is actually refused.
+        openMonitor()
+        append("Watching for MX Vertical over USB, Unifying receivers and Bluetooth")
 
         let center = NSWorkspace.shared.notificationCenter
         for name in [NSWorkspace.didWakeNotification, NSWorkspace.screensDidWakeNotification, NSWorkspace.sessionDidBecomeActiveNotification] {
             observers.append(center.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
-                Task { @MainActor in self?.systemDidWake() }
+                MainActorDelivery.run { self?.systemDidWake() }
             })
         }
         recomputeStatus()
@@ -102,52 +114,128 @@ final class DeviceManager: ObservableObject {
         entries.values.forEach { $0.controller.setDesiredDiversion(cids) }
     }
 
+    /// Controls that report raw movement through `onPointerDelta` while held (diverted as well).
+    func setDesiredRawXY(_ cids: Set<UInt16>) {
+        desiredRawXY = cids
+        entries.values.forEach { $0.controller.setDesiredRawXY(cids) }
+    }
+
+    // MARK: Device actions
+
+    func perform(_ action: DeviceAction) {
+        guard action.isValid else {
+            append("Ignoring invalid device action: \(action.title)")
+            return
+        }
+        switch action {
+        case .cycleDPI: cycleDPI()
+        case .setDPI(let dpi): setDPI(dpi)
+        case .switchHost(let host): switchToHost(host - 1)
+        }
+    }
+
+    /// Sets the pointer speed now (snapped to what the mouse supports) and keeps it across reconnects.
+    func setDPI(_ value: Int) {
+        setDesiredDPI(value)
+    }
+
+    /// Restores or clears the kept pointer speed. A value is applied as soon as a mouse is connected.
+    func setDesiredDPI(_ value: Int?) {
+        desiredDPI = value
+        entries.values.forEach { $0.controller.setDesiredDPI(value) }
+    }
+
+    /// Steps to the next pointer-speed preset; empty `presets` uses four evenly spaced speeds.
+    func cycleDPI(presets: [Int] = []) {
+        guard let controller = connectedController else {
+            append("Cycle Pointer Speed: no mouse is connected")
+            return
+        }
+        controller.cycleDPI(presets: presets)
+    }
+
+    /// Easy-Switch to a zero-based channel. The mouse disconnects from this Mac right away.
+    func switchToHost(_ index: Int) {
+        guard let controller = connectedController else {
+            append("Easy-Switch: no mouse is connected")
+            return
+        }
+        controller.switchToHost(index)
+    }
+
+    /// Re-reads battery, pointer speed and Easy-Switch channel (e.g. when the menu opens). The top
+    /// button changes the speed without telling us when it isn't diverted.
+    func refreshDeviceInfo() {
+        entries.values
+            .filter { if case .connected = $0.controller.state { return true } else { return false } }
+            .forEach { $0.controller.refreshDeviceInfo() }
+    }
+
+    private var connectedController: MXVerticalController? {
+        entries.values.first { if case .connected = $0.controller.state { return true } else { return false } }?.controller
+    }
+
+    /// A controller changed its kept speed (cycle, or a change noticed on the mouse).
+    private func controller(_ controller: MXVerticalController, didChangeDesiredDPI value: Int?) {
+        guard value != desiredDPI, entries.values.contains(where: { $0.controller === controller }) else { return }
+        desiredDPI = value
+        entries.values.filter { $0.controller !== controller }.forEach { $0.controller.setDesiredDPI(value) }
+    }
+
     /// Drops every open interface and matches the mouse again. A Bluetooth re-pair
     /// keeps the same serial but the old IOHIDDevice stops answering.
     func reconnect() {
         append("Reconnecting")
-        if HIDDeviceMonitor.inputMonitoringAccess == kIOHIDAccessTypeGranted {
-            accessDenied = false
-        }
         failedRecoveries = 0
         restartMonitoring()
     }
 
+    /// Shows the Input Monitoring prompt the first time (macOS only asks once) and reconnects
+    /// when access is granted. Meant for an explicit button in the UI. Returns whether access
+    /// is granted; when it isn't, the caller should point the user to System Settings.
+    @discardableResult
+    func requestInputMonitoringAccess() -> Bool {
+        let granted = HIDDeviceMonitor.requestInputMonitoringAccess()
+        if granted, accessDenied || entries.isEmpty {
+            reconnect()
+        }
+        return granted
+    }
+
     /// The open HID interface can be the pre-repair device. Matching again picks up the live one.
+    /// Controllers keep retrying on their own; this only re-matches a few times.
     private func scheduleRecovery() {
-        guard failedRecoveries < 3 else { return }
+        guard recoveryTask == nil, failedRecoveries < Self.maxRecoveries else { return }
         failedRecoveries += 1
+        let delay = UInt64(failedRecoveries) * 700_000_000
         append("HID++ did not answer; looking for the mouse again")
-        Task { @MainActor [weak self] in
-            try? await Task.sleep(nanoseconds: 700_000_000)
-            guard let self, !self.isConnected else { return }
+        recoveryTask = Task { @MainActor [weak self] in
+            try? await Task.sleep(nanoseconds: delay)
+            guard let self, !Task.isCancelled else { return }
+            self.recoveryTask = nil
+            guard !self.isConnected else { return }
             self.restartMonitoring()
         }
     }
 
     private func restartMonitoring() {
+        recoveryTask?.cancel()
+        recoveryTask = nil
         for device in Array(entries.keys) {
-            detach(device)
+            detach(device, removed: false)
         }
         monitor.stop()
-        let result = monitor.start()
-        if result != kIOReturnSuccess {
-            append(String(format: "IOHIDManagerOpen returned 0x%08X", UInt32(bitPattern: result)))
-            if result == IOKitReturn.notPermitted || result == IOKitReturn.notPrivileged {
-                accessDenied = true
-            }
-        }
-        noteInputMonitoring()
+        accessDenied = false
+        openMonitor()
         recomputeStatus()
     }
 
-    /// macOS hides Logitech interfaces until Input Monitoring is allowed.
-    private func noteInputMonitoring() {
-        let access = HIDDeviceMonitor.inputMonitoringAccess
-        guard access != kIOHIDAccessTypeGranted, monitor.currentDevices().isEmpty else { return }
-        accessDenied = true
-        if access == kIOHIDAccessTypeUnknown {
-            HIDDeviceMonitor.requestInputMonitoringAccess()
+    private func openMonitor() {
+        let result = monitor.start()
+        guard result != kIOReturnSuccess else { return }
+        append(String(format: "IOHIDManagerOpen returned 0x%08X", UInt32(bitPattern: result)))
+        if (result == IOKitReturn.notPermitted || result == IOKitReturn.notPrivileged), entries.isEmpty {
+            accessDenied = true
         }
     }
 
@@ -168,32 +256,12 @@ final class DeviceManager: ObservableObject {
 
     // MARK: Device lifecycle
 
-    private func isVendorHIDPP(_ info: HIDInterfaceInfo) -> Bool {
-        info.primaryUsagePage == 0xFF00 || info.primaryUsagePage == 0xFF43
-    }
-
-    private func samePhysicalDevice(_ lhs: HIDInterfaceInfo, _ rhs: HIDInterfaceInfo) -> Bool {
-        lhs.vendorID == rhs.vendorID && lhs.productID == rhs.productID && lhs.locationID == rhs.locationID
-    }
-
     private func attach(_ device: IOHIDDevice) {
         guard entries[device] == nil else { return }
         let info = HIDDeviceMonitor.info(for: device)
         guard let kind = MXVertical.classify(vendorID: info.vendorID, productID: info.productID) else { return }
-        // Bluetooth publishes the mouse and its HID++ collection as one interface. USB and
-        // receivers also publish a dedicated vendor-page interface, which is the one to use
-        // when both show up for the same device.
-        if info.locationID != 0 {
-            let twins = entries.filter { samePhysicalDevice($0.value.transport.info, info) }
-            if isVendorHIDPP(info) {
-                if twins.values.contains(where: { isVendorHIDPP($0.transport.info) }) { return }
-                for device in twins.keys where !isVendorHIDPP(twins[device]!.transport.info) {
-                    detach(device)
-                }
-            } else if !twins.isEmpty {
-                return
-            }
-        }
+        guard let superseded = HIDInterfaceInfo.twinsToReplace(adding: info, open: entries.mapValues(\.transport.info)) else { return }
+        superseded.forEach { detach($0, removed: false) }
 
         append("Found \(info.summary)")
         let transport = IOKitHIDTransport(device: device)
@@ -213,34 +281,75 @@ final class DeviceManager: ObservableObject {
         let controller = MXVerticalController(transport: transport, kind: kind)
         controller.onLog = { [weak self] text in self?.append(text) }
         controller.onButtonEvent = { [weak self] event in self?.onButtonEvent?(event) }
-        controller.onStateChange = { [weak self] state in
-            self?.recomputeStatus()
-            if case .connected = state {
-                self?.failedRecoveries = 0
-            } else if case .failed(let message) = state, message != "Disconnected" {
-                self?.scheduleRecovery()
-            }
+        controller.onPointerDelta = { [weak self] dx, dy in self?.onPointerDelta?(dx, dy) }
+        controller.onDesiredDPIChange = { [weak self, weak controller] value in
+            guard let self, let controller else { return }
+            self.controller(controller, didChangeDesiredDPI: value)
         }
-        controller.client.onTraffic = { [weak self] direction, bytes in
-            let line = (direction == .outgoing ? "→ " : "← ") + bytes.prefix(20).map { String(format: "%02X", $0) }.joined(separator: " ")
-            Task { @MainActor in
-                guard let self, self.logsTraffic else { return }
-                self.append(line, isTraffic: true)
-            }
+        controller.onStateChange = { [weak self, weak controller] state in
+            guard let self, let controller else { return }
+            self.controller(controller, didChangeTo: state)
         }
+        installTrafficLogging(on: controller)
         controller.setDesiredDiversion(desiredDiversion)
+        controller.setDesiredRawXY(desiredRawXY)
+        controller.setDesiredDPI(desiredDPI)
         entries[device] = Entry(transport: transport, controller: controller, kind: kind)
         controller.start()
         recomputeStatus()
     }
 
-    private func detach(_ device: IOHIDDevice) {
+    /// `removed` is true when IOKit removed the device; otherwise it is still present and its
+    /// handle must be closed.
+    private func detach(_ device: IOHIDDevice, removed: Bool) {
         guard let entry = entries.removeValue(forKey: device) else { return }
-        append("\(entry.transport.info.product) was disconnected")
-        // Release held keys now; the controller may be deallocated before its close callback runs.
-        entry.controller.shutdown()
-        entry.transport.deviceRemoved()
+        append(removed ? "\(entry.transport.info.product) was disconnected" : "Closing \(entry.transport.info.product)")
+        let controller = entry.controller
+        // A stale controller must not drive status or recovery for the entries that remain.
+        controller.onStateChange = nil
+        controller.onDesiredDPIChange = nil
+        controller.client.onTraffic = nil
+        // Releases held keys (still delivered through onButtonEvent) and hands buttons back.
+        controller.shutdown()
+        controller.onButtonEvent = nil
+        controller.onPointerDelta = nil
+        controller.onLog = nil
+        if removed {
+            entry.transport.deviceRemoved()
+        } else {
+            entry.transport.close()
+        }
         recomputeStatus()
+    }
+
+    private func controller(_ controller: MXVerticalController, didChangeTo state: MXVerticalController.State) {
+        guard !controller.isShutDown, entries.values.contains(where: { $0.controller === controller }) else { return }
+        recomputeStatus()
+        switch state {
+        case .connected:
+            failedRecoveries = 0
+        case .failed:
+            scheduleRecovery()
+        case .waitingForDevice:
+            // A directly connected mouse that doesn't answer is often a dead pre-repair interface.
+            if case .direct = controller.kind { scheduleRecovery() }
+        case .probing, .asleep:
+            break
+        }
+    }
+
+    private func installTrafficLogging(on controller: MXVerticalController) {
+        guard logsTraffic else {
+            controller.client.onTraffic = nil
+            return
+        }
+        controller.client.onTraffic = { [weak self] direction, bytes in
+            MainActorDelivery.run {
+                guard let self, self.logsTraffic else { return }
+                let line = (direction == .outgoing ? "→ " : "← ") + bytes.prefix(20).map { String(format: "%02X", $0) }.joined(separator: " ")
+                self.append(line, isTraffic: true)
+            }
+        }
     }
 
     private func systemDidWake() {
@@ -291,13 +400,18 @@ extension DeviceManager.Status {
 
     var subtitle: String {
         switch self {
-        case .searching: return "Not connected"
-        case .accessDenied: return "macOS is blocking access"
-        case .probing(let kind): return "Connecting via \(kind.title)…"
-        case .waiting: return "Receiver found — click a mouse button to wake it"
-        case .connected(let snapshot): return "Connected via \(snapshot.connection.title)"
-        case .asleep: return "Asleep — move the mouse to wake it"
-        case .failed(let message): return message
+        case .searching: return String(localized: "Not connected")
+        case .accessDenied: return String(localized: "macOS is blocking access")
+        case .probing(let kind): return String(localized: "Connecting via \(kind.title)…")
+        case .waiting(let kind):
+            switch kind {
+            case .unifying, .bolt: return String(localized: "Receiver found — click a mouse button to wake it")
+            case .usb, .bluetooth: return String(localized: "Mouse found — click a button to wake it")
+            }
+        case .connected(let snapshot): return String(localized: "Connected via \(snapshot.connection.title)")
+        case .asleep: return String(localized: "Asleep — move the mouse to wake it")
+        // The controller's terminal sentinel; other messages are already localized.
+        case .failed(let message): return message == "Disconnected" ? String(localized: "Disconnected") : message
         }
     }
 

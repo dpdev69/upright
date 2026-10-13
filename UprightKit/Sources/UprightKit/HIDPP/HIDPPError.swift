@@ -34,11 +34,20 @@ public enum HIDPPError: Error, Equatable, Sendable, CustomStringConvertible {
         }
     }
 
-    /// True when a receiver reports that nothing is answering in a slot (empty, asleep, or off).
+    /// True when the device isn't answering right now: a timeout, a report that couldn't be
+    /// sent, or a receiver saying nothing is reachable in a slot (empty, asleep, or off).
     public var meansDeviceUnreachable: Bool {
         switch self {
-        case .timeout: return true
+        case .timeout, .sendFailed: return true
         case .hidpp10(let code): return [0x04, 0x08, 0x09].contains(code)
+        default: return false
+        }
+    }
+
+    /// The device asked to be asked again (HID++ 2.0 BUSY, HID++ 1.0 busy).
+    public var isBusy: Bool {
+        switch self {
+        case .hidpp20(0x08), .hidpp10(0x07): return true
         default: return false
         }
     }

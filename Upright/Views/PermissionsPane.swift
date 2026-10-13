@@ -8,29 +8,51 @@ struct PermissionsPane: View {
         Form {
             Section {
                 PermissionRow(
-                    title: "Accessibility",
+                    title: String(localized: "Accessibility"),
                     symbolName: "accessibility",
                     tint: .blue,
-                    explanation: "Required to send keyboard shortcuts, media keys and clicks when you press a mapped button. Mission Control actions and “Do Nothing” work without it.",
+                    explanation: String(localized: "Required to post the keyboard shortcuts, media keys and clicks your buttons are mapped to, and to change scrolling. Mission Control, opening apps and links, pointer speed and “Do Nothing” work without it."),
                     state: permissions.isAccessibilityTrusted ? .granted : .required
                 ) {
-                    Button("Open Settings…") { permissions.requestAccessibility() }
+                    if permissions.accessibilityGrantIsStale {
+                        Button("Reset Permission") { permissions.resetAccessibilityPermission() }
+                            .disabled(permissions.isResettingAccessibility)
+                    } else {
+                        Button("Open Settings…") { permissions.requestAccessibility() }
+                    }
+                }
+                if permissions.accessibilityGrantIsStale && !permissions.isAccessibilityTrusted {
+                    Label {
+                        Text("Accessibility is off. If you already turned it on, macOS may have kept an outdated entry — Reset fixes that.")
+                            .fixedSize(horizontal: false, vertical: true)
+                    } icon: {
+                        Image(systemName: "exclamationmark.arrow.triangle.2.circlepath")
+                            .foregroundStyle(.orange)
+                    }
+                    .font(.callout)
+                    if permissions.isResettingAccessibility {
+                        ProgressView()
+                            .controlSize(.small)
+                            .accessibilityLabel(Text("Resetting permission"))
+                    }
                 }
             } footer: {
-                Text("After you switch Upright on in System Settings, this page updates by itself. If you rebuild Upright from source, macOS may ask again because the app’s signature changed.")
+                Text("After you switch Upright on in System Settings, this page updates by itself.")
                     .font(.callout)
                     .foregroundStyle(.secondary)
             }
 
             Section {
                 PermissionRow(
-                    title: "Input Monitoring",
+                    title: String(localized: "Input Monitoring"),
                     symbolName: "keyboard.badge.eye",
                     tint: .purple,
-                    explanation: "Required to see the MX Vertical over Bluetooth and apply button remaps. Without it the mouse stays “Not connected” and the top button keeps changing pointer speed.",
+                    explanation: String(localized: "Only needed if macOS hides the mouse from Upright, which can happen over Bluetooth. Upright then shows the MX Vertical as blocked and its buttons keep their normal behavior until you allow it."),
                     state: inputMonitoringState
                 ) {
-                    Button(permissions.inputMonitoring == .notDetermined ? "Request…" : "Open Settings…") {
+                    // Prompts while undecided, otherwise opens System Settings; never both at once.
+                    // AppModel reconnects the mouse once access is granted.
+                    Button(permissions.inputMonitoring == .denied ? "Open Settings…" : "Allow…") {
                         permissions.requestInputMonitoring()
                     }
                 }
@@ -39,6 +61,7 @@ struct PermissionsPane: View {
             Section {
                 Label("Upright never reads what you type. It only listens to the HID++ channel of Logitech receivers and MX Vertical mice, and only posts the actions you assign.", systemImage: "lock.shield")
                     .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
             } header: {
                 Text("Privacy")
             }
@@ -86,6 +109,8 @@ struct PermissionRow<Actions: View>: View {
             }
         }
         .padding(.vertical, 4)
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(Text(title))
     }
 
     @ViewBuilder
