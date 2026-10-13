@@ -6,8 +6,9 @@ import os
 /// Applies `ScrollSettings` to mouse-wheel events through an active session event tap.
 ///
 /// The tap exists only while it has something to do: a setting changes scrolling, Accessibility
-/// is granted (active taps need it), and an MX Vertical is connected unless the user opted out of
-/// that restriction. Trackpad and Magic Mouse (continuous) scrolling always passes through.
+/// is granted (active taps need it), and a supported mouse is connected or asleep unless the user
+/// opted out of that restriction. The tap can't tell mice apart, so it rewrites the wheel of every
+/// mouse, supported or not. Trackpad and Magic Mouse (continuous) scrolling always passes through.
 @MainActor
 final class ScrollController: ObservableObject {
     /// True while the event tap is installed and rewriting wheel events.
@@ -17,10 +18,11 @@ final class ScrollController: ObservableObject {
     private var loggedFailure = false
     private let logger = Logger(subsystem: "Upright", category: "Scrolling")
 
-    func update(settings: ScrollSettings, accessibilityTrusted: Bool, mxVerticalConnected: Bool) {
+    /// `mousePresent` is `FleetSummary.anyPresent`: any supported mouse that is connected or asleep.
+    func update(settings: ScrollSettings, accessibilityTrusted: Bool, mousePresent: Bool) {
         let wanted = settings.transformsEvents
             && accessibilityTrusted
-            && (mxVerticalConnected || !settings.onlyWhileMXVerticalConnected)
+            && (mousePresent || !settings.onlyWhileMouseConnected)
         guard wanted else {
             stop()
             return
@@ -41,6 +43,15 @@ final class ScrollController: ObservableObject {
         self.tap = tap
         isActive = true
         logger.info("Scroll event tap installed")
+    }
+
+    func update(settings: ScrollSettings, accessibilityTrusted: Bool, summary: FleetSummary) {
+        update(settings: settings, accessibilityTrusted: accessibilityTrusted, mousePresent: summary.anyPresent)
+    }
+
+    /// Compatibility for the single-mouse caller in `AppModel` until it passes the fleet summary.
+    func update(settings: ScrollSettings, accessibilityTrusted: Bool, mxVerticalConnected: Bool) {
+        update(settings: settings, accessibilityTrusted: accessibilityTrusted, mousePresent: mxVerticalConnected)
     }
 
     func stop() {
