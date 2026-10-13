@@ -106,6 +106,31 @@ final class DeviceFeatureParsingTests: XCTestCase {
         XCTAssertFalse(DeviceAction.switchHost(4).isValid)
         XCTAssertEqual(DeviceAction.switchHost(2).title, "Switch to Computer 2")
     }
+
+    func testSnapshotDefaultsForFixturesWithoutIdentity() {
+        let snapshot = DeviceSnapshot(name: "MX Vertical", connection: .usb, deviceIndex: 0xFF, protocolVersion: "4.5",
+                                      features: [], controls: [], battery: nil)
+        XCTAssertNil(snapshot.identity)
+        XCTAssertEqual(snapshot.address, .unassigned)
+        XCTAssertEqual(snapshot.reprogVersion, 0)
+        XCTAssertEqual(snapshot.modelKey, .mxVertical)
+
+        let master = DeviceIdentity(name: "MX Master 3S", kind: .mouse, modelIDs: ModelIDs(bluetoothLE: 0xB034))
+        let identified = DeviceSnapshot(name: "MX Master 3S", connection: .bolt, deviceIndex: 2, protocolVersion: "4.5",
+                                        features: [], controls: [], battery: nil, identity: master,
+                                        address: DeviceAddress(link: 2, index: 2), reprogVersion: 5)
+        XCTAssertEqual(identified.modelKey, ModelKey(productID: 0xB034))
+        XCTAssertEqual(identified.address, DeviceAddress(link: 2, index: 2))
+    }
+
+    func testConfigurableControlsNeverIncludePrimaryClicks() {
+        let flags: ControlFlags = [.mouseButton, .reprogrammable, .divertable]
+        XCTAssertFalse(ControlInfo(cid: KnownControl.leftClick, taskID: 0, flags: flags).isConfigurable)
+        XCTAssertFalse(ControlInfo(cid: KnownControl.rightClick, taskID: 0, flags: flags).isConfigurable)
+        XCTAssertTrue(ControlInfo(cid: KnownControl.back, taskID: 0, flags: flags).isConfigurable)
+        XCTAssertTrue(ControlInfo(cid: KnownControl.back, taskID: 0, flags: flags).isMouseButton)
+        XCTAssertFalse(ControlInfo(cid: 0x00D1, taskID: 0, flags: [.nonStandard, .divertable]).isMouseButton)
+    }
 }
 
 @MainActor
@@ -459,5 +484,458 @@ final class DeviceFeatureControllerTests: XCTestCase {
         XCTAssertTrue(mouse.rawXY.isEmpty)
         XCTAssertTrue(logs.contains { $0.contains("without raw XY support") && $0.contains("0x0052") })
         XCTAssertFalse(logs.contains { $0.contains("refused") })
+    }
+}
+
+/// `DeviceSession` on its own, against the simulator's profiles: identification, the capability
+/// gate, address stamping and the raw-XY quirk.
+@MainActor
+final class DeviceSessionTests: XCTestCase {
+    private func makeSession(
+        _ transport: SimulatedHIDPPTransport,
+        at index: UInt8,
+        link: UInt32 = 7,
+        transportPID: UInt16? = nil,
+        fallbackName: String? = nil,
+        kindHint: DeviceKind? = nil
+    ) -> DeviceSession {
+        let client = HIDPPClient(transport: transport)
+        client.defaultTimeout = 0.3
+        client.busyRetryDelay = 0.01
+        let session = DeviceSession(
+            device: HIDPPDevice(client: client, index: index),
+            connection: transport.transportKind.connection,
+            address: DeviceAddress(link: link, index: index),
+            transportPID: transportPID,
+            fallbackName: fallbackName,
+            kindHint: kindHint
+        )
+        client.onUnsolicited = { [weak session] message in
+            MainActorDelivery.run { _ = session?.handle(message) }
+        }
+        return session
+    }
+
+    /// Runs `start()` expecting the capability gate to refuse the device.
+    private func unsupported(
+        _ session: DeviceSession,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) async -> (reason: UnsupportedReason, partial: DeviceSnapshot?)? {
+        do {
+            let snapshot = try await session.start()
+            XCTFail("expected unsupportedDevice, connected to \(snapshot.name)", file: file, line: line)
+        } catch HIDPPError.unsupportedDevice(let reason, let partial) {
+            return (reason, partial)
+        } catch {
+            XCTFail("expected unsupportedDevice, got \(error)", file: file, line: line)
+        }
+        return nil
+    }
+
+    /// (feature ID, function) of every HID++ 2.0 request sent to `index`, in order, resolving
+    /// feature indices through `profile`. Root getFeature lookups are left out.
+    private func requests(_ transport: SimulatedHIDPPTransport, to index: UInt8, profile: SimulatedDeviceProfile) -> [[UInt16]] {
+        transport.sentReports.compactMap { bytes in
+            guard let message = HIDPPMessage(bytes: bytes), message.deviceIndex == index,
+                  Int(message.featureIndex) < profile.features.count else { return nil }
+            let feature = profile.features[Int(message.featureIndex)].id
+            if feature == 0x0000, message.function == 0 { return nil }
+            return [feature, UInt16(message.function)]
+        }
+    }
+
+    private static var unknownKindVertical: SimulatedDeviceProfile {
+        var profile = DeviceProfiles.mxVertical
+        profile.kind = .unknown
+        return profile
+    }
+
+    // MARK: Identity
+
+    func testSnapshotCarriesIdentityAddressAndReprogVersion() async throws {
+        let mouse = SimulatedDirect(profile: DeviceProfiles.mxVertical, connection: .bluetooth)
+        let session = makeSession(mouse, at: 0xFF, transportPID: 0xB020)
+        let snapshot = try await session.start()
+        let address = DeviceAddress(link: 7, index: 0xFF)
+
+        XCTAssertEqual(session.address, address)
+        XCTAssertEqual(snapshot.address, address)
+        XCTAssertEqual(snapshot.connection, .bluetooth)
+        XCTAssertEqual(snapshot.reprogVersion, 4)
+        XCTAssertEqual(snapshot.name, "MX Vertical Advanced Ergonomic Mouse")
+        XCTAssertEqual(snapshot.serialNumber, "DEMO-0001")
+        XCTAssertEqual(snapshot.modelKey, .mxVertical)
+
+        let identity = try XCTUnwrap(snapshot.identity)
+        XCTAssertEqual(identity.name, snapshot.name)
+        XCTAssertEqual(identity.kind, .mouse)
+        XCTAssertEqual(identity.unitID, 0x1A2B_3C4D)
+        XCTAssertEqual(identity.serialNumber, "DEMO-0001")
+        XCTAssertEqual(identity.modelIDs, ModelIDs(bluetoothLE: 0xB020, wireless: 0x407B, usb: 0xC08A))
+        XCTAssertEqual(identity.transportPID, 0xB020)
+        XCTAssertEqual(identity.model, .mxVertical)
+        XCTAssertEqual(identity.deviceID(at: address), .unit(0x1A2B_3C4D, model: .mxVertical))
+
+        // Everything the single-mouse snapshot had is still read.
+        XCTAssertEqual(snapshot.configurableControls.map(\.cid), [0x52, 0x53, 0x56, 0xFD])
+        XCTAssertEqual(snapshot.firmware.map(\.kind), [.bootloader, .firmware, .other])
+        XCTAssertEqual(snapshot.battery?.percentage, 50)
+        XCTAssertEqual(snapshot.dpi?.current, 1000)
+        XCTAssertEqual(snapshot.hosts?.count, 3)
+        XCTAssertEqual(session.snapshot, snapshot)
+    }
+
+    func testStartReadsInOrderAndWritesNothing() async throws {
+        let profile = DeviceProfiles.mxVertical
+        let mouse = SimulatedDirect(profile: profile)
+        _ = try await makeSession(mouse, at: 0xFF).start()
+        let sent = requests(mouse, to: 0xFF, profile: profile)
+
+        // Protocol, feature table, name, kind, IDs and serial, controls, battery, speed, hosts.
+        let milestones: [[UInt16]] = [
+            [0x0000, 1], [0x0001, 0], [0x0005, 0], [0x0005, 2], [0x0003, 0], [0x0003, 2],
+            [0x1B04, 0], [0x1000, 0], [0x2201, 1], [0x1814, 0],
+        ]
+        let positions = milestones.map { sent.firstIndex(of: $0) }
+        XCTAssertFalse(positions.contains(nil), "every milestone is read: \(sent)")
+        let found = positions.compactMap { $0 }
+        XCTAssertEqual(found, found.sorted(), "read in order: \(sent)")
+
+        let reads: Set<[UInt16]> = [
+            [0x0000, 1], [0x0001, 0], [0x0001, 1], [0x0005, 0], [0x0005, 1], [0x0005, 2], [0x0003, 0], [0x0003, 1],
+            [0x0003, 2], [0x1B04, 0], [0x1B04, 1], [0x1000, 0], [0x2201, 1], [0x2201, 2], [0x1814, 0], [0x1815, 0],
+            [0x1815, 1], [0x1815, 3],
+        ]
+        XCTAssertEqual(Set(sent).subtracting(reads), [], "only reads")
+        XCTAssertTrue(mouse.diverted.isEmpty)
+        XCTAssertEqual(mouse.dpi, 1000)
+        XCTAssertTrue(mouse.hostSwitches.isEmpty)
+    }
+
+    func testBoltMouseIdentifiesAsItsOwnModel() async throws {
+        let receiver = SimulatedReceiver.bolt([2: DeviceProfiles.mxMaster3S])
+        let session = makeSession(receiver, at: 2, link: 3, transportPID: 0xB034)
+        let snapshot = try await session.start()
+
+        XCTAssertEqual(snapshot.connection, .bolt)
+        XCTAssertEqual(snapshot.deviceIndex, 2)
+        XCTAssertEqual(snapshot.address, DeviceAddress(link: 3, index: 2))
+        XCTAssertEqual(snapshot.reprogVersion, 5)
+        XCTAssertEqual(snapshot.modelKey, ModelKey(productID: 0xB034))
+        XCTAssertEqual(snapshot.identity?.unitID, 0x2A2B_3C4D)
+        XCTAssertEqual(snapshot.identity?.kind, .mouse)
+        XCTAssertEqual(snapshot.battery?.percentage, 25)
+        XCTAssertEqual(snapshot.configurableControls.map(\.cid), [0x52, 0x53, 0x56, 0xC3, 0xC4])
+    }
+
+    func testIdenticalMiceShareTheirModelButNotTheirDeviceID() async throws {
+        let receiver = SimulatedReceiver.unifying([1: DeviceProfiles.mxVertical, 2: DeviceProfiles.mxVerticalSecondUnit])
+        let first = try await makeSession(receiver, at: 1, transportPID: 0x407B).start()
+        let second = try await makeSession(receiver, at: 2, transportPID: 0x407B).start()
+        let firstID = try XCTUnwrap(first.identity?.deviceID(at: first.address))
+        let secondID = try XCTUnwrap(second.identity?.deviceID(at: second.address))
+
+        XCTAssertEqual(first.modelKey, .mxVertical)
+        XCTAssertEqual(second.modelKey, .mxVertical)
+        XCTAssertNotEqual(firstID, secondID)
+        XCTAssertTrue(firstID.isStable)
+        XCTAssertTrue(secondID.isStable)
+        XCTAssertNotEqual(first.address, second.address)
+    }
+
+    func testMouseWithoutUnitIDOrSerialGetsATransientID() async throws {
+        let receiver = SimulatedReceiver.unifying([4: DeviceProfiles.mouseWithoutUnitID])
+        let snapshot = try await makeSession(receiver, at: 4, link: 9, transportPID: 0x4082).start()
+        let identity = try XCTUnwrap(snapshot.identity)
+
+        XCTAssertNil(identity.unitID)
+        XCTAssertNil(identity.serialNumber)
+        XCTAssertEqual(identity.deviceID(at: snapshot.address), .transient(DeviceAddress(link: 9, index: 4)))
+        XCTAssertFalse(identity.deviceID(at: snapshot.address).isStable)
+        XCTAssertEqual(snapshot.modelKey, ModelKey(productID: 0xB023), "the model is still known")
+    }
+
+    func testNameFallsBackToTheGivenNameThenLogitechMouse() async throws {
+        var nameless = DeviceProfiles.mxVertical
+        nameless.features.removeAll { $0.id == 0x0005 }
+        let named = try await makeSession(SimulatedDirect(profile: nameless), at: 0xFF, fallbackName: "MX Vertical").start()
+        XCTAssertEqual(named.name, "MX Vertical")
+        XCTAssertEqual(named.identity?.name, "MX Vertical")
+        XCTAssertEqual(named.identity?.kind, .unknown, "no 0x0005, no kind")
+        XCTAssertEqual(named.modelKey, .mxVertical, "0x0003 still keys the model")
+
+        let unnamed = try await makeSession(SimulatedDirect(profile: nameless), at: 0xFF, fallbackName: "  ").start()
+        XCTAssertEqual(unnamed.name, DeviceSession.defaultName)
+        XCTAssertEqual(DeviceSession.defaultName, "Logitech mouse")
+
+        let empty = try await makeSession(SimulatedDirect(profile: DeviceProfiles.mxVertical.named("")), at: 0xFF).start()
+        XCTAssertEqual(empty.name, "Logitech mouse")
+        XCTAssertEqual(empty.identity?.kind, .mouse)
+    }
+
+    func testTrackballAndBudgetMouseAreServedWithoutTheirPrimaryClicks() async throws {
+        let ergo = try await makeSession(SimulatedReceiver.unifying([1: DeviceProfiles.mxErgo]), at: 1).start()
+        XCTAssertEqual(ergo.identity?.kind, .trackball)
+        XCTAssertFalse(ergo.configurableControls.isEmpty)
+
+        // The M185 flags Left and Right as divertable; they are never offered.
+        let m185 = try await makeSession(SimulatedReceiver.nano([1: DeviceProfiles.m185]), at: 1, transportPID: 0x4055).start()
+        XCTAssertEqual(m185.connection, .nano)
+        XCTAssertEqual(m185.configurableControls.map(\.cid), [0x52])
+        XCTAssertNil(m185.dpi)
+    }
+
+    // MARK: Capability gate
+
+    func testKeyboardIsUnsupportedBeforeItsControlsAreRead() async throws {
+        let receiver = SimulatedReceiver.unifying([3: DeviceProfiles.mxKeys])
+        let session = makeSession(receiver, at: 3, transportPID: 0x408A)
+        let outcome = await unsupported(session)
+        let result = try XCTUnwrap(outcome)
+
+        XCTAssertEqual(result.reason, .notAPointer(.keyboard))
+        let partial = try XCTUnwrap(result.partial)
+        XCTAssertEqual(partial.name, "MX Keys Wireless Keyboard")
+        XCTAssertEqual(partial.address, DeviceAddress(link: 7, index: 3))
+        XCTAssertEqual(partial.identity?.kind, .keyboard)
+        XCTAssertEqual(partial.identity?.unitID, 0x8A2B_3C4D)
+        XCTAssertFalse(partial.features.isEmpty)
+        XCTAssertTrue(partial.controls.isEmpty)
+        XCTAssertNil(session.snapshot)
+        XCTAssertEqual(receiver.requestCount(feature: 0x1B04, slot: 3), 0, "the gate stops before the control table")
+        XCTAssertEqual(receiver.setReportingCount(slot: 3), 0)
+    }
+
+    func testHIDPP10DeviceIsUnsupported() async throws {
+        let receiver = SimulatedReceiver.unifying([1: DeviceProfiles.m510HIDPP10])
+        let session = makeSession(receiver, at: 1, transportPID: 0x1025, fallbackName: "M510", kindHint: .mouse)
+        let outcome = await unsupported(session)
+        let result = try XCTUnwrap(outcome)
+
+        XCTAssertEqual(result.reason, .hidpp10(major: 1, minor: 0))
+        let partial = try XCTUnwrap(result.partial)
+        XCTAssertEqual(partial.protocolVersion, "1.0")
+        XCTAssertEqual(partial.name, "M510")
+        XCTAssertEqual(partial.identity?.kind, .mouse)
+        XCTAssertEqual(partial.identity?.transportPID, 0x1025)
+        XCTAssertEqual(receiver.requestCount(feature: 0x0001), 0, "nothing else is asked")
+    }
+
+    func testMouseWithoutReprogControlsIsUnsupported() async throws {
+        let mouse = SimulatedDirect(profile: DeviceProfiles.g502Lightspeed)
+        let outcome = await unsupported(makeSession(mouse, at: 0xFF, transportPID: 0xC08D))
+        let result = try XCTUnwrap(outcome)
+
+        XCTAssertEqual(result.reason, .noReprogControls)
+        let partial = try XCTUnwrap(result.partial)
+        XCTAssertEqual(partial.name, "G502 LIGHTSPEED Wireless Gaming Mouse")
+        XCTAssertEqual(partial.identity?.kind, .mouse)
+        XCTAssertEqual(partial.identity?.unitID, 0x9A2B_3C4D)
+        XCTAssertNotNil(partial.feature(.batteryVoltage))
+        XCTAssertNil(partial.feature(.reprogControlsV4))
+    }
+
+    func testPointerWithoutConfigurableControlsIsUnsupported() async throws {
+        let touchpad = SimulatedDeviceProfile(
+            name: "Test Touchpad",
+            kind: .touchpad,
+            wirelessPID: 0x4101,
+            unitID: 0x0D0D_0001,
+            modelIDs: ModelIDs(wireless: 0x4101),
+            features: ([0x0000, 0x0001, 0x0003, 0x0005, 0x1B04] as [UInt16]).map { SimulatedDeviceProfile.Feature($0) },
+            controls: [
+                ControlInfo(cid: 0x50, taskID: 0x38, flags: [.mouseButton, .divertable]),
+                ControlInfo(cid: 0x51, taskID: 0x39, flags: [.mouseButton, .divertable]),
+                ControlInfo(cid: 0xD7, taskID: 0, flags: [.divertable, .virtual]),
+            ]
+        )
+        let receiver = SimulatedReceiver.unifying([5: touchpad])
+        let outcome = await unsupported(makeSession(receiver, at: 5))
+        let result = try XCTUnwrap(outcome)
+
+        XCTAssertEqual(result.reason, .noConfigurableControls)
+        XCTAssertEqual(result.partial?.controls.map(\.cid), [0x50, 0x51, 0xD7])
+        XCTAssertEqual(result.partial?.identity?.kind, .touchpad)
+        XCTAssertEqual(receiver.setReportingCount(slot: 5), 0)
+    }
+
+    func testReportedKindWinsOverTheReceiversHint() async throws {
+        let mouse = try await makeSession(SimulatedDirect(profile: DeviceProfiles.mxVertical), at: 0xFF, kindHint: .keyboard).start()
+        XCTAssertEqual(mouse.identity?.kind, .mouse)
+
+        let keyboard = makeSession(SimulatedReceiver.unifying([1: DeviceProfiles.mxKeys]), at: 1, kindHint: .mouse)
+        let result = await unsupported(keyboard)
+        XCTAssertEqual(result?.reason, .notAPointer(.keyboard))
+    }
+
+    func testKindHintDecidesWhenTheDeviceDoesNotReportItsKind() async throws {
+        let hintedKeyboard = SimulatedReceiver.unifying([2: Self.unknownKindVertical])
+        let result = await unsupported(makeSession(hintedKeyboard, at: 2, kindHint: .keyboard))
+        XCTAssertEqual(result?.reason, .notAPointer(.keyboard))
+        XCTAssertEqual(result?.partial?.identity?.kind, .keyboard)
+        XCTAssertEqual(hintedKeyboard.requestCount(feature: 0x1B04, slot: 2), 0)
+
+        let hintedMouse = try await makeSession(SimulatedReceiver.unifying([2: Self.unknownKindVertical]), at: 2, kindHint: .mouse).start()
+        XCTAssertEqual(hintedMouse.identity?.kind, .mouse)
+
+        // Neither: a control flagged as a mouse button makes it a pointer.
+        let unhinted = try await makeSession(SimulatedReceiver.unifying([2: Self.unknownKindVertical]), at: 2, kindHint: .unknown).start()
+        XCTAssertEqual(unhinted.identity?.kind, .unknown)
+        XCTAssertEqual(unhinted.configurableControls.map(\.cid), [0x52, 0x53, 0x56, 0xFD])
+    }
+
+    func testWithoutAnyKindAMouseButtonIsRequired() async throws {
+        var keys = DeviceProfiles.mxKeys
+        keys.kind = .unknown
+        let receiver = SimulatedReceiver.unifying([1: keys])
+        let result = await unsupported(makeSession(receiver, at: 1))
+
+        XCTAssertEqual(result?.reason, .notAPointer(.unknown))
+        XCTAssertEqual(result?.partial?.controls.count, keys.controls.count, "read, but never written")
+        XCTAssertFalse(result?.partial?.configurableControls.isEmpty ?? true)
+        XCTAssertEqual(receiver.setReportingCount(slot: 1), 0)
+    }
+
+    func testSleepingDeviceIsUnreachableNotUnsupported() async {
+        let direct = SimulatedDirect(profile: DeviceProfiles.mxVertical)
+        direct.dropsRequests = true
+        do {
+            _ = try await makeSession(direct, at: 0xFF).start(pingTimeout: 0.1)
+            XCTFail("expected a timeout")
+        } catch let error as HIDPPError {
+            XCTAssertEqual(error, .timeout)
+            XCTAssertNil(error.unsupportedReason)
+        } catch {
+            XCTFail("unexpected \(error)")
+        }
+
+        let receiver = SimulatedReceiver.unifying([1: DeviceProfiles.mxVertical])
+        receiver.goToSleep(slot: 1)
+        do {
+            _ = try await makeSession(receiver, at: 1).start(pingTimeout: 0.1)
+            XCTFail("expected the receiver to report the slot unreachable")
+        } catch let error as HIDPPError {
+            XCTAssertTrue(error.meansDeviceUnreachable, "\(error)")
+            XCTAssertNil(error.unsupportedReason)
+        } catch {
+            XCTFail("unexpected \(error)")
+        }
+    }
+
+    // MARK: Events
+
+    func testEventsAreStampedWithTheSessionAddress() async throws {
+        let receiver = SimulatedReceiver.unifying([3: DeviceProfiles.mxVertical])
+        let session = makeSession(receiver, at: 3, link: 4)
+        let address = DeviceAddress(link: 4, index: 3)
+        var events: [ButtonEvent] = []
+        var deltas: [PointerDelta] = []
+        var legacyDeltas: [[Int]] = []
+        session.onButtonEvent = { events.append($0) }
+        session.onSourcedPointerDelta = { deltas.append($0) }
+        session.onPointerDelta = { legacyDeltas.append([$0, $1]) }
+        _ = try await session.start()
+        try await session.applyDiversion([KnownControl.back], rawXY: [KnownControl.dpiSwitch])
+
+        receiver.hold([KnownControl.dpiSwitch], slot: 3)
+        receiver.move(dx: -5, dy: 300, slot: 3)
+        receiver.hold([], slot: 3)
+        receiver.hold([KnownControl.back], slot: 3)
+        await eventually("three events") { events.count == 3 }
+        session.releaseAll()
+
+        XCTAssertEqual(events, [
+            ButtonEvent(cid: KnownControl.dpiSwitch, phase: .press, source: address),
+            ButtonEvent(cid: KnownControl.dpiSwitch, phase: .release, source: address),
+            ButtonEvent(cid: KnownControl.back, phase: .press, source: address),
+            ButtonEvent(cid: KnownControl.back, phase: .release, source: address),
+        ])
+        XCTAssertEqual(deltas, [PointerDelta(source: address, dx: -5, dy: 300)])
+        XCTAssertEqual(legacyDeltas, [[-5, 300]])
+    }
+
+    func testLegacySessionStampsUnassigned() async throws {
+        let mouse = SimulatedDirect(profile: DeviceProfiles.mxVertical)
+        let client = HIDPPClient(transport: mouse)
+        let session = DeviceSession(device: HIDPPDevice(client: client, index: 0xFF), connection: .usb)
+        client.onUnsolicited = { [weak session] message in MainActorDelivery.run { _ = session?.handle(message) } }
+        var events: [ButtonEvent] = []
+        session.onButtonEvent = { events.append($0) }
+        let snapshot = try await session.start()
+        try await session.applyDiversion([KnownControl.back])
+        mouse.hold([KnownControl.back])
+        await eventually("pressed") { events.count == 1 }
+
+        XCTAssertEqual(session.address, .unassigned)
+        XCTAssertEqual(snapshot.address, .unassigned)
+        XCTAssertEqual(events, [ButtonEvent(cid: KnownControl.back, phase: .press)])
+    }
+
+    func testFirstRawXYReportAfterAPressIsDroppedFromReprogV5() async throws {
+        let receiver = SimulatedReceiver.bolt([1: DeviceProfiles.mxMaster3S])
+        let session = makeSession(receiver, at: 1)
+        var events: [ButtonEvent] = []
+        var deltas: [[Int]] = []
+        var legacyDeltas: [[Int]] = []
+        session.onButtonEvent = { events.append($0) }
+        session.onSourcedPointerDelta = { deltas.append([$0.dx, $0.dy]) }
+        session.onPointerDelta = { legacyDeltas.append([$0, $1]) }
+        let snapshot = try await session.start()
+        XCTAssertEqual(snapshot.reprogVersion, 5)
+        try await session.applyDiversion([], rawXY: [KnownControl.gestureButton])
+        XCTAssertEqual(session.rawXYControls, [KnownControl.gestureButton])
+
+        for round in 0..<2 {
+            receiver.hold([KnownControl.gestureButton], slot: 1)
+            receiver.move(dx: 99, dy: -99, slot: 1)
+            receiver.move(dx: round * 10 + 1, dy: 2, slot: 1)
+            receiver.move(dx: round * 10 + 3, dy: 4, slot: 1)
+            receiver.hold([], slot: 1)
+        }
+        await eventually("two presses and releases") { events.count == 4 }
+        XCTAssertEqual(deltas, [[1, 2], [3, 4], [11, 2], [13, 4]], "the first report after each press is dropped")
+        XCTAssertEqual(legacyDeltas, deltas)
+    }
+
+    func testRawXYReportsBeforeReprogV5AreAllDelivered() async throws {
+        let receiver = SimulatedReceiver.unifying([1: DeviceProfiles.mxVertical])
+        let session = makeSession(receiver, at: 1)
+        var events: [ButtonEvent] = []
+        var deltas: [[Int]] = []
+        session.onButtonEvent = { events.append($0) }
+        session.onSourcedPointerDelta = { deltas.append([$0.dx, $0.dy]) }
+        let snapshot = try await session.start()
+        XCTAssertEqual(snapshot.reprogVersion, 4)
+        try await session.applyDiversion([], rawXY: [KnownControl.dpiSwitch])
+
+        receiver.hold([KnownControl.dpiSwitch], slot: 1)
+        receiver.move(dx: 1, dy: 2, slot: 1)
+        receiver.move(dx: 3, dy: 4, slot: 1)
+        receiver.hold([], slot: 1)
+        await eventually("press and release") { events.count == 2 }
+        XCTAssertEqual(deltas, [[1, 2], [3, 4]])
+    }
+
+    func testVoltageBatteryIsReadAndFollowed() async throws {
+        var profile = DeviceProfiles.mxVertical
+        profile.features = profile.features.map { $0.id == 0x1000 ? SimulatedDeviceProfile.Feature(0x1001, version: 2) : $0 }
+        profile.battery = .voltage
+        profile.batteryLevel = 50
+        let mouse = SimulatedDirect(profile: profile)
+        let session = makeSession(mouse, at: 0xFF)
+        var changes: [BatteryStatus] = []
+        session.onBatteryChange = { changes.append($0) }
+        let snapshot = try await session.start()
+
+        let battery = try XCTUnwrap(snapshot.battery)
+        XCTAssertTrue(battery.isApproximate)
+        XCTAssertEqual(Double(battery.percentage), 50, accuracy: 2)
+
+        mouse.reportBattery(percentage: 20, charging: true)
+        await eventually("battery broadcast") { changes.count == 1 }
+        XCTAssertEqual(Double(changes.first?.percentage ?? 0), 20, accuracy: 2)
+        XCTAssertEqual(changes.first?.isCharging, true)
+        XCTAssertEqual(session.snapshot?.battery, changes.first)
     }
 }

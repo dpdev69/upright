@@ -1,8 +1,5 @@
 import Foundation
 
-// Wave 0 scaffold: final signatures and a first implementation. W2.2 owns this file and
-// proves it golden-equal to today's AppModel.syncDiversion for an MX Vertical.
-
 /// Everything besides the mappings that decides one endpoint's configuration.
 public struct ConfigurationInputs: Hashable, Sendable {
     /// The app-wide "Remap buttons" switch.
@@ -10,8 +7,10 @@ public struct ConfigurationInputs: Hashable, Sendable {
     public var accessibilityGranted: Bool
     /// This mouse's own "Remap this mouse" preference.
     public var deviceRemapEnabled: Bool
-    /// False for standby, unsupported and pending endpoints (`DeviceRegistry.isActive`).
+    /// False for standby, unsupported and pending endpoints (`DeviceRegistry.isActive`, or
+    /// `DeviceRegistry.prospectiveRole` for an endpoint that is still connecting).
     public var isActive: Bool
+    /// This mouse's pointer speed preference; nil leaves the speed to the mouse.
     public var preferredDPI: Int?
     /// Controls of this device the engine sees held: kept diverted until released.
     public var held: Set<UInt16>
@@ -37,35 +36,40 @@ public struct ConfigurationInputs: Hashable, Sendable {
     }
 }
 
+/// Decides what one endpoint should be doing. Pure: the same inputs always give the same
+/// configuration, so AppModel can compare it with what it last applied.
 public enum ConfigurationPlanner {
     /// The configuration for one endpoint.
     ///
-    /// - Remapping off: nothing diverted.
-    /// - Inactive endpoint or "Remap this mouse" off: only held controls stay diverted (so their
-    ///   release still arrives), held gestures keep raw movement.
-    /// - Otherwise: the mapped controls plus held ones; gesture controls also report raw XY
-    ///   when the control can.
+    /// - Remapping off: nothing diverted, held buttons included (as Upright 2.x did).
+    /// - Inactive endpoint, or "Remap this mouse" off: only held controls stay diverted, so their
+    ///   release still arrives; held gestures keep their raw movement. Nothing else is diverted
+    ///   and the pointer speed is left alone, so a standby twin with nothing held is `.native`.
+    /// - Otherwise: the mapped controls plus the held ones. Gesture controls also report raw
+    ///   movement while held, when the control can.
     ///
-    /// Diversion is limited to the device's configurable controls (never the primary clicks).
-    /// `dpi` snaps the preferred speed to what the device supports; without it the value is
-    /// passed through.
+    /// Diversion is limited to the device's configurable controls, never the primary clicks
+    /// (`ControlCatalog.neverDivert`), so mappings made for another model never reach it.
+    /// `dpi` is the preferred speed snapped to `dpiInfo`'s supported list; without a list
+    /// (unknown device) it is passed through, and the device snaps it when it is applied.
+    ///
+    /// For an MX Vertical this is exactly what Upright 2.x's `AppModel.syncDiversion` put on the
+    /// wire (`ConfigurationPlannerTests.testMatchesTodaysSyncDiversionForMXVertical`).
     public static func configuration(
         mappings: ButtonMappings,
         controls: [ControlInfo],
-        dpi: DPIInfo? = nil,
+        dpi dpiInfo: DPIInfo? = nil,
         inputs: ConfigurationInputs
     ) -> EndpointConfiguration {
-        let speed = inputs.preferredDPI.map { dpi?.nearest(to: $0) ?? $0 }
+        let served = inputs.isActive && inputs.deviceRemapEnabled
+        let speed = inputs.isActive ? inputs.preferredDPI.map { dpiInfo?.nearest(to: $0) ?? $0 } : nil
         guard inputs.remappingEnabled else { return EndpointConfiguration(dpi: speed) }
 
-        let divert: Set<UInt16>
-        let gestures: Set<UInt16>
-        if inputs.isActive && inputs.deviceRemapEnabled {
-            divert = mappings.divertedControls(accessibilityGranted: inputs.accessibilityGranted).union(inputs.held)
-            gestures = mappings.gestureControls(accessibilityGranted: inputs.accessibilityGranted).union(inputs.gesturesHeld)
-        } else {
-            divert = inputs.held
-            gestures = inputs.gesturesHeld
+        var divert = inputs.held
+        var gestures = inputs.gesturesHeld
+        if served {
+            divert.formUnion(mappings.divertedControls(accessibilityGranted: inputs.accessibilityGranted))
+            gestures.formUnion(mappings.gestureControls(accessibilityGranted: inputs.accessibilityGranted))
         }
 
         let configurable = controls.filter { $0.isConfigurable && !ControlCatalog.neverDivert.contains($0.cid) }
@@ -76,5 +80,17 @@ public enum ConfigurationPlanner {
             rawXY: gestures.intersection(rawCapable),
             dpi: speed
         )
+    }
+
+    /// The configuration for a connected endpoint, from its controls and pointer-speed list.
+    /// A mouse without ADJUSTABLE_DPI (0x2201) gets no speed.
+    public static func configuration(
+        mappings: ButtonMappings,
+        snapshot: DeviceSnapshot,
+        inputs: ConfigurationInputs
+    ) -> EndpointConfiguration {
+        var configuration = configuration(mappings: mappings, controls: snapshot.controls, dpi: snapshot.dpi, inputs: inputs)
+        if snapshot.dpi == nil { configuration.dpi = nil }
+        return configuration
     }
 }
