@@ -110,6 +110,8 @@ struct ScrollPane: View {
 
     /// Why the settings aren't in effect, when they should be but aren't.
     private var status: AnyView? {
+        // Demo Mode never installs the scroll tap: the settings are shown as if in effect.
+        guard model.environment.usesEventTaps else { return nil }
         let settings = model.settings.scrollSettings
         guard settings.transformsEvents, !model.scroll.isActive else { return nil }
         if !permissions.isAccessibilityTrusted {
