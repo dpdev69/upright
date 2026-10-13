@@ -405,7 +405,7 @@ extension DeviceManager.Status {
         case .probing(let kind): return String(localized: "Connecting via \(kind.title)…")
         case .waiting(let kind):
             switch kind {
-            case .unifying, .bolt: return String(localized: "Receiver found — click a mouse button to wake it")
+            case .unifying, .bolt, .nano: return String(localized: "Receiver found — click a mouse button to wake it")
             case .usb, .bluetooth: return String(localized: "Mouse found — click a button to wake it")
             }
         case .connected(let snapshot): return String(localized: "Connected via \(snapshot.connection.title)")

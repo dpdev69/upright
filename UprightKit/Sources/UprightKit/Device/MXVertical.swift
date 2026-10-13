@@ -6,6 +6,7 @@ public enum ConnectionKind: String, Hashable, Sendable {
     case bluetooth
     case unifying
     case bolt
+    case nano
 
     public var title: String {
         switch self {
@@ -13,6 +14,7 @@ public enum ConnectionKind: String, Hashable, Sendable {
         case .bluetooth: return NSLocalizedString("Bluetooth", comment: "How the mouse connects to the Mac")
         case .unifying: return NSLocalizedString("Unifying receiver", comment: "How the mouse connects to the Mac")
         case .bolt: return NSLocalizedString("Bolt receiver", comment: "How the mouse connects to the Mac")
+        case .nano: return NSLocalizedString("Nano receiver", comment: "How the mouse connects to the Mac")
         }
     }
 
@@ -20,7 +22,7 @@ public enum ConnectionKind: String, Hashable, Sendable {
         switch self {
         case .usb: return "cable.connector"
         case .bluetooth: return "dot.radiowaves.left.and.right"
-        case .unifying, .bolt: return "antenna.radiowaves.left.and.right"
+        case .unifying, .bolt, .nano: return "antenna.radiowaves.left.and.right"
         }
     }
 }
@@ -74,57 +76,7 @@ public enum MXVertical {
     public static let displayName = "MX Vertical"
 }
 
-/// Control IDs (CIDs) used by REPROG_CONTROLS_V4, as listed in Solaar's special_keys table
-/// and LogiOps' MX Vertical example configuration.
-public enum KnownControl {
-    public static let leftClick: UInt16 = 0x0050
-    public static let rightClick: UInt16 = 0x0051
-    public static let middleClick: UInt16 = 0x0052
-    public static let back: UInt16 = 0x0053
-    public static let forward: UInt16 = 0x0056
-    public static let dpiChange: UInt16 = 0x00ED
-    public static let dpiSwitch: UInt16 = 0x00FD
-
-    public static let primaryClicks: Set<UInt16> = [leftClick, rightClick]
-
+extension KnownControl {
     /// The MX Vertical's remappable buttons, shown before a mouse has been detected.
     public static let mxVerticalDefaults: [UInt16] = [back, forward, dpiSwitch, middleClick]
-}
-
-/// User-facing description of a control.
-public struct ControlDescriptor: Hashable, Sendable, Identifiable {
-    public var cid: UInt16
-    public var name: String
-    public var detail: String
-    public var symbolName: String
-
-    public var id: UInt16 { cid }
-
-    public init(cid: UInt16) {
-        self.cid = cid
-        switch cid {
-        case KnownControl.back:
-            name = NSLocalizedString("Back Button", comment: "Mouse control name")
-            detail = NSLocalizedString("Lower thumb button", comment: "Mouse control description")
-            symbolName = "chevron.backward.circle"
-        case KnownControl.forward:
-            name = NSLocalizedString("Forward Button", comment: "Mouse control name")
-            detail = NSLocalizedString("Upper thumb button", comment: "Mouse control description")
-            symbolName = "chevron.forward.circle"
-        case KnownControl.dpiSwitch, KnownControl.dpiChange:
-            name = NSLocalizedString("Top Button", comment: "Mouse control name")
-            detail = NSLocalizedString("Pointer-speed (DPI) button behind the wheel", comment: "Mouse control description")
-            symbolName = "speedometer"
-        case KnownControl.middleClick:
-            name = NSLocalizedString("Wheel Click", comment: "Mouse control name")
-            detail = NSLocalizedString("Press the scroll wheel", comment: "Mouse control description")
-            symbolName = "smallcircle.filled.circle"
-        default:
-            name = String(format: NSLocalizedString("Control 0x%04X", comment: "Mouse control name; %04X is its hexadecimal ID"), cid)
-            detail = NSLocalizedString("Additional programmable control", comment: "Mouse control description")
-            symbolName = "button.programmable"
-        }
-    }
-
-    public var hexID: String { String(format: "0x%04X", cid) }
 }
