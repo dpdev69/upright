@@ -30,7 +30,7 @@
 		A7035ECB836DDB1F70ECE23E /* ButtonMappings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7ED7F195DD6A0AC6DD7483E5 /* ButtonMappings.swift */; };
 		B0237D3616875AAE4DBEE4A3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DCE498C0536AFA6C6A77EB68 /* Assets.xcassets */; };
 		B32E2975128C916881502231 /* AboutPane.swift in Sources */ = {isa = PBXBuildFile; fileRef = 997C24297E913D6E1AF25808 /* AboutPane.swift */; };
-		BCB6FA3AB36A66E5B1CD0A1F /* MXVerticalController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37ED4DF59948372259E16DD /* MXVerticalController.swift */; };
+		BCB6FA3AB36A66E5B1CD0A1F /* EndpointController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37ED4DF59948372259E16DD /* EndpointController.swift */; };
 		BD4020CC5205950150BA67A4 /* DeviceSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52C8EAB4A319611D97F9C903 /* DeviceSession.swift */; };
 		C69B7BCA3584AB53157039F3 /* PermissionsMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51200E3EC13ECE6FE38D7322 /* PermissionsMonitor.swift */; };
 		CE1C711802458CB28A80E18E /* SettingsWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DEEC269F06A06FB9D38D923 /* SettingsWindowController.swift */; };
@@ -113,7 +113,7 @@
 		B969D8B5009543D641EEB50B /* UprightApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UprightApp.swift; sourceTree = "<group>"; };
 		BBDFFF771C0DE11E7DF89756 /* HIDPPTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HIDPPTransport.swift; sourceTree = "<group>"; };
 		C3CD83B2323D740C78867EFB /* HIDPPError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HIDPPError.swift; sourceTree = "<group>"; };
-		D37ED4DF59948372259E16DD /* MXVerticalController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MXVerticalController.swift; sourceTree = "<group>"; };
+		D37ED4DF59948372259E16DD /* EndpointController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EndpointController.swift; sourceTree = "<group>"; };
 		D392257AFB5E408CF65C3A21 /* IOKitHID.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOKitHID.swift; sourceTree = "<group>"; };
 		DCE498C0536AFA6C6A77EB68 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		EAE0AE15A05BBAD2A85FEFE6 /* DeviceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceManager.swift; sourceTree = "<group>"; };
@@ -273,7 +273,7 @@
 				83F6E1AE3E307D1C210DF3B8 /* HIDPPLink.swift */,
 				30D4E4074B638B495A6A3ED5 /* InterfaceClassifier.swift */,
 				7CF538CC41DE88392458B6B7 /* MXVertical.swift */,
-				D37ED4DF59948372259E16DD /* MXVerticalController.swift */,
+				D37ED4DF59948372259E16DD /* EndpointController.swift */,
 				365D919A9D58C624CF3F4698 /* ReceiverDirectory.swift */,
 			);
 			path = Device;
@@ -469,7 +469,7 @@
 				7F65C76EFB8E46BF1DB35DE9 /* MenuBarView.swift in Sources */,
 				AC3D574CE0DD4BDA46A8F786 /* ModelPicker.swift in Sources */,
 				111E5A423C212EA716AB42E5 /* MXVertical.swift in Sources */,
-				BCB6FA3AB36A66E5B1CD0A1F /* MXVerticalController.swift in Sources */,
+				BCB6FA3AB36A66E5B1CD0A1F /* EndpointController.swift in Sources */,
 				62DA65C5FE1B769E669BD22B /* OnboardingView.swift in Sources */,
 				C69B7BCA3584AB53157039F3 /* PermissionsMonitor.swift in Sources */,
 				FFC048A19AF99992CDA594FB /* PermissionsPane.swift in Sources */,
