@@ -74,6 +74,8 @@
 		6F63C9552C3D4972269456DE /* SimulatedReceiver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 645152AAB8A959A10E3FC067 /* SimulatedReceiver.swift */; };
 		5A47F446A52ED2FE03C20961 /* SimulatedDeviceProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40438FDF4D32550B59BA790 /* SimulatedDeviceProfile.swift */; };
 		D53A1D69560C9193F6375944 /* DeviceProfiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7DD3F59209DFCA513B8ECCD /* DeviceProfiles.swift */; };
+		B0A1E0000000000000000001 /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0A1E0000000000000000002 /* AppEnvironment.swift */; };
+		B0A1E0000000000000000003 /* LinkSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0A1E0000000000000000004 /* LinkSource.swift */; };
 		3A5124622A8E5486FD725B8F /* DemoMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE13987809A1653431CA533B /* DemoMode.swift */; };
 		4A14A5DD1456FFAC56E27D16 /* SnapshotExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39771585E0905625EE9AD4FE /* SnapshotExporter.swift */; };
 		CFE95841A53296C76E38D1FA /* SnapshotAnchor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67A4A6FB17F2B29099B50EAC /* SnapshotAnchor.swift */; };
@@ -150,6 +152,8 @@
 		645152AAB8A959A10E3FC067 /* SimulatedReceiver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimulatedReceiver.swift; sourceTree = "<group>"; };
 		D40438FDF4D32550B59BA790 /* SimulatedDeviceProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimulatedDeviceProfile.swift; sourceTree = "<group>"; };
 		E7DD3F59209DFCA513B8ECCD /* DeviceProfiles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceProfiles.swift; sourceTree = "<group>"; };
+		B0A1E0000000000000000002 /* AppEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEnvironment.swift; sourceTree = "<group>"; };
+		B0A1E0000000000000000004 /* LinkSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkSource.swift; sourceTree = "<group>"; };
 		CE13987809A1653431CA533B /* DemoMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoMode.swift; sourceTree = "<group>"; };
 		39771585E0905625EE9AD4FE /* SnapshotExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotExporter.swift; sourceTree = "<group>"; };
 		67A4A6FB17F2B29099B50EAC /* SnapshotAnchor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotAnchor.swift; sourceTree = "<group>"; };
@@ -240,6 +244,8 @@
 				2F53FBF5620FAA73BC3A99CB /* AppModel.swift */,
 				766EE0AB39B7FB46D7AA53A3 /* AppSettings.swift */,
 				267982B81F3F104CE213696C /* BatteryNotifier.swift */,
+				B0A1E0000000000000000002 /* AppEnvironment.swift */,
+				B0A1E0000000000000000004 /* LinkSource.swift */,
 				CE13987809A1653431CA533B /* DemoMode.swift */,
 				EAE0AE15A05BBAD2A85FEFE6 /* DeviceManager.swift */,
 				FB6805FD19F67DDAFBA489A1 /* FrontmostAppMonitor.swift */,
@@ -428,6 +434,8 @@
 				01CC78E876CECDBC21DA1288 /* Components.swift in Sources */,
 				E253951E30C93731CE5CCD97 /* ConfigurationPlanner.swift in Sources */,
 				4C3BCB5FFEEC9B6A380E7196 /* ControlCatalog.swift in Sources */,
+				B0A1E0000000000000000001 /* AppEnvironment.swift in Sources */,
+				B0A1E0000000000000000003 /* LinkSource.swift in Sources */,
 				3A5124622A8E5486FD725B8F /* DemoMode.swift in Sources */,
 				59AE20FD5CBEE5D7832FF358 /* DeviceCatalog.swift in Sources */,
 				00344AC5F37AB10330195394 /* DeviceFeatures.swift in Sources */,

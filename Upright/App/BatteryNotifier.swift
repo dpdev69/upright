@@ -2,14 +2,21 @@ import Foundation
 import UserNotifications
 import os
 
-/// Posts a notification when the mouse battery gets low (15%) and again when critical (5%),
-/// once each per discharge. See `BatteryAlertPolicy` for when it re-arms.
+/// Posts a notification when a mouse battery gets low (15%) and again when critical (5%),
+/// once each per discharge and per mouse. See `BatteryAlertPolicy` for when it re-arms.
+///
+/// Every connected mouse has its own policy, keyed by its runtime `DeviceAddress`. A mouse with a
+/// stable `DeviceID` also leaves its policy behind when its endpoint goes away (sleep, unplug,
+/// re-pair on another slot), so coming back doesn't repeat an alert for the same discharge.
 @MainActor
 final class BatteryNotifier: NSObject {
     /// Readings are always tracked; notifications are posted only while this is on.
     var isEnabled: Bool
 
-    private var policy = BatteryAlertPolicy()
+    /// Policies of the endpoints that exist now.
+    private var policies: [DeviceAddress: BatteryAlertPolicy] = [:]
+    /// The last policy state of every stable unit seen, used to seed a new endpoint of that unit.
+    private var remembered: [DeviceID: BatteryAlertPolicy] = [:]
     private var center: UNUserNotificationCenter { .current() }
     private let logger = Logger(subsystem: "Upright", category: "Battery")
 
@@ -23,13 +30,48 @@ final class BatteryNotifier: NSObject {
         center.delegate = self
     }
 
-    /// Feeds the latest reading of the connected mouse. Nil (no mouse or no reading) is ignored,
-    /// so a reconnect doesn't repeat an alert for the same discharge.
-    func update(battery: BatteryStatus?, deviceName: String) {
-        guard let battery, let alert = policy.update(battery) else { return }
-        logger.notice("Battery at \(battery.percentage)%, alert: \(String(describing: alert), privacy: .public)")
+    /// Feeds the latest reading of one mouse. `deviceName` is its display name (nickname first)
+    /// and goes into the notification text. Nil (no reading) is ignored, so a reconnect doesn't
+    /// repeat an alert for the same discharge. A transient or missing `deviceID` is fine: the
+    /// policy then lives only as long as the address.
+    func update(address: DeviceAddress, deviceID: DeviceID?, deviceName: String, battery: BatteryStatus?) {
+        guard let battery else { return }
+        let stableID = deviceID.flatMap { $0.isStable ? $0 : nil }
+        var policy = policies[address] ?? stableID.flatMap { remembered[$0] } ?? BatteryAlertPolicy()
+        let alert = policy.update(battery)
+        policies[address] = policy
+        if let stableID { remembered[stableID] = policy }
+        guard let alert else { return }
+        logger.notice("\(deviceName, privacy: .private) battery at \(battery.percentage)%, alert: \(String(describing: alert), privacy: .public)")
         guard isEnabled else { return }
-        post(alert, deviceName: deviceName)
+        post(alert, deviceName: deviceName, identifier: Self.notificationIdentifier(address: address, deviceID: stableID))
+    }
+
+    /// Drops the policy of an endpoint that went away. A stable unit keeps its remembered state.
+    func endpointRemoved(_ address: DeviceAddress) {
+        policies[address] = nil
+    }
+
+    func endpointsRemoved(_ addresses: [DeviceAddress]) {
+        addresses.forEach(endpointRemoved)
+    }
+
+    /// Drops the policies of every address not in `live`, for callers that diff the record list
+    /// instead of listening for removals.
+    func prune(keeping live: Set<DeviceAddress>) {
+        policies = policies.filter { live.contains($0.key) }
+    }
+
+    /// Compatibility for the single-mouse caller in `AppModel` until it passes addresses.
+    func update(battery: BatteryStatus?, deviceName: String) {
+        update(address: .unassigned, deviceID: nil, deviceName: deviceName, battery: battery)
+    }
+
+    /// `upright.battery.<DeviceID>` for a stable unit, else `upright.battery.<link>.<index>`.
+    /// A critical alert replaces the low one of the same mouse in Notification Center.
+    static func notificationIdentifier(address: DeviceAddress, deviceID: DeviceID?) -> String {
+        if let deviceID, deviceID.isStable { return "upright.battery.\(deviceID.rawValue)" }
+        return "upright.battery.\(address.link).\(address.index)"
     }
 
     /// Shows the permission prompt if macOS hasn't asked yet. Call when the user turns alerts on.
@@ -46,7 +88,7 @@ final class BatteryNotifier: NSObject {
         }
     }
 
-    private func post(_ alert: BatteryAlertPolicy.Alert, deviceName: String) {
+    private func post(_ alert: BatteryAlertPolicy.Alert, deviceName: String, identifier: String) {
         let content = UNMutableNotificationContent()
         switch alert {
         case .low(let percentage):
@@ -57,8 +99,8 @@ final class BatteryNotifier: NSObject {
             content.body = String(localized: "\(percentage)% left. Charge it now to keep using it.")
         }
         content.sound = .default
-        // One identifier: a critical alert replaces the low one in Notification Center.
-        let request = UNNotificationRequest(identifier: "upright.battery", content: content, trigger: nil)
+        content.threadIdentifier = "upright.battery"
+        let request = UNNotificationRequest(identifier: identifier, content: content, trigger: nil)
         Task {
             guard await authorize() else { return }
             do {
