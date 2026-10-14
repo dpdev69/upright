@@ -572,7 +572,9 @@ final class MultiDeviceControllerTests: XCTestCase {
         let hub = makeHub(receiver, tuning: tuning)
         hub.start()
 
-        await eventually("three connected") { isConnected(hub, at: 1) && isConnected(hub, at: 2) && isConnected(hub, at: 3) }
+        // Serialized probing of three mice behind a slot that drops every request: ~1.5 s locally,
+        // over 3 s on CI runners.
+        await eventually("three connected", timeout: 15) { isConnected(hub, at: 1) && isConnected(hub, at: 2) && isConnected(hub, at: 3) }
         hub.refreshDeviceInfo(at: nil)
         hub.cycleDPI(at: 1, presets: [800, 1600])
         hub.setConfiguration(EndpointConfiguration(divert: [KnownControl.back]), at: 2)
