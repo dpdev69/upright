@@ -3,6 +3,11 @@ import Foundation
 import os
 
 /// App preferences outside the button mappings, saved to UserDefaults on every change.
+///
+/// Per-mouse settings (nickname, "Remap this mouse", pointer speed, what was last seen of it)
+/// are in `devicePreferences`. Upright 2.x's single `preferredDPI` is copied once into the MX
+/// Vertical's seed there, so the first MX Vertical seen keeps today's speed; the old key is
+/// left in place for downgrades and nothing reads it after that.
 @MainActor
 final class AppSettings: ObservableObject {
     private enum Key {
@@ -12,6 +17,7 @@ final class AppSettings: ObservableObject {
         static let preferredDPI = "preferredDPI"
         static let dpiPresets = "dpiPresets"
         static let hasCompletedOnboarding = "hasCompletedOnboarding"
+        static let devicePreferences = DevicePreferencesStore.defaultsKey
     }
 
     static let defaultDPIPresets = [800, 1200, 1600, 2400]
@@ -35,7 +41,9 @@ final class AppSettings: ObservableObject {
         didSet { defaults.set(showBatteryInMenuBar, forKey: Key.showBatteryInMenuBar) }
     }
 
-    /// The pointer speed to apply when the mouse connects; nil leaves the mouse's own setting.
+    /// Upright 2.x's one pointer speed for "the" mouse. Legacy: it only seeds the MX Vertical's
+    /// `devicePreferences` (once, at first launch of this version) and is kept for downgrades.
+    /// Per-mouse speeds live in `devicePreferences`; set them through `AppModel`.
     @Published var preferredDPI: Int? {
         didSet {
             if let preferredDPI, DeviceAction.dpiRange.contains(preferredDPI) {
@@ -61,6 +69,15 @@ final class AppSettings: ObservableObject {
         didSet { defaults.set(hasCompletedOnboarding, forKey: Key.hasCompletedOnboarding) }
     }
 
+    /// Every mouse's own settings (by `DeviceID`) and the per-model seeds for mice seen for the
+    /// first time. Saved under `devicePreferences.v1` on every change.
+    @Published var devicePreferences: DevicePreferencesStore {
+        didSet {
+            guard devicePreferences != oldValue else { return }
+            devicePreferences.save(to: defaults)
+        }
+    }
+
     private let defaults: UserDefaults
     private let logger = Logger(subsystem: "Upright", category: "Settings")
 
@@ -70,7 +87,8 @@ final class AppSettings: ObservableObject {
         batteryAlertsEnabled = defaults.object(forKey: Key.batteryAlertsEnabled) as? Bool ?? true
         showBatteryInMenuBar = defaults.object(forKey: Key.showBatteryInMenuBar) as? Bool ?? false
         let dpi = defaults.object(forKey: Key.preferredDPI) as? Int
-        preferredDPI = dpi.flatMap { DeviceAction.dpiRange.contains($0) ? $0 : nil }
+        let legacyDPI = dpi.flatMap { DeviceAction.dpiRange.contains($0) ? $0 : nil }
+        preferredDPI = legacyDPI
         let presets = Self.sanitized(defaults.array(forKey: Key.dpiPresets) as? [Int] ?? [])
         dpiPresets = presets.isEmpty ? Self.defaultDPIPresets : presets
         if let completed = defaults.object(forKey: Key.hasCompletedOnboarding) as? Bool {
@@ -82,6 +100,15 @@ final class AppSettings: ObservableObject {
             hasCompletedOnboarding = isUpgrade
             defaults.set(isUpgrade, forKey: Key.hasCompletedOnboarding)
         }
+
+        // The legacy speed seeds the MX Vertical once; an existing seed means it already ran.
+        // Data it can't read in full is backed up before anything below saves over it.
+        let logger = Logger(subsystem: "Upright", category: "Settings")
+        var store = DevicePreferencesStore.load(from: defaults, log: { logger.notice("\($0, privacy: .public)") })
+        let hadSeed = store.models[.mxVertical] != nil
+        store.migrateLegacy(preferredDPI: legacyDPI)
+        devicePreferences = store
+        if !hadSeed { store.save(to: defaults) }
     }
 
     /// Puts scrolling back to how macOS does it.

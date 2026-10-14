@@ -102,11 +102,11 @@ final class ScrollTransformTests: XCTestCase {
         XCTAssertTrue(ScrollSettings(reverseVertical: true).transformsEvents)
         XCTAssertTrue(ScrollSettings(speed: 1.25).transformsEvents)
         XCTAssertTrue(ScrollSettings(smoothScrolling: true).transformsEvents)
-        XCTAssertFalse(ScrollSettings(onlyWhileMXVerticalConnected: false).transformsEvents)
+        XCTAssertFalse(ScrollSettings(onlyWhileMouseConnected: false).transformsEvents)
     }
 
     func testSettingsRoundTripAndTolerantDecoding() throws {
-        let settings = ScrollSettings(reverseVertical: true, speed: 1.5, smoothScrolling: true, onlyWhileMXVerticalConnected: false)
+        let settings = ScrollSettings(reverseVertical: true, speed: 1.5, smoothScrolling: true, onlyWhileMouseConnected: false)
         let data = try JSONEncoder().encode(settings)
         XCTAssertEqual(try JSONDecoder().decode(ScrollSettings.self, from: data), settings)
 
@@ -117,6 +117,38 @@ final class ScrollTransformTests: XCTestCase {
         )
         XCTAssertEqual(try JSONDecoder().decode(ScrollSettings.self, from: Data("{}".utf8)), .default)
         XCTAssertEqual(try JSONDecoder().decode(ScrollSettings.self, from: Data(#"{"speed":99}"#.utf8)).speed, 3)
+    }
+
+    /// The Swift property was renamed for multi-mouse support, but saves keep the old key.
+    func testOnlyWhileMouseConnectedKeepsItsStoredKey() throws {
+        XCTAssertTrue(ScrollSettings.default.onlyWhileMouseConnected)
+
+        let old = try JSONDecoder().decode(ScrollSettings.self, from: Data(#"{"onlyWhileMXVerticalConnected":false}"#.utf8))
+        XCTAssertFalse(old.onlyWhileMouseConnected)
+        let oldTrue = try JSONDecoder().decode(ScrollSettings.self, from: Data(#"{"onlyWhileMXVerticalConnected":true}"#.utf8))
+        XCTAssertTrue(oldTrue.onlyWhileMouseConnected)
+
+        let encoded = try JSONEncoder().encode(ScrollSettings(onlyWhileMouseConnected: false))
+        let object = try XCTUnwrap(JSONSerialization.jsonObject(with: encoded) as? [String: Any])
+        XCTAssertEqual(object["onlyWhileMXVerticalConnected"] as? Bool, false)
+        XCTAssertNil(object["onlyWhileMouseConnected"])
+        XCTAssertEqual(
+            Set(object.keys),
+            ["reverseVertical", "reverseHorizontal", "speed", "smoothScrolling", "onlyWhileMXVerticalConnected"]
+        )
+
+        // A save under the new Swift name is not a thing: it is ignored and the default applies.
+        let wrongKey = try JSONDecoder().decode(ScrollSettings.self, from: Data(#"{"onlyWhileMouseConnected":false}"#.utf8))
+        XCTAssertTrue(wrongKey.onlyWhileMouseConnected)
+    }
+
+    func testDeprecatedAliasStillReadsAndWritesTheRenamedProperty() {
+        var settings = ScrollSettings(onlyWhileMouseConnected: false)
+        XCTAssertFalse(settings.onlyWhileMXVerticalConnected)
+        settings.onlyWhileMXVerticalConnected = true
+        XCTAssertTrue(settings.onlyWhileMouseConnected)
+        settings.onlyWhileMouseConnected = false
+        XCTAssertFalse(settings.onlyWhileMXVerticalConnected)
     }
 }
 

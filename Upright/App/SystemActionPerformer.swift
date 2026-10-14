@@ -13,6 +13,11 @@ final class SystemActionPerformer: ActionPerforming {
     /// How many held shortcuts currently need each modifier, so overlapping shortcuts that
     /// share a modifier release it only after the last one lets go.
     private var modifierHolds: [Int: Int] = [:]
+    /// Like `modifierHolds`, for synthetic mouse buttons and repeating media keys: two mice
+    /// holding the same button (or key) post one press, and the last release ends it.
+    private var mouseButtonHolds = HoldCounts<SyntheticMouseButton>()
+    private var mediaKeyHolds = HoldCounts<MediaKey>()
+    /// Buttons with at least one hold, in the order they went down.
     private var heldMouseButtons: [SyntheticMouseButton] = []
     private var lastClick: (button: SyntheticMouseButton, time: TimeInterval, location: CGPoint, count: Int64)?
     private var clickStates: [SyntheticMouseButton: Int64] = [:]
@@ -107,6 +112,9 @@ final class SystemActionPerformer: ActionPerforming {
     // MARK: Mouse buttons
 
     private func postMouseButton(_ button: SyntheticMouseButton, down: Bool) {
+        // Only the first press and the last release reach the system; the ones in between are
+        // another mouse holding the same button, or a release with nothing held.
+        guard down ? mouseButtonHolds.acquire(button) : mouseButtonHolds.release(button) else { return }
         let location = CGEvent(source: nil)?.location ?? .zero
         guard let event = CGEvent(
             mouseEventSource: source,
@@ -118,11 +126,10 @@ final class SystemActionPerformer: ActionPerforming {
         event.setIntegerValueField(.mouseEventClickState, value: down ? nextClickState(button, at: location) : clickStates[button] ?? 1)
         event.flags = CGEventSource.flagsState(.combinedSessionState)
 
+        heldMouseButtons.removeAll { $0 == button }
         if down {
-            heldMouseButtons.removeAll { $0 == button }
             heldMouseButtons.append(button)
         } else {
-            heldMouseButtons.removeAll { $0 == button }
             clickStates[button] = nil
         }
         // While a button is held, pointer movement must arrive as drags of that button.
@@ -146,7 +153,8 @@ final class SystemActionPerformer: ActionPerforming {
     // MARK: Media keys
 
     private func startRepeating(_ key: MediaKey) {
-        stopRepeating(key)
+        // A second mouse holding the same key joins the repeat that is already running.
+        guard mediaKeyHolds.acquire(key) else { return }
         postMediaKey(key)
         mediaRepeats[key] = Task { @MainActor [weak self] in
             try? await Task.sleep(nanoseconds: Self.mediaRepeatDelay)
@@ -158,6 +166,7 @@ final class SystemActionPerformer: ActionPerforming {
     }
 
     private func stopRepeating(_ key: MediaKey) {
+        guard mediaKeyHolds.release(key) else { return }
         mediaRepeats.removeValue(forKey: key)?.cancel()
     }
 
@@ -204,6 +213,25 @@ final class SystemActionPerformer: ActionPerforming {
                 logger.error("Could not open \(app.bundleID, privacy: .public): \(error.localizedDescription, privacy: .public)")
             }
         }
+    }
+}
+
+/// How many holders currently need each key. `acquire` is true for the first holder and
+/// `release` for the last, which are the only moments that change what the system sees.
+fileprivate struct HoldCounts<Key: Hashable> {
+    private var counts: [Key: Int] = [:]
+
+    mutating func acquire(_ key: Key) -> Bool {
+        let count = counts[key, default: 0] + 1
+        counts[key] = count
+        return count == 1
+    }
+
+    /// False while other holders remain, and for a key nobody holds.
+    mutating func release(_ key: Key) -> Bool {
+        guard let count = counts[key] else { return false }
+        counts[key] = count == 1 ? nil : count - 1
+        return count == 1
     }
 }
 

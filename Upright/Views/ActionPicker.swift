@@ -7,11 +7,16 @@ import UniformTypeIdentifiers
 ///
 /// With `allowsGestures` off (gesture slots), "Gestures…" is hidden and so is "Default": a slot's
 /// button is always diverted, so `.deviceDefault` there means the same as "Do Nothing".
+///
+/// The pointer-speed and Easy-Switch items follow the mouse being set up (`actionTarget` in the
+/// environment): its Easy-Switch channel count, whether it has adjustable pointer speed, and its
+/// speed range.
 struct ActionPicker: View {
     @Binding var selection: ButtonAction
     let allowsGestures: Bool
 
     @ObservedObject private var settings = AppModel.shared.settings
+    @Environment(\.actionTarget) private var target
     @State private var isRecording = false
     @State private var wantsShortcut = false
     @State private var textEntry: TextEntryKind?
@@ -72,24 +77,26 @@ struct ActionPicker: View {
                 }
             }
 
-            Menu("Pointer Speed") {
-                Picker(selection: $selection) {
-                    Label("Cycle Pointer Speed", systemImage: "speedometer").tag(ButtonAction.device(.cycleDPI))
-                    ForEach(settings.dpiPresets, id: \.self) { dpi in
-                        Text("Set to \(dpi) DPI").tag(ButtonAction.device(.setDPI(dpi)))
+            if target.supportsPointerSpeed {
+                Menu("Pointer Speed") {
+                    Picker(selection: $selection) {
+                        Label("Cycle Pointer Speed", systemImage: "speedometer").tag(ButtonAction.device(.cycleDPI))
+                        ForEach(presets, id: \.self) { dpi in
+                            Text("Set to \(dpi) DPI").tag(ButtonAction.device(.setDPI(dpi)))
+                        }
+                    } label: {
+                        Text("Pointer Speed")
                     }
-                } label: {
-                    Text("Pointer Speed")
+                    .pickerStyle(.inline)
+                    .labelsHidden()
+                    Divider()
+                    Button("Edit Presets…") { AppModel.shared.selectedPane = .device }
                 }
-                .pickerStyle(.inline)
-                .labelsHidden()
-                Divider()
-                Button("Edit Presets…") { AppModel.shared.selectedPane = .device }
             }
 
             Menu("Easy-Switch") {
                 Picker(selection: $selection) {
-                    ForEach(Array(DeviceAction.hostRange), id: \.self) { host in
+                    ForEach(Array(target.hostRange), id: \.self) { host in
                         Text("Switch to Computer \(host)").tag(ButtonAction.device(.switchHost(host)))
                     }
                 } label: {
@@ -136,7 +143,7 @@ struct ActionPicker: View {
                 .lineLimit(1)
         }
         .fixedSize()
-        .help(selection.helpText)
+        .help(helpText)
         .accessibilityLabel(Text("Action"))
         .accessibilityValue(Text(displayTitle))
     }
@@ -160,13 +167,27 @@ struct ActionPicker: View {
         return selection.symbolName
     }
 
+    /// The pointer-speed presets this mouse can be set to.
+    private var presets: [Int] {
+        settings.dpiPresets.filter(target.allowsDPI)
+    }
+
+    /// The action's help, plus a warning when the mouse being set up can't do it.
+    private var helpText: String {
+        guard !target.supports(selection) else { return selection.helpText }
+        let warning = target.deviceName.map { String(localized: "\($0) can’t do this, so the button does nothing on it.") }
+            ?? String(localized: "This mouse can’t do this, so the button does nothing on it.")
+        return selection.helpText + "\n" + warning
+    }
+
     /// Whether the menu already has a checkable item for the action.
     private func isListed(_ action: ButtonAction) -> Bool {
         switch action {
         case .deviceDefault: return allowsGestures
         case .disabled, .system: return true
-        case .device(.cycleDPI), .device(.switchHost): return true
-        case .device(.setDPI(let dpi)): return settings.dpiPresets.contains(dpi)
+        case .device(.cycleDPI): return target.supportsPointerSpeed
+        case .device(.switchHost(let host)): return target.hostRange.contains(host)
+        case .device(.setDPI(let dpi)): return target.supportsPointerSpeed && presets.contains(dpi)
         case .keyCombo, .launchApp, .openURL, .runShortcut, .gestures: return false
         }
     }
@@ -177,6 +198,70 @@ struct ActionPicker: View {
         case (.shortcut, .runShortcut(let name)): return name
         default: return ""
         }
+    }
+}
+
+// MARK: The mouse being set up
+
+/// What the mouse an action is picked for can do, for the pointer-speed and Easy-Switch items.
+/// Unknown values (no mouse of the model here) offer everything, as before multi-mouse.
+struct ActionTarget: Equatable {
+    /// The mouse's name, for help text; nil when no mouse is known.
+    var deviceName: String?
+    /// Its Easy-Switch channels; nil when unknown (3, like every Easy-Switch mouse).
+    var hostCount: Int?
+    /// Its pointer-speed range (0x2201); nil when unknown or not adjustable.
+    var dpi: DPIInfo?
+    /// False hides the Pointer Speed items (the mouse has no 0x2201).
+    var supportsPointerSpeed = true
+
+    static let unknown = ActionTarget()
+
+    /// The channels "Switch to Computer N" can name.
+    var hostRange: ClosedRange<Int> {
+        let upper = min(max(hostCount ?? DeviceAction.hostRange.upperBound, 1), DeviceAction.hostRange.upperBound)
+        return DeviceAction.hostRange.lowerBound...upper
+    }
+
+    /// Whether "Set to N DPI" is within the mouse's range (any valid speed when unknown).
+    func allowsDPI(_ value: Int) -> Bool {
+        guard DeviceAction.dpiRange.contains(value) else { return false }
+        guard let dpi, !dpi.supported.isEmpty else { return true }
+        return (dpi.minimum...dpi.maximum).contains(value)
+    }
+
+    /// Whether the mouse can carry out an action (only device actions can be out of reach).
+    func supports(_ action: ButtonAction) -> Bool {
+        switch action {
+        case .device(.cycleDPI): return supportsPointerSpeed
+        case .device(.setDPI(let value)): return supportsPointerSpeed && allowsDPI(value)
+        case .device(.switchHost(let host)): return hostRange.contains(host)
+        default: return true
+        }
+    }
+
+    /// What a connected mouse reports; `.unknown` without one.
+    init(snapshot: DeviceSnapshot?, name: String? = nil) {
+        guard let snapshot else { return }
+        deviceName = name ?? snapshot.name
+        hostCount = snapshot.hosts?.count
+        dpi = snapshot.dpi
+        supportsPointerSpeed = snapshot.dpi != nil
+            || snapshot.features.contains { $0.featureID == HIDPPFeature.adjustableDPI.rawValue }
+    }
+
+    init() {}
+}
+
+private struct ActionTargetKey: EnvironmentKey {
+    static let defaultValue = ActionTarget.unknown
+}
+
+extension EnvironmentValues {
+    /// The mouse the action pickers below are picking for.
+    var actionTarget: ActionTarget {
+        get { self[ActionTargetKey.self] }
+        set { self[ActionTargetKey.self] = newValue }
     }
 }
 

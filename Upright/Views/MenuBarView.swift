@@ -2,7 +2,11 @@ import AppKit
 import Combine
 import SwiftUI
 
-/// The panel that drops down from the menu bar icon.
+/// The panel that drops down from the menu bar icon: one row per mouse (name, connection,
+/// battery, state), pointer speed and Easy-Switch of the mouse in focus, and what its buttons do.
+///
+/// The mouse in focus (`AppModel.menuDevice`) is the last one pressed, else the one selected in
+/// Settings, else the first connected one.
 struct MenuBarView: View {
     @EnvironmentObject private var model: AppModel
     @EnvironmentObject private var devices: DeviceManager
@@ -11,26 +15,53 @@ struct MenuBarView: View {
 
     @StateObject private var panel = PanelWindow()
     @State private var highlightedControl: UInt16?
+    /// Models whose "New:" banner was dismissed (saved in the app's defaults).
+    @State private var dismissedNewModels: Set<String> = []
+
+    private static let dismissedNewModelsKey = "menuBar.dismissedNewModels"
 
     var body: some View {
+        let mice = pointerRecords
         VStack(alignment: .leading, spacing: 0) {
-            header
+            header(mice: mice)
                 .padding(.horizontal, 14)
                 .padding(.top, 14)
                 .padding(.bottom, 12)
 
-            callout
+            callout(mice: mice)
 
-            if let snapshot = devices.snapshot, snapshot.dpi != nil || (snapshot.hosts?.count ?? 0) > 1 {
+            if let newModel = newModel(in: mice) {
+                NewModelBanner(name: newModel.name) {
+                    dismissNewModel(newModel.key)
+                    model.selectedModel = newModel.key
+                    openSettings(pane: .buttons)
+                } onDismiss: {
+                    dismissNewModel(newModel.key)
+                }
+                .modifier(CalloutBackground(tint: .accentColor))
+            }
+
+            if !mice.isEmpty {
                 Divider().padding(.horizontal, 10)
-                DeviceQuickControls(snapshot: snapshot)
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 10)
+                deviceRows(mice)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 6)
+            }
+
+            if let target = quickControlsTarget {
+                Divider().padding(.horizontal, 10)
+                DeviceQuickControls(
+                    record: target.record,
+                    snapshot: target.snapshot,
+                    showsName: mice.count > 1
+                )
+                .padding(.horizontal, 14)
+                .padding(.vertical, 10)
             }
 
             Divider().padding(.horizontal, 10)
 
-            mappingsSection
+            mappingsSection(showsModelName: Set(mice.compactMap(\.model)).count > 1)
                 .padding(.horizontal, 6)
                 .padding(.vertical, 6)
 
@@ -42,9 +73,10 @@ struct MenuBarView: View {
                 }
                 .keyboardShortcut(",", modifiers: .command)
 
-                MenuItemButton(title: String(localized: "Reconnect Mouse"), systemImage: "arrow.clockwise") {
-                    devices.reconnect()
+                MenuItemButton(title: String(localized: "Reconnect All Mice"), systemImage: "arrow.clockwise") {
+                    devices.reconnect(nil)
                 }
+                .help(String(localized: "Looks for every Logitech mouse again and reapplies their button configuration"))
 
                 MenuItemButton(title: String(localized: "Quit Upright"), systemImage: "power", shortcut: "⌘Q") {
                     NSApp.terminate(nil)
@@ -55,19 +87,29 @@ struct MenuBarView: View {
         }
         .frame(minWidth: 320, idealWidth: 340, maxWidth: 440)
         .background(WindowReader { panel.window = $0 })
-        .onAppear { devices.refreshDeviceInfo() }
+        .onAppear {
+            loadDismissedNewModels()
+            devices.refreshDeviceInfo()
+        }
         .onReceive(panel.didBecomeKey) { devices.refreshDeviceInfo() }
         .onChange(of: model.lastPressedControl) { pressed in
             guard let pressed else { return }
+            // Only buttons of the mouse whose summary is shown flash.
+            guard pressed.source == model.menuDevice || (pressed.model != nil && pressed.model == menuModel) else { return }
             flash(pressed.cid)
         }
     }
 
+    /// Served mice in list order; a second link to a mouse already listed is left out.
+    private var pointerRecords: [DeviceRegistry.Record] {
+        devices.records.filter { $0.role != .unsupported && !$0.isStandby }
+    }
+
     // MARK: Header
 
-    private var header: some View {
+    private func header(mice: [DeviceRegistry.Record]) -> some View {
         HStack(alignment: .top, spacing: 11) {
-            Image(systemName: devices.snapshot == nil ? "computermouse" : "computermouse.fill")
+            Image(systemName: devices.summary.anyConnected ? "computermouse.fill" : "computermouse")
                 .font(.system(size: 18))
                 .symbolRenderingMode(.hierarchical)
                 .foregroundStyle(.tint)
@@ -76,10 +118,9 @@ struct MenuBarView: View {
                 .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 3) {
-                Text(devices.status.title)
+                Text(verbatim: "Upright")
                     .font(.headline)
-                    .fixedSize(horizontal: false, vertical: true)
-                statusLine
+                statusLine(mice: mice)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -95,77 +136,146 @@ struct MenuBarView: View {
         }
     }
 
-    private var statusLine: some View {
-        VStack(alignment: .leading, spacing: 3) {
-            HStack(spacing: 5) {
+    @ViewBuilder
+    private func statusLine(mice: [DeviceRegistry.Record]) -> some View {
+        HStack(spacing: 5) {
+            if mice.isEmpty {
+                // No mouse yet: what the interfaces are doing (searching, a receiver waiting
+                // for its mouse, access refused). The one place the panel reads the compat status.
                 StatusDot(indicator: devices.status.indicator)
-                if case .failed = devices.status {
-                    Text("Connection problem")
-                    Button(String(localized: "Details…")) { openSettings(pane: .device) }
-                        .buttonStyle(.link)
-                        .help(devices.status.subtitle)
-                } else {
-                    Text(devices.status.subtitle)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-            }
-            if let battery = devices.snapshot?.battery {
-                HStack(spacing: 5) {
-                    BatteryLabel(battery: battery)
-                    if battery.isCharging {
-                        Text("Charging")
-                    }
-                }
+                Text(devices.status.subtitle)
+                    .fixedSize(horizontal: false, vertical: true)
+            } else if !devices.summary.problems.isEmpty, devices.summary.connectedCount == 0 {
+                StatusDot(indicator: .problem)
+                Text("Connection problem")
+                Button(String(localized: "Details…")) { openSettings(pane: .device, device: devices.summary.problems.first) }
+                    .buttonStyle(.link)
+            } else {
+                StatusDot(indicator: devices.summary.anyConnected ? .good : .pending)
+                Text(verbatim: Self.fleetText(mice: mice, connected: devices.summary.connectedCount))
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
+    }
+
+    /// "2 mice connected", "1 mouse connected", "Asleep — move a mouse to wake it", "Connecting…".
+    private static func fleetText(mice: [DeviceRegistry.Record], connected: Int) -> String {
+        if connected == 1 { return String(localized: "1 mouse connected") }
+        if connected > 1 { return String(localized: "\(connected) mice connected") }
+        if mice.contains(where: { if case .asleep = $0.state { return true } else { return false } }) {
+            return String(localized: "Asleep — move a mouse to wake it")
+        }
+        return String(localized: "Connecting…")
     }
 
     // MARK: Callouts
 
     @ViewBuilder
-    private var callout: some View {
-        if devices.status == .accessDenied {
+    private func callout(mice: [DeviceRegistry.Record]) -> some View {
+        if devices.needsInputMonitoring {
             InputMonitoringCallout(compact: true)
                 .modifier(CalloutBackground(tint: .orange))
         } else if model.isMissingAccessibility {
             AccessibilityCallout(compact: true)
                 .modifier(CalloutBackground(tint: .orange))
-        } else if devices.status == .searching {
-            ConnectHint()
+        } else if mice.isEmpty, devices.status == .searching {
+            ConnectionHint()
                 .modifier(CalloutBackground(tint: .secondary))
         }
     }
 
+    // MARK: New model
+
+    /// A connected model Upright has no setup for yet (other than the MX Vertical, which the
+    /// first-run window covers), until its banner is dismissed or the model gets a setup.
+    private func newModel(in mice: [DeviceRegistry.Record]) -> (key: ModelKey, name: String)? {
+        guard settings.hasCompletedOnboarding else { return nil }
+        for record in mice where record.role == .active && record.snapshot != nil {
+            guard let key = record.model, key != .mxVertical,
+                  model.library.models[key] == nil,
+                  !dismissedNewModels.contains(key.rawValue)
+            else { continue }
+            return (key, model.modelName(key))
+        }
+        return nil
+    }
+
+    private func loadDismissedNewModels() {
+        dismissedNewModels = Set(model.defaults.stringArray(forKey: Self.dismissedNewModelsKey) ?? [])
+    }
+
+    private func dismissNewModel(_ key: ModelKey) {
+        dismissedNewModels.insert(key.rawValue)
+        model.defaults.set(dismissedNewModels.sorted(), forKey: Self.dismissedNewModelsKey)
+    }
+
+    // MARK: Mice
+
+    private func deviceRows(_ mice: [DeviceRegistry.Record]) -> some View {
+        VStack(spacing: 1) {
+            ForEach(Array(mice.enumerated()), id: \.element.address) { index, record in
+                MenuDeviceRow(record: record, isInFocus: mice.count > 1 && record.address == model.menuDevice) {
+                    openSettings(pane: .device, device: record.address)
+                }
+                .snapshotAnchor("battery.\(index + 1)")
+            }
+        }
+    }
+
+    /// The mouse in focus, when it has a pointer speed or several Easy-Switch channels.
+    private var quickControlsTarget: (record: DeviceRegistry.Record, snapshot: DeviceSnapshot)? {
+        guard let address = model.menuDevice,
+              let record = devices.records.first(where: { $0.address == address }),
+              record.role == .active,
+              let snapshot = record.snapshot,
+              snapshot.dpi != nil || (snapshot.hosts?.count ?? 0) > 1
+        else { return nil }
+        return (record, snapshot)
+    }
+
     // MARK: Mappings
 
-    private var mappingsSection: some View {
-        VStack(alignment: .leading, spacing: 1) {
-            mappingsHeader
+    /// The model whose buttons are summarized: the mouse in focus, else the Buttons pane's model.
+    private var menuModel: ModelKey {
+        model.menuDevice.flatMap(model.model(of:)) ?? model.selectedModel
+    }
+
+    private func mappingsSection(showsModelName: Bool) -> some View {
+        let shownModel = menuModel
+        let mappings = model.effectiveMappings(model: shownModel)
+        return VStack(alignment: .leading, spacing: 1) {
+            mappingsHeader(model: shownModel, showsModelName: showsModelName)
                 .padding(.horizontal, 8)
                 .padding(.top, 2)
                 .padding(.bottom, 4)
 
-            let mappings = model.effectiveMappings
-            ForEach(devices.controls) { control in
+            ForEach(model.controls(for: shownModel)) { control in
                 MappingSummaryRow(
                     control: control,
                     action: mappings[control.cid],
                     isPaused: !model.isRemappingEnabled,
                     isHighlighted: highlightedControl == control.cid
                 ) {
+                    if model.selectedModel != shownModel { model.selectedModel = shownModel }
                     openSettings(pane: .buttons)
                 }
             }
         }
     }
 
-    private var mappingsHeader: some View {
-        HStack(spacing: 6) {
-            if let app = activeProfileApp {
-                Text("In \(app.name)")
-                    .help(String(localized: "\(app.name) has its own button settings"))
-            } else {
-                Text("Buttons")
+    private func mappingsHeader(model shownModel: ModelKey, showsModelName: Bool) -> some View {
+        HStack(spacing: 4) {
+            Group {
+                if let app = activeProfileApp(for: shownModel) {
+                    Text("In \(app.name)")
+                        .help(String(localized: "\(app.name) has its own button settings"))
+                } else {
+                    Text("Buttons")
+                }
+            }
+            if showsModelName {
+                Text(verbatim: "· " + model.modelName(shownModel))
+                    .lineLimit(1)
             }
             Spacer(minLength: 8)
             if !model.isRemappingEnabled {
@@ -179,9 +289,11 @@ struct MenuBarView: View {
         .accessibilityAddTraits(.isHeader)
     }
 
-    /// The frontmost app, when it has an enabled profile of its own.
-    private var activeProfileApp: FrontmostApp? {
-        guard let app = model.frontmostApp, model.profiles.enabledProfile(forBundleID: app.bundleID) != nil else { return nil }
+    /// The frontmost app, when it has an enabled profile of its own for `shownModel`.
+    private func activeProfileApp(for shownModel: ModelKey) -> FrontmostApp? {
+        guard let app = model.frontmostApp,
+              model.profiles(for: shownModel).enabledProfile(forBundleID: app.bundleID) != nil
+        else { return nil }
         return app
     }
 
@@ -196,24 +308,187 @@ struct MenuBarView: View {
     // MARK: Actions
 
     /// Closes this panel (a MenuBarExtra window doesn't close itself when a button in it is
-    /// clicked), then opens Settings.
-    private func openSettings(pane: SettingsPane? = nil) {
+    /// clicked), then opens Settings, optionally on one mouse in the Mice pane.
+    private func openSettings(pane: SettingsPane? = nil, device: DeviceAddress? = nil) {
         panel.close()
-        SettingsWindowController.shared.show(pane: pane)
+        SettingsWindowController.shared.show(pane: pane, device: device)
+    }
+}
+
+// MARK: - Menu bar label
+
+/// The status item: a filled mouse while any mouse is connected, and optionally the lowest
+/// battery level among connected mice (red when it is low).
+struct MenuBarLabel: View {
+    @ObservedObject var devices: DeviceManager
+    @ObservedObject var settings: AppSettings
+
+    var body: some View {
+        let summary = devices.summary
+        let icon = Image(systemName: summary.anyConnected ? "computermouse.fill" : "computermouse")
+        Group {
+            if settings.showBatteryInMenuBar, let battery = summary.lowestBattery?.status {
+                // One Text, so the menu bar shows both the icon and the level.
+                Text(icon) + Text(verbatim: " " + battery.levelText).foregroundColor(battery.isLow ? .red : nil)
+            } else {
+                icon
+            }
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text(verbatim: accessibilityText))
+    }
+
+    /// Every mouse, for example "Upright, MX Vertical connected, battery 80%, MX Master 3S asleep".
+    private var accessibilityText: String {
+        var parts = ["Upright"]
+        let mice = devices.records.filter { $0.role != .unsupported && !$0.isStandby }
+        if mice.isEmpty {
+            // No mouse yet: what the interfaces are doing (the documented status fallback).
+            switch devices.status {
+            case .connected: parts.append(String(localized: "connected"))
+            case .asleep: parts.append(String(localized: "mouse asleep"))
+            case .probing, .waiting: parts.append(String(localized: "connecting"))
+            case .searching: parts.append(String(localized: "not connected"))
+            case .accessDenied: break
+            case .failed: parts.append(String(localized: "connection problem"))
+            }
+        }
+        for record in mice {
+            let name = record.displayName
+            switch record.state {
+            case .connected(let snapshot):
+                if let battery = snapshot.battery {
+                    parts.append(String(localized: "\(name) connected, \(battery.accessibilityDescription)", comment: "Menu bar accessibility: a mouse and its battery"))
+                } else {
+                    parts.append(String(localized: "\(name) connected", comment: "Menu bar accessibility"))
+                }
+            case .asleep:
+                parts.append(String(localized: "\(name) asleep", comment: "Menu bar accessibility"))
+            case .probing, .waitingForDevice:
+                parts.append(String(localized: "\(name) connecting", comment: "Menu bar accessibility"))
+            case .failed:
+                parts.append(String(localized: "\(name) has a connection problem", comment: "Menu bar accessibility"))
+            case .unsupported:
+                break
+            }
+        }
+        if devices.needsInputMonitoring {
+            parts.append(String(localized: "needs Input Monitoring access"))
+        }
+        return parts.joined(separator: ", ")
+    }
+}
+
+// MARK: - Device rows
+
+/// One mouse: connection glyph, name, connection and state, battery.
+private struct MenuDeviceRow: View {
+    let record: DeviceRegistry.Record
+    /// The mouse the controls below act on (marked when there are several).
+    let isInFocus: Bool
+    let onSelect: () -> Void
+
+    var body: some View {
+        Button(action: onSelect) {
+            HStack(spacing: 10) {
+                Image(systemName: record.connection.symbolName)
+                    .foregroundStyle(record.isConnected ? Color.accentColor : Color.secondary)
+                    .frame(width: 18)
+                    .accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(verbatim: record.displayName)
+                        .fontWeight(isInFocus ? .semibold : .regular)
+                        .lineLimit(1)
+                    HStack(spacing: 4) {
+                        StatusDot(indicator: record.indicator)
+                        Text(verbatim: "\(record.connection.compactTitle) · \(record.stateText)")
+                            .lineLimit(1)
+                    }
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                }
+                Spacer(minLength: 8)
+                if let battery = record.snapshot?.battery {
+                    BatteryLabel(battery: battery)
+                        .font(.callout)
+                        .opacity(record.isConnected ? 1 : 0.6)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .buttonStyle(RowButtonStyle())
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text(verbatim: accessibilityText))
+        .accessibilityHint(Text("Opens this mouse in Settings"))
+        .accessibilityAddTraits(.isButton)
+    }
+
+    /// "MX Master 3S, Bolt receiver, connected, Battery 80%".
+    private var accessibilityText: String {
+        var parts = [record.displayName, record.connection.title, record.stateText]
+        if let battery = record.snapshot?.battery {
+            parts.append(battery.accessibilityDescription)
+        }
+        return parts.joined(separator: ", ")
+    }
+}
+
+/// "New: MX Master 3S. Its buttons work as usual. Set Up…"
+private struct NewModelBanner: View {
+    let name: String
+    let onSetUp: () -> Void
+    let onDismiss: () -> Void
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: "sparkles")
+                .foregroundStyle(.tint)
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 3) {
+                Text("New: \(name)")
+                    .font(.headline)
+                Text("Its buttons work as usual until you set them up.")
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                Button("Set Up…", action: onSetUp)
+                    .controlSize(.small)
+                    .padding(.top, 2)
+            }
+            Spacer(minLength: 4)
+            Button(action: onDismiss) {
+                Image(systemName: "xmark")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+            }
+            .buttonStyle(.borderless)
+            .help(String(localized: "Dismiss"))
+            .accessibilityLabel(Text("Dismiss"))
+        }
     }
 }
 
 // MARK: - Device controls
 
-/// Pointer speed presets and the current Easy-Switch channel.
+/// Pointer speed presets and the current Easy-Switch channel of one mouse.
 private struct DeviceQuickControls: View {
+    let record: DeviceRegistry.Record
     let snapshot: DeviceSnapshot
+    /// Several mice: name the one these controls act on.
+    let showsName: Bool
 
-    @EnvironmentObject private var devices: DeviceManager
+    @EnvironmentObject private var model: AppModel
     @EnvironmentObject private var settings: AppSettings
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
+            if showsName {
+                Text(verbatim: record.displayName)
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(.secondary)
+                    .accessibilityAddTraits(.isHeader)
+            }
+
             if let dpi = snapshot.dpi {
                 VStack(alignment: .leading, spacing: 5) {
                     HStack {
@@ -253,8 +528,7 @@ private struct DeviceQuickControls: View {
     private func presetButton(_ preset: Int, dpi: DPIInfo) -> some View {
         let isCurrent = dpi.nearest(to: preset) == dpi.current
         return Button {
-            devices.setDPI(preset)
-            settings.preferredDPI = preset
+            model.setPreferredDPI(preset, for: record.address)
         } label: {
             Text(verbatim: "\(preset)")
                 .monospacedDigit()
@@ -270,7 +544,7 @@ private struct DeviceQuickControls: View {
         }
         .accessibilityLabel(Text("\(preset) DPI"))
         .accessibilityAddTraits(isCurrent ? .isSelected : [])
-        .help(String(localized: "Set pointer speed to \(preset) DPI"))
+        .help(String(localized: "Set the pointer speed of \(record.displayName) to \(preset) DPI"))
     }
 
     private func channelText(_ hosts: HostInfo) -> String {
@@ -359,26 +633,6 @@ private struct MenuItemButton: View {
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .buttonStyle(RowButtonStyle())
-    }
-}
-
-/// How to get the mouse talking to Upright, shown while nothing is connected.
-private struct ConnectHint: View {
-    var body: some View {
-        HStack(alignment: .top, spacing: 10) {
-            Image(systemName: "cable.connector")
-                .foregroundStyle(.secondary)
-                .accessibilityHidden(true)
-            VStack(alignment: .leading, spacing: 3) {
-                Text("How to connect")
-                    .font(.headline)
-                Text("Plug in the Unifying receiver, connect the USB cable, or pair over Bluetooth. Then click a mouse button to wake it.")
-                    .font(.callout)
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-        }
-        .accessibilityElement(children: .combine)
     }
 }
 

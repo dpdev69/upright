@@ -1,15 +1,28 @@
 import AppKit
 import SwiftUI
 
-/// Picks which mapping table the Buttons pane edits (global or one app's overrides), adds and
-/// removes app profiles, and says which profile is in effect right now.
+/// Picks which of a model's mapping tables the Buttons pane edits (global or one app's
+/// overrides), adds and removes that model's app profiles, and says which profile is in effect
+/// right now. App profiles are per model: adding one for an app never touches another model's.
 struct ProfileSection: View {
-    @EnvironmentObject private var model: AppModel
+    @EnvironmentObject private var appModel: AppModel
+    /// The model whose profiles are listed and edited.
+    let modelKey: ModelKey
     /// nil edits the global table.
     @Binding var selectedBundleID: String?
 
     @State private var confirmingRemoval = false
     @State private var addFailed = false
+
+    init(model: ModelKey, selectedBundleID: Binding<String?>) {
+        modelKey = model
+        _selectedBundleID = selectedBundleID
+    }
+
+    /// The model's setup (global table and app profiles).
+    private var profiles: MappingProfiles {
+        appModel.library[modelKey]
+    }
 
     var body: some View {
         Section {
@@ -21,10 +34,10 @@ struct ProfileSection: View {
                         Image(systemName: "globe")
                     }
                     .tag(String?.none)
-                    if !model.profiles.apps.isEmpty {
+                    if !profiles.apps.isEmpty {
                         Divider()
                     }
-                    ForEach(model.profiles.apps) { app in
+                    ForEach(profiles.apps) { app in
                         Label {
                             Text(app.isEnabled ? app.displayName : String(localized: "\(app.displayName) (off)"))
                         } icon: {
@@ -35,13 +48,14 @@ struct ProfileSection: View {
                 } label: {
                     Text("Edit mappings for")
                 }
+                .snapshotAnchor("profilePicker")
                 addMenu
             }
 
             if let profile = selectedProfile {
                 Toggle(isOn: Binding(
                     get: { profile.isEnabled },
-                    set: { model.setAppProfileEnabled($0, bundleID: profile.bundleID) }
+                    set: { appModel.setAppProfileEnabled($0, bundleID: profile.bundleID, model: modelKey) }
                 )) {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Use this profile")
@@ -73,7 +87,7 @@ struct ProfileSection: View {
             Button("Remove Profile", role: .destructive) {
                 guard let bundleID = selectedBundleID else { return }
                 selectedBundleID = nil
-                model.removeAppProfile(bundleID: bundleID)
+                appModel.removeAppProfile(bundleID: bundleID, model: modelKey)
             }
         } message: {
             Text("Its overrides are deleted. The app goes back to using the global actions.")
@@ -83,7 +97,7 @@ struct ProfileSection: View {
         } message: {
             Text("Upright couldn’t read a bundle identifier from it.")
         }
-        .onChange(of: model.profiles.apps.map(\.bundleID)) { ids in
+        .onChange(of: profiles.apps.map(\.bundleID)) { ids in
             if let selected = selectedBundleID, !ids.contains(where: { $0.caseInsensitiveCompare(selected) == .orderedSame }) {
                 selectedBundleID = nil
             }
@@ -91,7 +105,7 @@ struct ProfileSection: View {
     }
 
     private var selectedProfile: AppProfile? {
-        selectedBundleID.flatMap { model.profiles[app: $0] }
+        selectedBundleID.flatMap { profiles[app: $0] }
     }
 
     private var addMenu: some View {
@@ -130,9 +144,9 @@ struct ProfileSection: View {
 
     @ViewBuilder
     private var activeNow: some View {
-        let frontmost = model.frontmostApp
+        let frontmost = appModel.frontmostApp
         Group {
-            if let active = model.profiles.enabledProfile(forBundleID: frontmost?.bundleID) {
+            if let active = profiles.enabledProfile(forBundleID: frontmost?.bundleID) {
                 Text("In effect now: the \(active.displayName) profile.")
             } else if let frontmost {
                 Text("In effect now: the global actions (\(frontmost.name) has no active profile).")
@@ -142,6 +156,7 @@ struct ProfileSection: View {
         }
         .font(.callout)
         .foregroundStyle(.secondary)
+        .snapshotAnchor("inEffect")
     }
 
     /// Regular apps that are running and don't have a profile yet, by name.
@@ -151,7 +166,7 @@ struct ProfileSection: View {
         return NSWorkspace.shared.runningApplications
             .filter { $0.activationPolicy == .regular }
             .compactMap { app -> AppReference? in
-                guard let id = app.bundleIdentifier, id != own, model.profiles[app: id] == nil,
+                guard let id = app.bundleIdentifier, id != own, profiles[app: id] == nil,
                       seen.insert(id.lowercased()).inserted else { return nil }
                 return AppReference(bundleID: id, displayName: app.localizedName ?? id)
             }
@@ -159,8 +174,8 @@ struct ProfileSection: View {
     }
 
     private func add(_ app: AppReference) {
-        model.addAppProfile(bundleID: app.bundleID, displayName: app.displayName)
-        selectedBundleID = model.profiles[app: app.bundleID]?.bundleID ?? app.bundleID
+        appModel.addAppProfile(bundleID: app.bundleID, displayName: app.displayName, model: modelKey)
+        selectedBundleID = appModel.library[modelKey][app: app.bundleID]?.bundleID ?? app.bundleID
     }
 }
 

@@ -1,14 +1,44 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "…and %lld more." : {
+    "“Cycle Pointer Speed” steps through these speeds on whichever mouse the button belongs to, and each one can be assigned to a button in Buttons. Speeds are rounded to the nearest one that mouse supports." : {
 
     },
-    "“Cycle Pointer Speed” steps through these speeds, and each one can be assigned to a button in Buttons. Speeds are rounded to the nearest one the mouse supports." : {
+    "“Default” leaves a button to the mouse: %@." : {
 
+    },
+    "“Default” leaves a button to the mouse." : {
+
+    },
+    "%@ — click a mouse button to wake it" : {
+
+    },
+    "%@ (%lld mice)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ (%2$lld mice)"
+          }
+        }
+      }
     },
     "%@ (off)" : {
 
+    },
+    "%@ #%lld" : {
+      "comment" : "A second mouse with the same name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ #%2$lld"
+          }
+        }
+      }
+    },
+    "%@ asleep" : {
+      "comment" : "Menu bar accessibility"
     },
     "%@ battery is almost empty" : {
 
@@ -16,10 +46,50 @@
     "%@ battery is low" : {
 
     },
+    "%@ can’t do this, so the button does nothing on it." : {
+
+    },
+    "%@ connected" : {
+      "comment" : "Menu bar accessibility"
+    },
+    "%@ connected, %@" : {
+      "comment" : "Menu bar accessibility: a mouse and its battery",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ connected, %2$@"
+          }
+        }
+      }
+    },
+    "%@ connecting" : {
+      "comment" : "Menu bar accessibility"
+    },
+    "%@ has a connection problem" : {
+      "comment" : "Menu bar accessibility"
+    },
     "%@ has its own button settings" : {
 
     },
     "%@ needs ⌘, ⌃ or ⌥ — or use a function key" : {
+
+    },
+    "%@ opens Mission Control." : {
+
+    },
+    "%@ slot %lld" : {
+      "comment" : "Where a mouse is connected, e.g. Bolt slot 2",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ slot %2$lld"
+          }
+        }
+      }
+    },
+    "%@ was disconnected" : {
 
     },
     "%@, charging" : {
@@ -27,6 +97,17 @@
     },
     "%@, paused" : {
 
+    },
+    "%@, slot %lld" : {
+      "comment" : "Where a mouse is connected: a receiver and its slot",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@, slot %2$lld"
+          }
+        }
+      }
     },
     "%@: %@" : {
       "comment" : "Gesture summary entry; direction and action name",
@@ -39,10 +120,39 @@
         }
       }
     },
+    "%@: %@ → %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@: %2$@ → %3$@"
+          }
+        }
+      }
+    },
+    "%@: %@." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@: %2$@."
+          }
+        }
+      }
+    },
+    "%@: no mouse is connected" : {
+
+    },
     "%1$@: skipped a link for control %2$d that uses “%3$@:” (only http, https and mailto links can be imported)" : {
       "comment" : "Import report entry; %1$@ is “global” or an app’s bundle ID, %2$d a control number, %3$@ a URL scheme such as file"
     },
     "%lld DPI" : {
+
+    },
+    "%lld entries couldn’t be used and were left out." : {
+
+    },
+    "%lld mice connected" : {
 
     },
     "%lld%% left. Charge it now to keep using it." : {
@@ -67,6 +177,9 @@
 
     },
     "⌥⌘Esc opens Force Quit" : {
+
+    },
+    "1 mouse connected" : {
 
     },
     "About" : {
@@ -111,16 +224,25 @@
     "Add Profile" : {
 
     },
+    "Additional left-click button" : {
+      "comment" : "Mouse control description"
+    },
     "Additional programmable control" : {
       "comment" : "Mouse control description"
     },
     "After you switch Upright on in System Settings, this page updates by itself." : {
 
     },
+    "AI Button" : {
+      "comment" : "Mouse control name"
+    },
     "All apps" : {
 
     },
     "All Apps (Global)" : {
+
+    },
+    "All devices" : {
 
     },
     "Allow Accessibility" : {
@@ -135,8 +257,23 @@
     "Allowed" : {
 
     },
+    "also on %@" : {
+      "comment" : "The same mouse is also connected another way, e.g. also on USB"
+    },
+    "Alternate back button" : {
+      "comment" : "Mouse control description"
+    },
+    "Analog Horizontal Scroll" : {
+      "comment" : "Mouse control name"
+    },
     "App Exposé" : {
       "comment" : "Built-in action name"
+    },
+    "Applies to every %@" : {
+
+    },
+    "Applies to every mouse wheel. macOS doesn’t say which mouse a scroll came from. Trackpads are never changed." : {
+
     },
     "Applies to tilt and Shift-scroll." : {
 
@@ -144,23 +281,44 @@
     "Approve Upright in Login Items to finish turning this on." : {
 
     },
+    "Asleep" : {
+
+    },
+    "Asleep — move a mouse to wake it" : {
+
+    },
     "Asleep — move the mouse to wake it" : {
+
+    },
+    "Asleep: %@" : {
 
     },
     "Back" : {
       "comment" : "Built-in action name"
     },
-    "Back and Forward navigate in apps (⌘[ and ⌘]); the top button opens Mission Control." : {
-
+    "Back (Alternate)" : {
+      "comment" : "Mouse control name"
     },
-    "Back and Forward start working once Accessibility access is allowed." : {
-
+    "Back (Arrow Key)" : {
+      "comment" : "Mouse control name"
     },
-    "Back and Forward work as mouse buttons 4 and 5; the top button changes pointer speed." : {
+    "Back (Horizontal Scroll)" : {
+      "comment" : "Mouse control name"
+    },
+    "Back and Forward navigate in apps (⌘[ and ⌘])." : {
 
     },
     "Back Button" : {
       "comment" : "Mouse control name"
+    },
+    "Back button of a multi-platform mouse" : {
+      "comment" : "Mouse control description"
+    },
+    "Back, sent as a horizontal scroll" : {
+      "comment" : "Mouse control description"
+    },
+    "Back, sent as an Alt or Windows arrow key" : {
+      "comment" : "Mouse control description"
     },
     "Basic" : {
 
@@ -192,6 +350,18 @@
     "Built on public HID++ knowledge" : {
 
     },
+    "Button 0x%04X" : {
+      "comment" : "Mouse control name; %04X is its hexadecimal ID"
+    },
+    "Button 6" : {
+      "comment" : "Mouse control name"
+    },
+    "Button 9" : {
+      "comment" : "Mouse control name"
+    },
+    "Button 10" : {
+      "comment" : "Mouse control name"
+    },
     "Buttons" : {
 
     },
@@ -206,6 +376,12 @@
     },
     "Cancel" : {
 
+    },
+    "Changes are saved and applied as soon as a mouse of this model connects." : {
+
+    },
+    "Changes the pointer speed (DPI)" : {
+      "comment" : "Mouse control description"
     },
     "Channel %lld · %@" : {
       "localizations" : {
@@ -233,7 +409,7 @@
     "Charging" : {
 
     },
-    "Check that you trust these actions, which open apps, links or shortcuts:" : {
+    "Check that you trust these actions" : {
 
     },
     "Choose" : {
@@ -269,6 +445,9 @@
     "Click: %@" : {
       "comment" : "Gesture summary entry; %@ is an action name"
     },
+    "Closing %@" : {
+
+    },
     "Command" : {
 
     },
@@ -278,28 +457,43 @@
     "Configuration" : {
 
     },
-    "Connect the mouse to change its pointer speed." : {
+    "Configure" : {
 
     },
-    "Connect the mouse to try a button." : {
+    "Connect a Logitech mouse" : {
 
     },
-    "Connect your MX Vertical" : {
+    "Connect a mouse to change its pointer speed." : {
 
     },
-    "Connect your MX Vertical to see every button it reports. Changes are saved and applied as soon as it connects." : {
+    "Connect a mouse to try a button." : {
+
+    },
+    "Connect the mouse to change its pointer speed or Easy-Switch channel." : {
+
+    },
+    "Connect your Logitech mouse" : {
 
     },
     "connected" : {
 
     },
+    "Connected" : {
+
+    },
     "Connected via %@" : {
+
+    },
+    "Connected: %@" : {
 
     },
     "connecting" : {
 
     },
     "Connecting via %@…" : {
+
+    },
+    "Connecting…" : {
 
     },
     "Connection" : {
@@ -323,8 +517,29 @@
     "Controls" : {
 
     },
+    "Copied" : {
+
+    },
+    "Copies the lines shown" : {
+
+    },
+    "Copies what this device reported (features, buttons, connection) for a bug report or a new-model request" : {
+
+    },
     "Copy" : {
       "comment" : "Built-in action name"
+    },
+    "Copy another model’s buttons and app profiles to this one." : {
+
+    },
+    "Copy Device Report" : {
+
+    },
+    "Copy Setup From" : {
+
+    },
+    "Cursor Button (Long Press)" : {
+      "comment" : "Mouse control name"
     },
     "Customize Buttons…" : {
 
@@ -332,19 +547,25 @@
     "Cycle Pointer Speed" : {
       "comment" : "Pointer speed action name"
     },
+    "Cycles through pointer speeds (DPI)" : {
+      "comment" : "Mouse control description"
+    },
+    "Dedicated AI button" : {
+      "comment" : "Mouse control description"
+    },
     "Default" : {
       "comment" : "Button action name"
     },
     "Delete" : {
 
     },
+    "Demo Mode: showing simulated mice; no real device is opened" : {
+
+    },
     "Details" : {
 
     },
     "Details…" : {
-
-    },
-    "Device" : {
 
     },
     "Device index" : {
@@ -354,6 +575,9 @@
 
     },
     "Disconnected" : {
+
+    },
+    "Dismiss" : {
 
     },
     "Do Nothing" : {
@@ -368,7 +592,16 @@
     "Down Arrow" : {
 
     },
+    "DPI Change Button" : {
+      "comment" : "Mouse control name"
+    },
+    "DPI Switch Button" : {
+      "comment" : "Mouse control name"
+    },
     "e.g. 1000" : {
+
+    },
+    "Each model’s buttons and app profiles are replaced by the file’s. Models the file doesn’t list keep their setup." : {
 
     },
     "Easy-Switch" : {
@@ -405,13 +638,19 @@
     "Every button does what the mouse does on its own. You can still change the actions below; they apply when you turn remapping back on." : {
 
     },
-    "Every button goes back to what the mouse does on its own, and all app profiles are removed. Export first if you might want them back." : {
-
-    },
-    "Every button goes back to what the mouse does on its own. App profiles are kept." : {
+    "Every button goes back to what the mouse does on its own. App profiles are kept. Other models aren’t changed." : {
 
     },
     "Every button in this app uses the global action again." : {
+
+    },
+    "Every button keeps the behavior the mouse gives it. Nothing is remapped." : {
+
+    },
+    "Every button of every mouse model goes back to what the mouse does on its own, and all app profiles are removed. Export first if you might want them back." : {
+
+    },
+    "Every button on this mouse does what it normally does." : {
 
     },
     "Experimental" : {
@@ -429,16 +668,46 @@
     "Firmware" : {
       "comment" : "Kind of firmware entry"
     },
+    "Fn + Left Click" : {
+      "comment" : "Mouse control name"
+    },
+    "Fn + Second Left Click" : {
+      "comment" : "Mouse control name"
+    },
+    "Forget" : {
+
+    },
+    "Forget %@?" : {
+
+    },
+    "Forget This Mouse…" : {
+
+    },
     "Forward" : {
       "comment" : "Built-in action name"
+    },
+    "Forward (Arrow Key)" : {
+      "comment" : "Mouse control name"
+    },
+    "Forward (HID)" : {
+      "comment" : "Mouse control name"
     },
     "Forward Button" : {
       "comment" : "Mouse control name"
     },
+    "Forward button of a multi-platform mouse" : {
+      "comment" : "Mouse control description"
+    },
     "Forward Delete" : {
 
     },
-    "Four speeds spread across what this mouse supports" : {
+    "Forward, sent as a standard mouse button" : {
+      "comment" : "Mouse control description"
+    },
+    "Forward, sent as an Alt or Windows arrow key" : {
+      "comment" : "Mouse control description"
+    },
+    "Found %@" : {
 
     },
     "Full" : {
@@ -446,6 +715,9 @@
     },
     "General" : {
 
+    },
+    "Gesture Button" : {
+      "comment" : "Mouse control name"
     },
     "Gestures" : {
       "comment" : "Button action name"
@@ -456,14 +728,26 @@
     "Gestures…" : {
 
     },
+    "Give every other mouse you use the same buttons and app profiles." : {
+
+    },
     "Give this button a different action in this app" : {
 
     },
     "Global: %@" : {
 
     },
+    "Haptic Sense Button" : {
+      "comment" : "Mouse control name"
+    },
+    "Haptic thumb panel" : {
+      "comment" : "Mouse control description"
+    },
     "Hardware" : {
       "comment" : "Kind of firmware entry"
+    },
+    "HID++ did not answer; looking for the device again" : {
+
     },
     "HID++ features" : {
 
@@ -483,10 +767,35 @@
     "Home" : {
 
     },
+    "Horizontal scroll to the left, reported as a button" : {
+      "comment" : "Mouse control description"
+    },
+    "Horizontal scroll to the right, reported as a button" : {
+      "comment" : "Mouse control description"
+    },
+    "Horizontal scroll wheel" : {
+      "comment" : "Mouse control description"
+    },
     "How to connect" : {
 
     },
     "https://example.com" : {
+
+    },
+    "Identifies this mouse again and reapplies its button configuration" : {
+
+    },
+    "Ignoring %@: %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Ignoring %1$@: %2$@"
+          }
+        }
+      }
+    },
+    "Ignoring invalid device action: %@" : {
 
     },
     "Import" : {
@@ -495,10 +804,16 @@
     "Import failed" : {
 
     },
+    "Import into" : {
+
+    },
+    "Import Mappings" : {
+
+    },
     "Import…" : {
 
     },
-    "Importing replaces your current mappings and app profiles." : {
+    "Importing replaces the setup of each mouse model in the file. You can review it first." : {
 
     },
     "In %@" : {
@@ -522,6 +837,15 @@
     "Input Monitoring needed" : {
 
     },
+    "Its buttons appear here as soon as it connects." : {
+
+    },
+    "Its buttons follow the setup in Buttons." : {
+
+    },
+    "Its buttons work as usual until you set them up." : {
+
+    },
     "Its overrides are deleted. The app goes back to using the global actions." : {
 
     },
@@ -540,10 +864,34 @@
     "Keyboard Shortcut…" : {
 
     },
+    "Keyboard; Upright only configures mice" : {
+      "comment" : "Why a Logitech device isn't supported"
+    },
+    "Last connection" : {
+
+    },
+    "Last seen %@" : {
+      "comment" : "When a remembered mouse was last connected, e.g. Last seen 3 days ago"
+    },
     "Left" : {
       "comment" : "Short gesture direction"
     },
+    "Left + Right Click" : {
+      "comment" : "Mouse control name"
+    },
+    "Left and right buttons pressed together" : {
+      "comment" : "Mouse control description"
+    },
     "Left Arrow" : {
+
+    },
+    "Left Button" : {
+      "comment" : "Mouse control name"
+    },
+    "Left click while the Fn key is held" : {
+      "comment" : "Mouse control description"
+    },
+    "Left out (can’t be used)" : {
 
     },
     "Less" : {
@@ -564,19 +912,46 @@
     "LogiOps" : {
 
     },
+    "Logitech device" : {
+      "comment" : "A device that hasn't said what it is yet"
+    },
+    "Logitech HID devices" : {
+
+    },
+    "Logitech mouse" : {
+      "comment" : "Name shown for a mouse that doesn't report its own name"
+    },
+    "Long press of the cursor button" : {
+      "comment" : "Mouse control description"
+    },
+    "Looks for every Logitech mouse again and reapplies their button configuration" : {
+
+    },
     "Low battery alerts" : {
 
     },
     "Lower thumb button" : {
       "comment" : "Mouse control description"
     },
-    "macOS doesn’t say which mouse a scroll came from. With this off, every mouse wheel is changed, but trackpads never are." : {
+    "Mac woke up; reapplying button configuration" : {
 
     },
     "macOS is blocking access" : {
 
     },
-    "macOS is hiding the MX Vertical, so button remaps are not applied. Allow Upright under Privacy & Security → Input Monitoring. The top button keeps changing pointer speed until then." : {
+    "macOS is blocking:" : {
+
+    },
+    "macOS is hiding %@, so button remaps are not applied there. Allow Upright under Privacy & Security → Input Monitoring. The buttons keep their normal behavior until then." : {
+
+    },
+    "macOS is hiding your Logitech mouse, so button remaps are not applied. Allow Upright under Privacy & Security → Input Monitoring. The buttons keep their normal behavior until then." : {
+
+    },
+    "Made for %@" : {
+
+    },
+    "Mapped buttons start working once Accessibility access is allowed." : {
 
     },
     "Mappings and app profiles" : {
@@ -590,6 +965,9 @@
     },
     "Media" : {
       "comment" : "Action category"
+    },
+    "Mice" : {
+
     },
     "Middle Click" : {
       "comment" : "Built-in action name"
@@ -630,11 +1008,23 @@
     "Moves the mouse to Easy-Switch channel %lld; it disconnects from this Mac" : {
       "comment" : "Action tooltip; %lld is the Easy-Switch channel number"
     },
+    "Multi-Platform Back" : {
+      "comment" : "Mouse control name"
+    },
+    "Multi-Platform Forward" : {
+      "comment" : "Mouse control name"
+    },
+    "Multi-Platform Gesture Button" : {
+      "comment" : "Mouse control name"
+    },
     "Mute" : {
       "comment" : "Built-in action name"
     },
     "Name" : {
 
+    },
+    "Nano receiver" : {
+      "comment" : "How the mouse connects to the Mac"
     },
     "Navigation" : {
       "comment" : "Action category"
@@ -651,16 +1041,40 @@
     "needs Input Monitoring access" : {
 
     },
+    "New: %@" : {
+
+    },
     "Next Tab" : {
       "comment" : "Built-in action name"
     },
     "Next Track" : {
       "comment" : "Built-in action name"
     },
-    "No MX Vertical connected" : {
+    "Nickname" : {
 
     },
+    "No buttons Upright can remap" : {
+      "comment" : "Why a Logitech device isn't supported"
+    },
+    "No mice yet. Connected Logitech mice appear here." : {
+
+    },
+    "No mouse is connected yet, so this sets up the %@. Other mice keep their own setup." : {
+
+    },
+    "No other model has a setup yet." : {
+
+    },
+    "No programmable buttons" : {
+      "comment" : "Why a Logitech device isn't supported"
+    },
     "None" : {
+
+    },
+    "Not a mouse; Upright only configures mice" : {
+      "comment" : "Why a Logitech device isn't supported"
+    },
+    "Not answering" : {
 
     },
     "not connected" : {
@@ -669,22 +1083,45 @@
     "Not connected" : {
 
     },
+    "Not Connected" : {
+
+    },
+    "Not connected yet. You can set it up now; changes apply as soon as one connects." : {
+
+    },
+    "Not connected. Changes are saved and applied as soon as it connects." : {
+
+    },
     "Not needed right now" : {
+
+    },
+    "Not supported" : {
 
     },
     "Nothing yet." : {
 
     },
-    "Notifies you when the mouse drops to 15% and again at 5%." : {
+    "Notifies you when a mouse drops to 15% and again at 5%." : {
 
     },
     "OK" : {
 
     },
-    "Only needed if macOS hides the mouse from Upright, which can happen over Bluetooth. Upright then shows the MX Vertical as blocked and its buttons keep their normal behavior until you allow it." : {
+    "Older HID++ %d.%d device; Upright needs HID++ 2.0" : {
+      "comment" : "Why a Logitech device isn't supported; %d.%d is its protocol version",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Older HID++ %1$d.%2$d device; Upright needs HID++ 2.0"
+          }
+        }
+      }
+    },
+    "Only needed if macOS hides a mouse from Upright, which can happen over Bluetooth. Upright then shows it as blocked and its buttons keep their normal behavior until you allow it." : {
 
     },
-    "Only while the MX Vertical is connected" : {
+    "Only while a Logitech mouse is connected" : {
 
     },
     "Open %@" : {
@@ -708,9 +1145,6 @@
     "Open URL…" : {
 
     },
-    "Open-source button remapping for the Logitech MX Vertical, without Logi Options+." : {
-
-    },
     "Opens %@" : {
       "comment" : "Button action tooltip; %@ is a URL"
     },
@@ -731,11 +1165,23 @@
     "Opens button settings" : {
 
     },
+    "Opens this mouse in Settings" : {
+
+    },
     "Option" : {
 
     },
     "Other" : {
       "comment" : "Kind of firmware entry"
+    },
+    "Other Logitech devices (%lld)" : {
+
+    },
+    "Other Mice" : {
+
+    },
+    "Other Models" : {
+
     },
     "Override" : {
 
@@ -752,7 +1198,7 @@
     "Paused — mouse defaults" : {
 
     },
-    "Paused until the MX Vertical connects." : {
+    "Paused until a Logitech mouse connects." : {
 
     },
     "Permissions" : {
@@ -761,10 +1207,10 @@
     "Play / Pause" : {
       "comment" : "Built-in action name"
     },
-    "Plug in the Unifying receiver, connect the USB cable, or pair over Bluetooth. Then click a mouse button to wake it." : {
+    "Plug in a Logitech Unifying, Bolt or Nano receiver, connect the USB cable, or pair the mouse over Bluetooth. Then click a mouse button to wake it." : {
 
     },
-    "Plug in the Unifying receiver, connect the USB cable, or pair the mouse over Bluetooth. Then click a mouse button to wake it." : {
+    "Plug in its receiver, connect the USB cable, or pair the mouse over Bluetooth. Then click a mouse button to wake it. Upright works with several mice at once." : {
 
     },
     "Pointer speed" : {
@@ -776,8 +1222,14 @@
     "Pointer Speed %lld DPI" : {
       "comment" : "Action name; %lld is the sensor resolution in DPI"
     },
+    "Pointer Speed: no mouse is connected" : {
+
+    },
     "Pointer-speed (DPI) button behind the wheel" : {
       "comment" : "Mouse control description"
+    },
+    "Precision Button" : {
+      "comment" : "Mouse control name"
     },
     "Press the scroll wheel" : {
       "comment" : "Mouse control description"
@@ -787,6 +1239,9 @@
     },
     "Previous Track" : {
       "comment" : "Built-in action name"
+    },
+    "Primary click" : {
+      "comment" : "Mouse control description"
     },
     "Privacy" : {
 
@@ -809,7 +1264,13 @@
     "Reconnect" : {
 
     },
-    "Reconnect Mouse" : {
+    "Reconnect All Mice" : {
+
+    },
+    "Reconnecting" : {
+
+    },
+    "Reconnecting all devices" : {
 
     },
     "Record Shortcut" : {
@@ -830,10 +1291,13 @@
     "Redo" : {
       "comment" : "Built-in action name"
     },
-    "Released under the MIT License. Logitech, MX Vertical, Unifying, Bolt and Logi Options+ are trademarks of Logitech. Upright is not affiliated with or endorsed by Logitech." : {
+    "Released under the MIT License. Logitech, MX, Unifying, Bolt, Logi Options+ and other Logitech product names are trademarks of Logitech. Upright is not affiliated with or endorsed by Logitech." : {
 
     },
     "Remap buttons" : {
+
+    },
+    "Remap this mouse" : {
 
     },
     "Remappable" : {
@@ -851,10 +1315,16 @@
     "Remapping is on" : {
 
     },
+    "Remapping is paused for every mouse (menu bar switch)." : {
+
+    },
+    "Remaps Logitech mice over HID++. Built and tested on the MX Vertical." : {
+
+    },
     "Remove %lld DPI" : {
 
     },
-    "Remove every button action and app profile." : {
+    "Remove every button action and app profile, for every mouse model." : {
 
     },
     "Remove Profile" : {
@@ -867,6 +1337,25 @@
 
     },
     "Remove this preset" : {
+
+    },
+    "Replace Setup" : {
+
+    },
+    "Replace the %@ setup with a copy of the %@ setup?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Replace the %1$@ setup with a copy of the %2$@ setup?"
+          }
+        }
+      }
+    },
+    "Replace this model’s setup with a copy of another’s" : {
+
+    },
+    "Replaces the presets with four speeds spread across what this mouse supports" : {
 
     },
     "Required to post the keyboard shortcuts, media keys and clicks your buttons are mapped to, and to change scrolling. Mission Control, opening apps and links, pointer speed and “Do Nothing” work without it." : {
@@ -896,6 +1385,9 @@
     "Restore Defaults…" : {
 
     },
+    "Restore the default button actions of the %@?" : {
+
+    },
     "Restore the default button actions?" : {
 
     },
@@ -908,11 +1400,17 @@
     "Reverse vertical scrolling" : {
 
     },
+    "Review" : {
+
+    },
     "Right" : {
       "comment" : "Short gesture direction"
     },
     "Right Arrow" : {
 
+    },
+    "Right Button" : {
+      "comment" : "Mouse control name"
     },
     "Run “%@”" : {
       "comment" : "Button action name; %@ is a Shortcuts.app shortcut name"
@@ -932,16 +1430,34 @@
     "Runs the shortcut “%@”" : {
       "comment" : "Button action tooltip; %@ is a shortcut name"
     },
-    "Save them to a file to back them up or move them to another Mac." : {
+    "Save the setup of every mouse model to a file to back it up or move it to another Mac." : {
 
     },
     "Screenshot Selection" : {
       "comment" : "Built-in action name"
     },
+    "Scroll Left (Button 7)" : {
+      "comment" : "Mouse control name"
+    },
+    "Scroll Right (Button 8)" : {
+      "comment" : "Mouse control name"
+    },
     "Scrolling" : {
 
     },
     "Scrolling speed" : {
+
+    },
+    "Second Left Click" : {
+      "comment" : "Mouse control name"
+    },
+    "Second left click while the Fn key is held" : {
+      "comment" : "Mouse control description"
+    },
+    "Secondary click" : {
+      "comment" : "Mouse control description"
+    },
+    "Seen Before" : {
 
     },
     "Sends %@" : {
@@ -950,16 +1466,38 @@
     "Serial number" : {
 
     },
-    "Set pointer speed to %lld DPI" : {
-
+    "Set the pointer speed of %@ to %lld DPI" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Set the pointer speed of %1$@ to %2$lld DPI"
+          }
+        }
+      }
     },
     "Set to %lld DPI" : {
+
+    },
+    "Set up" : {
+
+    },
+    "Set Up…" : {
 
     },
     "Sets the pointer speed to %lld DPI (or the nearest speed the mouse supports)" : {
       "comment" : "Action tooltip; %lld is the sensor resolution in DPI"
     },
+    "Setting up your %@. Other mice keep their own setup." : {
+
+    },
+    "Settings for this mouse can’t be remembered: it doesn’t report a serial number." : {
+
+    },
     "Settings…" : {
+
+    },
+    "Setups in this file" : {
 
     },
     "Shift" : {
@@ -971,17 +1509,29 @@
     "Shortcut name" : {
 
     },
+    "Show" : {
+
+    },
     "Show battery level in the menu bar" : {
 
     },
     "Show Desktop" : {
       "comment" : "Built-in action name"
     },
+    "Shown in the menu bar and in this list instead of the model name" : {
+
+    },
     "Sleep and wake" : {
 
     },
+    "SmartShift Button" : {
+      "comment" : "Mouse control name"
+    },
     "Smooth scrolling" : {
 
+    },
+    "Software gesture button" : {
+      "comment" : "Mouse control description"
     },
     "Solaar" : {
 
@@ -1004,6 +1554,9 @@
     "Spotlight" : {
       "comment" : "Built-in action name"
     },
+    "Start Focus Session" : {
+      "comment" : "Name of a Shortcuts.app shortcut shown in Demo Mode"
+    },
     "Startup" : {
 
     },
@@ -1020,7 +1573,7 @@
     "Steps through the pointer-speed presets" : {
       "comment" : "Pointer speed action tooltip"
     },
-    "Stop reapplying a speed when the mouse reconnects" : {
+    "Stop reapplying a speed when this mouse reconnects" : {
 
     },
     "Suggested" : {
@@ -1039,14 +1592,24 @@
     "Switch" : {
 
     },
-    "Switch the mouse to Computer %lld?" : {
-
+    "Switch %@ to Computer %lld?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Switch %1$@ to Computer %2$lld?"
+          }
+        }
+      }
     },
     "Switch to Computer %lld" : {
       "comment" : "Action name; %lld is the Easy-Switch channel number"
     },
     "Switch…" : {
 
+    },
+    "Switches the scroll wheel mode" : {
+      "comment" : "Mouse control description"
     },
     "Switching moves the mouse to another paired computer, and it disconnects from this Mac right away. Press the Easy-Switch button under the mouse to come back." : {
 
@@ -1060,14 +1623,44 @@
     "That app can’t have a profile" : {
 
     },
+    "the %@ goes back" : {
+      "comment" : "Native behavior of a mouse button; the argument is its name"
+    },
+    "the %@ goes forward" : {
+      "comment" : "Native behavior of a mouse button; the argument is its name"
+    },
+    "the %@ is a middle click" : {
+      "comment" : "Native behavior of a mouse button; the argument is its name"
+    },
+    "the %@ scrolls sideways" : {
+      "comment" : "Native behavior of a mouse button; the argument is its name"
+    },
+    "the %@ switches pointer speed (DPI)" : {
+      "comment" : "Native behavior of a mouse button; the argument is its name"
+    },
+    "the %@ switches the wheel between ratchet and free spin" : {
+      "comment" : "Native behavior of a mouse button; the argument is its name"
+    },
+    "The %@’s buttons and app profiles are replaced. Other models aren’t changed." : {
+
+    },
     "The button is ignored" : {
       "comment" : "Button action tooltip"
+    },
+    "The buttons and app profiles of these models are replaced with a copy: %@. Buttons a model doesn’t have are ignored on it." : {
+
+    },
+    "The file can’t be imported into that model." : {
+
     },
     "The file doesn’t contain any mappings Upright can use." : {
       "comment" : "Import error"
     },
     "The file isn’t an Upright mappings file." : {
       "comment" : "Import error"
+    },
+    "The mouse didn't answer HID++ requests. Try clicking a button to wake it, then choose Reconnect." : {
+      "comment" : "Connection status shown when setup fails"
     },
     "The mouse handles this button itself" : {
       "comment" : "Button action tooltip"
@@ -1078,23 +1671,63 @@
     "The mouse will disconnect from this Mac. Press the Easy-Switch button under the mouse to come back." : {
 
     },
-    "The MX Vertical didn't answer HID++ requests. Try clicking a button to wake it, then choose Reconnect." : {
-      "comment" : "Connection status shown when setup fails"
-    },
     "The pointer moves while you gesture with this button." : {
 
     },
-    "These are the buttons your mouse reports as remappable. “Default” leaves a button to the mouse: the thumb buttons go back and forward, and the top button switches pointer speed (DPI)." : {
+    "These are the buttons a %@ is known to have. Changes are saved and applied as soon as one connects." : {
 
     },
-    "These entries couldn’t be used and were left out:" : {
+    "These are the buttons your %@ reported when it was last connected. Changes are saved and applied as soon as it connects." : {
+
+    },
+    "These are the buttons your %@ reports as remappable." : {
+
+    },
+    "These models now use the setup from the file: %@. Other models kept theirs. Your previous setup was saved; choose Undo Import to put it back." : {
+
+    },
+    "They open apps, links or shortcuts when you press the button." : {
+
+    },
+    "This file comes from an earlier version of Upright, which only supported the %@. Its buttons and app profiles replace the setup of the model you choose; other models keep theirs." : {
 
     },
     "This is a macOS screenshot shortcut" : {
 
     },
+    "This is a second connection to %@. Upright uses its %@ connection and leaves this one as it is." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "This is a second connection to %1$@. Upright uses its %2$@ connection and leaves this one as it is."
+          }
+        }
+      }
+    },
     "This Mac" : {
 
+    },
+    "This mouse can’t do this, so the button does nothing on it." : {
+
+    },
+    "Thumb button" : {
+      "comment" : "Mouse control description"
+    },
+    "Thumb gesture button" : {
+      "comment" : "Mouse control description"
+    },
+    "Tilt Left" : {
+      "comment" : "Mouse control name"
+    },
+    "Tilt Right" : {
+      "comment" : "Mouse control name"
+    },
+    "Tilt the scroll wheel to the left" : {
+      "comment" : "Mouse control description"
+    },
+    "Tilt the scroll wheel to the right" : {
+      "comment" : "Mouse control description"
     },
     "Top Button" : {
       "comment" : "Mouse control name"
@@ -1132,6 +1765,12 @@
     "Unifying receiver" : {
       "comment" : "How the mouse connects to the Mac"
     },
+    "Unknown HID interface" : {
+
+    },
+    "Untested model" : {
+
+    },
     "Up" : {
       "comment" : "Short gesture direction"
     },
@@ -1144,7 +1783,7 @@
     "Upright" : {
 
     },
-    "Upright applies this speed again whenever the mouse reconnects. The top button can still change it unless you remap that button." : {
+    "Upright applies this speed again whenever this mouse reconnects. Other mice keep their own. A pointer-speed button on the mouse can still change it unless you remap that button." : {
 
     },
     "Upright couldn’t read a bundle identifier from it." : {
@@ -1153,7 +1792,16 @@
     "Upright couldn’t start changing scrolling. Try turning a setting off and on again." : {
 
     },
+    "Upright forgets this mouse’s nickname, pointer speed and remapping switch. The button setup for its model stays." : {
+
+    },
+    "Upright found these but can’t configure them. They keep working as usual." : {
+
+    },
     "Upright isn’t in your Applications folder. Move it there first: if this copy is moved or deleted, it won’t open at login." : {
+
+    },
+    "Upright keeps each mouse’s name, pointer speed and remapping switch for when it comes back." : {
 
     },
     "Upright Mappings.json" : {
@@ -1165,7 +1813,7 @@
     "Upright needs Accessibility access to send keyboard shortcuts, media keys and clicks for your mouse buttons. It doesn't read what you type." : {
 
     },
-    "Upright never reads what you type. It only listens to the HID++ channel of Logitech receivers and MX Vertical mice, and only posts the actions you assign." : {
+    "Upright never reads what you type. It only listens to the HID++ channel of Logitech receivers and supported Logitech mice, and only posts the actions you assign." : {
 
     },
     "Upright only uses temporary button diversion, so nothing is written to the mouse’s memory. Turning the mouse off and on always restores its factory behavior." : {
@@ -1174,16 +1822,25 @@
     "Upright sends keyboard shortcuts, media keys and clicks on behalf of your mouse. Until you allow it, mapped buttons keep their normal behavior." : {
 
     },
-    "Upright talks to the mouse with the publicly documented HID++ 2.0 protocol, using temporary button diversion from the REPROG_CONTROLS_V4 feature (0x1B04). It does not include or depend on any Logitech software." : {
+    "Upright talks to your mouse with the publicly documented HID++ 2.0 protocol, using temporary button diversion from the REPROG_CONTROLS_V4 feature (0x1B04). It does not include or depend on any Logitech software." : {
+
+    },
+    "Upright was built and tested on the MX Vertical. This model should work, but it hasn’t been tested on real hardware yet. If something is off, copy the device report into an issue on GitHub." : {
 
     },
     "URL" : {
 
     },
+    "USB" : {
+      "comment" : "Short connection name in a device label"
+    },
     "USB cable" : {
       "comment" : "How the mouse connects to the Mac"
     },
     "Use Default" : {
+
+    },
+    "Use for All Mice" : {
 
     },
     "Use Global Action" : {
@@ -1192,10 +1849,16 @@
     "Use Suggested" : {
 
     },
+    "Use the %@ setup for all your mice?" : {
+
+    },
     "Use the global action again" : {
 
     },
     "Use this profile" : {
+
+    },
+    "Use This Setup for All My Mice…" : {
 
     },
     "Version %@ (%@)" : {
@@ -1208,11 +1871,20 @@
         }
       }
     },
+    "Virtual Gesture Button" : {
+      "comment" : "Mouse control name"
+    },
     "Volume Down" : {
       "comment" : "Built-in action name"
     },
     "Volume Up" : {
       "comment" : "Built-in action name"
+    },
+    "Waiting" : {
+
+    },
+    "Watching for Logitech mice over USB, Unifying, Bolt and Nano receivers, and Bluetooth" : {
+
     },
     "Welcome to Upright" : {
 
@@ -1220,7 +1892,7 @@
     "Wheel Click" : {
       "comment" : "Mouse control name"
     },
-    "When off, every button goes back to what the mouse does on its own." : {
+    "When off, every button of every mouse goes back to what the mouse does on its own." : {
 
     },
     "When Upright quits" : {
@@ -1232,13 +1904,16 @@
     "Windows & Spaces" : {
       "comment" : "Action category"
     },
+    "With several mice, the menu bar shows the lowest battery." : {
+
+    },
     "You can change any button later in Settings, and set different actions for individual apps." : {
 
     },
-    "You can continue without the mouse; Upright connects as soon as it appears." : {
+    "You can continue without a mouse; Upright connects as soon as one appears." : {
 
     },
-    "Your mappings and app profiles now match the file. Your previous setup was saved; choose Undo Import to put it back." : {
+    "Your current setup is saved first, so you can undo the import." : {
 
     },
     "Your shortcuts" : {

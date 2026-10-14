@@ -55,9 +55,13 @@ public struct AppProfile: Codable, Hashable, Sendable, Identifiable {
     }
 }
 
-/// Everything the user has mapped: the global table plus per-app overrides.
+/// One model's setup: the global table plus per-app overrides.
+///
+/// This is the whole of what Upright 2.x saved and exported (schema 2). Since schema 3 it is the
+/// per-model payload of a `MappingLibrary`, whose sections carry it without `schemaVersion`.
 public struct MappingProfiles: Codable, Hashable, Sendable {
-    /// Version written with every save and export. Bump when the format changes incompatibly.
+    /// Version written with a standalone encoding (the 2.x format). A `MappingLibrary` writes its
+    /// own version instead.
     public static let schemaVersion = 2
 
     public var global: ButtonMappings
@@ -79,6 +83,9 @@ public struct MappingProfiles: Codable, Hashable, Sendable {
         guard let bundleID, let profile = self[app: bundleID], profile.isEnabled else { return nil }
         return profile
     }
+
+    /// True when there is nothing to apply: no global mapping and no app profile.
+    public var isEmpty: Bool { global.isEmpty && apps.isEmpty }
 
     /// Every action the user has configured in the global table or an enabled app profile.
     public var allActiveActions: [ButtonAction] {
