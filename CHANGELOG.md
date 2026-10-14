@@ -6,6 +6,8 @@ All notable changes to Upright are listed here. The format follows
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-10-14
+
 ### Added
 
 - **Multi-mouse support.** Upright now works with Logitech HID++ 2.0 mice other than the MX
