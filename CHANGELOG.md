@@ -6,6 +6,29 @@ All notable changes to Upright are listed here. The format follows
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-10-14
+
+### Changed
+
+- **Less idle work.** The permissions check asks macOS once a minute when nothing is missing
+  (was every 5 s for the whole session, every second with a window open); it still polls every
+  second while a grant is awaited and a window is open or Upright just asked for it, and
+  rechecks when a window opens or closes, when Upright becomes active and when the Mac wakes.
+- **Absent receiver mice are probed every 5 minutes instead of every 30 s** once the receiver
+  sends link notifications; the receiver's link-up notification or the mouse's first report
+  reconnects it right away. Receivers without notifications keep the 30 s cap.
+  Hardware-unverified; see the smoke checklist, section 5.
+- **Faster button presses.** Mission Control, App Exposé and Show Desktop are started through
+  LaunchServices directly rather than by spawning `open`; the drag event tap used while a mouse
+  button mapping is held runs on its own thread, is created once and only switched on while a
+  button is held.
+- **Less UI churn.** Button presses, device log lines and app switches no longer rebuild the menu
+  bar item or every open pane; the Activity log and press feedback are observed only by the views
+  that show them.
+- HID++ request timeouts are cancelled once the reply arrives; a few settings skip no-op writes.
+- Raw HID++ report logging turns off when the Settings window closes.
+- Release builds strip dead code.
+
 ## [1.1.0] - 2026-10-14
 
 ### Added
