@@ -106,15 +106,10 @@ final class IOKitLinkSource: LinkSource {
         monitor.onIgnored = { [weak self] info, reason in
             MainActorDelivery.run { self?.onIgnored?(info.descriptor, reason) }
         }
-        // No Input Monitoring prompt here: the vendor HID++ interfaces usually open without it.
-        // The UI offers `requestInputMonitoringAccess()` when access is actually refused.
-        let result = monitor.start()
-        guard result != kIOReturnSuccess else { return }
-        let message = String(format: "IOHIDManagerOpen returned 0x%08X", UInt32(bitPattern: result))
-        if result == IOKitReturn.notPermitted || result == IOKitReturn.notPrivileged {
-            throw LinkSourceError.permissionDenied(message)
-        }
-        throw LinkSourceError.failed(message)
+        // No Input Monitoring prompt here: watching opens nothing, and only the interfaces the
+        // classifier accepts are opened (in `open(_:)`), each reporting its own permission
+        // failure. The UI offers `requestInputMonitoringAccess()` when access is refused.
+        monitor.start()
     }
 
     func stop() {

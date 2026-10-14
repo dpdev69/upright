@@ -163,12 +163,84 @@ public struct DevicePreferencesStore: Codable, Hashable, Sendable {
 
     // MARK: Persistence
 
+    /// Raw copies of saved data this version couldn't read in full live under this prefix plus
+    /// an ISO 8601 time.
+    public static let backupKeyPrefix = "devicePreferences.v1.backup."
+
     /// Reads the store saved in `defaults`; unreadable or missing data gives an empty store.
-    public static func load(from defaults: UserDefaults = .standard) -> DevicePreferencesStore {
-        guard let data = defaults.data(forKey: defaultsKey),
-              let store = try? JSONDecoder().decode(DevicePreferencesStore.self, from: data)
-        else { return DevicePreferencesStore() }
+    ///
+    /// Saved data that can't be read in full (not this format, unreadable entries that were
+    /// skipped, or top-level fields this version doesn't know and would drop on the next save)
+    /// is first copied, as it is, to a key under `backupKeyPrefix`, the way `MappingStore`
+    /// backs up mappings, so saving the store afterwards loses nothing. Each distinct saved
+    /// value is backed up once, however many launches read it. `now` exists for tests.
+    public static func load(
+        from defaults: UserDefaults = .standard,
+        log: (String) -> Void = { _ in },
+        now: Date = Date()
+    ) -> DevicePreferencesStore {
+        guard defaults.object(forKey: defaultsKey) != nil else { return DevicePreferencesStore() }
+        guard let data = defaults.data(forKey: defaultsKey) else {
+            backUpUnreadable(in: defaults, reason: "saved device preferences are not data", log: log, now: now)
+            return DevicePreferencesStore()
+        }
+        guard let store = try? JSONDecoder().decode(DevicePreferencesStore.self, from: data) else {
+            backUpUnreadable(in: defaults, reason: "saved device preferences could not be read", log: log, now: now)
+            return DevicePreferencesStore()
+        }
+        if let loss = losses(in: data, keeping: store) {
+            backUpUnreadable(in: defaults, reason: loss, log: log, now: now)
+        }
         return store
+    }
+
+    /// Keys of every backup made so far, oldest first.
+    public static func backupKeys(in defaults: UserDefaults) -> [String] {
+        defaults.dictionaryRepresentation().keys.filter { $0.hasPrefix(backupKeyPrefix) }.sorted()
+    }
+
+    /// What reading `data` into `store` left out, or nil when nothing was.
+    private static func losses(in data: Data, keeping store: DevicePreferencesStore) -> String? {
+        guard let top = try? JSONDecoder().decode([String: JSONValue].self, from: data) else {
+            return "saved device preferences could not be read"
+        }
+        let known: Set<String> = [CodingKeys.models.stringValue, CodingKeys.devices.stringValue]
+        let unknown = top.keys.filter { !known.contains($0) }.sorted()
+        if !unknown.isEmpty {
+            return "saved device preferences have fields this version doesn't know (\(unknown.joined(separator: ", ")))"
+        }
+        func entries(_ key: CodingKeys) -> Int {
+            switch top[key.stringValue] {
+            case nil, .null?: return 0
+            case .object(let entries)?: return entries.count
+            default: return 1
+            }
+        }
+        let skipped = entries(.models) - store.models.count + entries(.devices) - store.devices.count
+        guard skipped > 0 else { return nil }
+        return "skipped \(skipped) unreadable device preference entr\(skipped == 1 ? "y" : "ies")"
+    }
+
+    /// Copies the raw saved value to a new backup key, unless an existing backup already holds it.
+    private static func backUpUnreadable(in defaults: UserDefaults, reason: String, log: (String) -> Void, now: Date) {
+        guard let object = defaults.object(forKey: defaultsKey) else { return }
+        let data = defaults.data(forKey: defaultsKey)
+        let existing = backupKeys(in: defaults)
+        let alreadyKept = existing.contains { key in
+            if let data { return defaults.data(forKey: key) == data }
+            guard let kept = defaults.object(forKey: key) else { return false }
+            return String(describing: kept) == String(describing: object)
+        }
+        guard !alreadyKept else { return }
+        let stamp = ISO8601DateFormatter().string(from: now)
+        var key = backupKeyPrefix + stamp
+        var suffix = 1
+        while defaults.object(forKey: key) != nil {
+            suffix += 1
+            key = backupKeyPrefix + "\(stamp)-\(suffix)"
+        }
+        defaults.set(object, forKey: key)
+        log("Device preferences: \(reason); raw data backed up to \(key)")
     }
 
     public func save(to defaults: UserDefaults = .standard) {

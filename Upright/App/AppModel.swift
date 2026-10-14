@@ -161,7 +161,7 @@ final class AppModel: ObservableObject {
         isRemappingEnabled = enabled
         self.devices = devices ?? environment.makeDeviceManager()
         permissions = PermissionsMonitor(defaults: defaults, environment: environment)
-        loginItem = LoginItemController()
+        loginItem = LoginItemController(environment: environment)
         frontmostMonitor = FrontmostAppMonitor()
         // AppSettings also copies the 2.x pointer speed into the MX Vertical's seed (once).
         let settings = AppSettings(defaults: defaults)

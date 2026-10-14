@@ -11,7 +11,7 @@ are expected to work, but are **unverified on hardware**; see the list in the
 ## What you need
 
 - macOS 13 Ventura or newer
-- **Xcode 15 or newer**, free from the Mac App Store. Open it once after installing so it can
+- **Xcode 15.3 or newer**, free from the Mac App Store. Open it once after installing so it can
   finish setting up.
 - A supported Logitech mouse, connected by a Unifying receiver, a USB cable or Bluetooth. Bolt and
   Nano receivers are also read, but are unverified on hardware. (The MX Vertical doesn't work with

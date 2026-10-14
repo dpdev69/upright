@@ -363,26 +363,8 @@ public final class DeviceRegistry {
     private static func observe(_ state: EndpointController.State) -> (snapshot: DeviceSnapshot?, unsupported: UnsupportedReason?) {
         if case .connected(let snapshot) = state { return (snapshot, nil) }
         if case .asleep(let snapshot) = state { return (snapshot, nil) }
-        if let payload = unsupportedPayload(of: state) { return (payload.partial, payload.reason) }
+        if case .unsupported(let reason, let partial) = state { return (partial, reason) }
         return (nil, nil)
-    }
-
-    /// The reason and partial snapshot of a terminal `.unsupported(UnsupportedReason,
-    /// DeviceSnapshot?)` state (§B4).
-    ///
-    /// That case arrives with the hub (W3.1). Until then the registry recognizes it by its name
-    /// and payload types, so it handles the verdict the moment the case exists; afterwards this
-    /// is equivalent to `if case .unsupported(let reason, let partial) = state`, which should
-    /// replace it.
-    nonisolated static func unsupportedPayload(of state: Any) -> (reason: UnsupportedReason, partial: DeviceSnapshot?)? {
-        let mirror = Mirror(reflecting: state)
-        guard mirror.displayStyle == .enum, let payload = mirror.children.first, payload.label == "unsupported" else {
-            return nil
-        }
-        if let reason = payload.value as? UnsupportedReason { return (reason, nil) }
-        let values = Mirror(reflecting: payload.value).children.map(\.value)
-        guard let reason = values.first as? UnsupportedReason else { return nil }
-        return (reason, values.dropFirst().first.flatMap { $0 as? DeviceSnapshot })
     }
 }
 

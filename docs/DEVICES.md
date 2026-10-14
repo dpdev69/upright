@@ -94,9 +94,11 @@ Upright doesn't need a catalog entry to try a mouse:
 - Mappings for a mouse that isn't in the catalog are kept per detected model, the same as for
   catalog models. All of this is **untested** on hardware.
 
-If your mouse isn't listed, or is listed and misbehaves, run `make probe ARGS=--all` (read-only: it
-doesn't divert any button) and use **Settings → Mice → Copy Device Report** while it is connected.
-Attach both to an issue on GitHub. That is how a model moves from "Published data" to "Verified".
+If your mouse isn't listed, or is listed and misbehaves, first use **Settings → Mice → Copy Device
+Report** while it is connected, then quit Upright and run `make probe ARGS=--all`. The probe
+doesn't divert or change any button (it only turns on a receiver's notification flags), but it
+uses the same HID++ software ID (`0x0A`) as Upright on a shared interface, so the two must not run
+at the same time. Attach both to an issue on GitHub. That is how a model moves from "Published data" to "Verified".
 
 ## Receivers
 

@@ -142,12 +142,18 @@ public final class HIDDeviceMonitor {
         stop()
     }
 
-    /// Starts monitoring on the main run loop. Returns the IOHIDManagerOpen result.
+    /// Starts monitoring on the main run loop.
     ///
     /// Callbacks are scheduled in the common run loop modes so devices keep being matched (and
     /// reports keep arriving) while a menu is open or a modal panel runs.
-    @discardableResult
-    public func start() -> IOReturn {
+    ///
+    /// The manager itself is never opened (no `IOHIDManagerOpen`): matching and removal callbacks
+    /// fire without it, and opening at the manager level would open every matched interface,
+    /// including the ones `classify` turns away (a receiver's boot-mouse interface, a combined
+    /// keyboard+mouse interface), which can raise the Input Monitoring prompt or fail the whole
+    /// manager with kIOReturnNotPermitted. Only accepted interfaces are opened, one by one, by
+    /// `IOKitHIDTransport.open()`, which reports permission failures per interface.
+    public func start() {
         isRunning = true
         // Receivers and the USB cable publish a dedicated HID++ interface (usage page
         // 0xFF00 or 0xFF43). Bluetooth mice do not: a Bluetooth MX mouse is one mouse
@@ -174,8 +180,9 @@ public final class HIDDeviceMonitor {
             Unmanaged<HIDDeviceMonitor>.fromOpaque(context).takeUnretainedValue().deliverRemoval(device)
         }, context)
 
+        // Scheduling the manager also schedules every device it enumerates (open or not), so
+        // input reports of the interfaces opened later arrive on the main run loop.
         IOHIDManagerScheduleWithRunLoop(manager, CFRunLoopGetMain(), CFRunLoopMode.commonModes.rawValue)
-        return IOHIDManagerOpen(manager, IOOptionBits(kIOHIDOptionsTypeNone))
     }
 
     public func stop() {
@@ -184,7 +191,6 @@ public final class HIDDeviceMonitor {
         IOHIDManagerRegisterDeviceMatchingCallback(manager, nil, nil)
         IOHIDManagerRegisterDeviceRemovalCallback(manager, nil, nil)
         IOHIDManagerUnscheduleFromRunLoop(manager, CFRunLoopGetMain(), CFRunLoopMode.commonModes.rawValue)
-        IOHIDManagerClose(manager, IOOptionBits(kIOHIDOptionsTypeNone))
         chosen.removeAll()
         ignored.removeAll()
         skipped.removeAll()
@@ -276,9 +282,9 @@ public final class HIDDeviceMonitor {
 /// HID++ over an IOHIDDevice that was matched by `HIDDeviceMonitor` (and is therefore
 /// already scheduled on the main run loop). Reports are delivered on the main thread.
 ///
-/// The manager holds its own open on every matched device (balanced by `IOHIDManagerClose`).
-/// `open()` adds one more so permission failures surface per device; balance it with `close()`
-/// while the device is still present, or `deviceRemoved()` once IOKit has removed it.
+/// The monitor's manager is never opened, so `open()` is the only open on the device and
+/// permission failures surface per device; balance it with `close()` while the device is still
+/// present, or `deviceRemoved()` once IOKit has removed it.
 public final class IOKitHIDTransport: HIDPPTransport {
     public let device: IOHIDDevice
     public let info: HIDInterfaceInfo

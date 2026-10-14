@@ -61,7 +61,9 @@ make probe ARGS=--trace                # print the raw HID++ reports in both dir
 make probe ARGS=--help
 ```
 
-Quit Upright first: two programs diverting the same buttons fight over them. Every line the
+Quit Upright first, even without `--divert`: both use HID++ software ID `0x0A` on the same
+shared interface (each could take the other's replies), the probe turns on a receiver's
+notification flags, and two programs diverting the same buttons fight over them. Every line the
 probe prints is prefixed with its device, for example `[MX Master 3S · Bolt slot 2]`.
 
 Please run `make test` before opening a pull request, `make app` if you touched the app

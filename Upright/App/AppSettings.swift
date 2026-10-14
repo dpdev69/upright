@@ -102,7 +102,9 @@ final class AppSettings: ObservableObject {
         }
 
         // The legacy speed seeds the MX Vertical once; an existing seed means it already ran.
-        var store = DevicePreferencesStore.load(from: defaults)
+        // Data it can't read in full is backed up before anything below saves over it.
+        let logger = Logger(subsystem: "Upright", category: "Settings")
+        var store = DevicePreferencesStore.load(from: defaults, log: { logger.notice("\($0, privacy: .public)") })
         let hadSeed = store.models[.mxVertical] != nil
         store.migrateLegacy(preferredDPI: legacyDPI)
         devicePreferences = store

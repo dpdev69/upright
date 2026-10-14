@@ -84,8 +84,9 @@ final class ProbeSession {
         monitor.onIgnored = { [weak self] info, reason in
             MainActorDelivery.run { self?.console.say("· Ignoring \(info.summary): \(reason)") }
         }
-        let result = monitor.start()
-        console.say(String(format: "Watching for Logitech HID++ interfaces (IOHIDManagerOpen: 0x%08X)", UInt32(bitPattern: result)))
+        monitor.start()
+        // Each interface is opened on its own when it is attached; the result is printed per link.
+        console.say("Watching for Logitech HID++ interfaces")
         console.say("Input Monitoring access: \(Self.describe(HIDDeviceMonitor.inputMonitoringAccess))")
         if options.all {
             console.say("--all: interfaces Upright doesn't use are listed and read too (reads only).")

@@ -383,4 +383,66 @@ final class DevicePreferencesTests: XCTestCase {
         defaults.set("a string, not data", forKey: DevicePreferencesStore.defaultsKey)
         XCTAssertEqual(DevicePreferencesStore.load(from: defaults), DevicePreferencesStore())
     }
+
+    func testUnreadableSavedDataIsBackedUpOnceBeforeItIsReplaced() throws {
+        let suiteName = "io.github.upright.tests.devicePreferences.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suiteName))
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+
+        let raw = Data("[\"a future top-level array\"]".utf8)
+        defaults.set(raw, forKey: DevicePreferencesStore.defaultsKey)
+        var messages: [String] = []
+        let now = Date(timeIntervalSince1970: 1_700_000_000)
+        XCTAssertEqual(DevicePreferencesStore.load(from: defaults, log: { messages.append($0) }, now: now), DevicePreferencesStore())
+        let keys = DevicePreferencesStore.backupKeys(in: defaults)
+        XCTAssertEqual(keys.count, 1)
+        let key = try XCTUnwrap(keys.first)
+        XCTAssertTrue(key.hasPrefix("devicePreferences.v1.backup."))
+        XCTAssertEqual(defaults.data(forKey: key), raw)
+        XCTAssertEqual(messages.count, 1)
+
+        // Later launches reading the same blob don't pile up backups.
+        _ = DevicePreferencesStore.load(from: defaults, now: now.addingTimeInterval(60))
+        _ = DevicePreferencesStore.load(from: defaults, now: now.addingTimeInterval(120))
+        XCTAssertEqual(DevicePreferencesStore.backupKeys(in: defaults), keys)
+
+        // Saving over it (what AppSettings does next) leaves the backup in place.
+        var store = DevicePreferencesStore()
+        store.migrateLegacy(preferredDPI: 1600)
+        store.save(to: defaults)
+        XCTAssertEqual(defaults.data(forKey: key), raw)
+        XCTAssertEqual(DevicePreferencesStore.load(from: defaults), store)
+        XCTAssertEqual(DevicePreferencesStore.backupKeys(in: defaults), keys)
+    }
+
+    func testSkippedEntriesAndUnknownFieldsAreBackedUp() throws {
+        let suiteName = "io.github.upright.tests.devicePreferences.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suiteName))
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+
+        // One readable unit, one entry whose key isn't a model.
+        let skipped = Data(#"{"models":{"not a model":{"preferredDPI":800}},"devices":{"\#(verticalA.rawValue)":{"nickname":"Desk"}}}"#.utf8)
+        defaults.set(skipped, forKey: DevicePreferencesStore.defaultsKey)
+        var messages: [String] = []
+        let store = DevicePreferencesStore.load(from: defaults, log: { messages.append($0) })
+        XCTAssertEqual(store.devices[verticalA]?.nickname, "Desk")
+        XCTAssertTrue(store.models.isEmpty)
+        XCTAssertEqual(DevicePreferencesStore.backupKeys(in: defaults).count, 1)
+        XCTAssertTrue(messages.first?.contains("skipped 1") == true, "\(messages)")
+
+        // A newer version's extra top-level field would be dropped on save: backed up too.
+        let newer = Data(#"{"models":{},"devices":{},"groups":[1]}"#.utf8)
+        defaults.set(newer, forKey: DevicePreferencesStore.defaultsKey)
+        XCTAssertEqual(DevicePreferencesStore.load(from: defaults), DevicePreferencesStore())
+        let keys = DevicePreferencesStore.backupKeys(in: defaults)
+        XCTAssertEqual(keys.count, 2)
+        XCTAssertTrue(keys.contains { defaults.data(forKey: $0) == newer })
+
+        // Data saved by this version is read in full: no backup.
+        var clean = DevicePreferencesStore()
+        clean.record(verticalA, snapshot: snapshot(), now: Date(timeIntervalSince1970: 1_700_000_000))
+        clean.save(to: defaults)
+        XCTAssertEqual(DevicePreferencesStore.load(from: defaults), clean)
+        XCTAssertEqual(DevicePreferencesStore.backupKeys(in: defaults), keys)
+    }
 }

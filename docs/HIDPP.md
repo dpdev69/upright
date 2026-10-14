@@ -6,7 +6,10 @@ values come from public HID++ documentation and the open-source projects credite
 README. Bytes are hex; multi-byte values are big-endian unless noted.
 
 **What has been tested on hardware.** Only the MX Vertical (over a Unifying receiver, a USB cable
-and Bluetooth LE) has been checked against a real device. Everything about other models, about
+and Bluetooth LE) has been checked against a real device, and that testing predates the
+multi-mouse rewrite: the link/endpoint split (`HIDPPLink`/`EndpointController`), the request
+gate, the generic vendor-`046D` mouse-usage matching and the mapping v3 migration have not yet
+run on a real device. Everything about other models, about
 Bolt and Nano receivers, and about several mice at once comes from published data and from
 Upright's simulator (`UprightKit/Sources/UprightKit/Simulation`). Those places are marked
 *unverified* below, and [What is not verified](#what-is-not-verified) collects them. If you have
@@ -139,12 +142,12 @@ layout. "Link" is one opened HID interface; "endpoint" is one mouse.
 
 | Layout | Links | Endpoints | Notes |
 | --- | --- | --- | --- |
-| One mouse on a receiver | 1 | 1, at the mouse's slot | The usual case (verified with a Unifying receiver and an MX Vertical). |
+| One mouse on a receiver | 1 | 1, at the mouse's slot | The usual case. The 1.0 single-device code was verified with a Unifying receiver and an MX Vertical; the link/endpoint path in this release is simulator-tested, hardware check pending. |
 | Several mice on one receiver | 1 | One per mouse slot | All share the receiver's [request gate](#the-request-gate). Slots `1`-`6` are always scanned, whatever capacity the receiver claims. Simulator only. |
 | A mouse and a keyboard on one receiver | 1 | 1 (the mouse) | A slot the pairing table lists as a keyboard (or numpad, presenter, remote) gets no endpoint and no traffic. A slot listed with an unknown kind is probed read-only, and is then either served or ends in `.unsupported`. |
 | Several receivers | One each | One per mouse | Each link has its own client, gate and notification flags. Slot numbers repeat across receivers (slot `1` of two receivers is not the same slot); `DeviceAddress` includes the link number. |
-| Bluetooth mouse | 1 | 1, at `FF` | One endpoint per interface. Verified with an MX Vertical over BLE. |
-| USB cable | 1 | 1, at `FF` | As above. Verified with an MX Vertical. |
+| Bluetooth mouse | 1 | 1, at `FF` | One endpoint per interface. The 1.0 single-device code was verified with an MX Vertical over BLE; the link/endpoint path in this release is simulator-tested, hardware check pending. |
+| USB cable | 1 | 1, at `FF` | As above. The 1.0 single-device code was verified with an MX Vertical; the link/endpoint path in this release is simulator-tested, hardware check pending. |
 | A mix of the above | One per interface | One per mouse | For example an MX Vertical on a Unifying receiver, an MX Master 3S on a Bolt receiver and a Lift over Bluetooth: three links, three endpoints (this is Demo Mode's fleet). |
 | Two identical mice | As above | Two, with different `DeviceID`s | They get separate state, preferences and a "#2" suffix, and share one mapping setup (the mappings belong to the model). |
 | **The same unit on two links** | 2 | 2, same `DeviceID` | See below. |
@@ -611,7 +614,9 @@ unit that is served elsewhere), `unsupported` or `pending` (not identified yet).
 ## What is not verified
 
 Hardware-tested: the MX Vertical alone, on a Unifying receiver, over USB and over Bluetooth LE,
-one mouse at a time. The rest is built from Solaar and libratbag data, exercised in the
+one mouse at a time, with the 1.0 single-device code. The multi-mouse rewrite (`HIDPPLink` and
+`EndpointController`, the request gate, generic vendor-`046D` mouse-usage matching, the mapping
+v3 migration) has not yet run on a real device. The rest is built from Solaar and libratbag data, exercised in the
 simulator, and open for confirmation by anyone who owns the device. The most useful
 confirmations, in `make probe ARGS=--all` terms:
 
