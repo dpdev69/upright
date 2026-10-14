@@ -64,15 +64,35 @@ final class HIDPPMessageTests: XCTestCase {
         XCTAssertEqual(tracker.reset(), [])
     }
 
+    /// The classification cases that used to pin `MXVertical.classify`, now against
+    /// `InterfaceClassifier`. What changed: nothing is gated on the product name, so an MX Master 3
+    /// over Bluetooth is served; the non-HID++ M100 (C077) and other vendors are still ignored.
     func testDeviceClassification() {
-        XCTAssertEqual(MXVertical.classify(vendorID: 0x046D, productID: 0xC52B), .receiver(.unifying))
-        XCTAssertEqual(MXVertical.classify(vendorID: 0x046D, productID: 0xC548), .receiver(.bolt))
-        XCTAssertEqual(MXVertical.classify(vendorID: 0x046D, productID: 0xC08A), .direct(.usb))
-        XCTAssertEqual(MXVertical.classify(vendorID: 0x046D, productID: 0xB020), .direct(.bluetooth))
-        XCTAssertNil(MXVertical.classify(vendorID: 0x046D, productID: 0xC077))
-        XCTAssertNil(MXVertical.classify(vendorID: 0x05AC, productID: 0xC52B))
-        XCTAssertTrue(MXVertical.matches(name: "MX Vertical Advanced Ergonomic Mouse"))
-        XCTAssertFalse(MXVertical.matches(name: "MX Master 3"))
+        func classify(_ vendor: Int, _ product: Int, transport: String = "", page: Int = 0xFF00) -> InterfaceClass {
+            InterfaceClassifier.classify(HIDInterfaceDescriptor(vendorID: vendor, productID: product, transport: transport, usagePage: page))
+        }
+
+        XCTAssertEqual(classify(0x046D, 0xC52B), .receiver(.unifying, .unifying))
+        XCTAssertEqual(classify(0x046D, 0xC548), .receiver(.bolt, .bolt))
+        XCTAssertEqual(classify(0x046D, 0xC08A), .direct(.usb))
+        XCTAssertEqual(classify(0x046D, 0xB020), .direct(.bluetooth))
+        XCTAssertEqual(classify(0x046D, 0xC08A).transportKind, .direct(.usb))
+
+        // Inverted: an MX Master 3 (Bluetooth B023) was rejected by name before; it is a mouse now.
+        XCTAssertEqual(classify(0x046D, 0xB023, transport: "Bluetooth Low Energy", page: 0x01), .direct(.bluetooth))
+        // Inverted: Nano receivers were not watched; they are served, with the Unifying layout.
+        XCTAssertEqual(classify(0x046D, 0xC52F), .receiver(.nano, .unifying))
+
+        // Still ignored: a plain (non-HID++) Logitech mouse, another vendor, a Lightspeed receiver, a keyboard.
+        XCTAssertEqual(classify(0x046D, 0xC077, transport: "USB", page: 0x01).transportKind, nil)
+        XCTAssertEqual(classify(0x05AC, 0xC52B).transportKind, nil)
+        XCTAssertEqual(classify(0x046D, 0xC539).transportKind, nil)
+        XCTAssertEqual(classify(0x046D, 0xB350, transport: "Bluetooth Low Energy").transportKind, nil)
+        if case .ignored(let reason) = classify(0x046D, 0xC077, transport: "USB", page: 0x01) {
+            XCTAssertFalse(reason.isEmpty)
+        } else {
+            XCTFail("C077 must be ignored")
+        }
     }
 
     func testRePairReplacesADeadInterfaceAndLeavesALiveTwinAlone() {

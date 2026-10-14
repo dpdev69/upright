@@ -23,7 +23,7 @@ struct AboutPane: View {
                     Text(version)
                         .foregroundStyle(.secondary)
                         .textSelection(.enabled)
-                    Text("Open-source button remapping for the Logitech MX Vertical, without Logi Options+.")
+                    Text("Remaps Logitech mice over HID++. Built and tested on the MX Vertical.")
                         .multilineTextAlignment(.center)
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
@@ -34,7 +34,7 @@ struct AboutPane: View {
             }
 
             Section {
-                Text("Upright talks to the mouse with the publicly documented HID++ 2.0 protocol, using temporary button diversion from the REPROG_CONTROLS_V4 feature (0x1B04). It does not include or depend on any Logitech software.")
+                Text("Upright talks to your mouse with the publicly documented HID++ 2.0 protocol, using temporary button diversion from the REPROG_CONTROLS_V4 feature (0x1B04). It does not include or depend on any Logitech software.")
                     .fixedSize(horizontal: false, vertical: true)
                 link("Solaar", "https://github.com/pwr-Solaar/Solaar")
                 link("LogiOps", "https://github.com/PixlOne/logiops")
@@ -45,7 +45,7 @@ struct AboutPane: View {
             }
 
             Section {
-                Text("Released under the MIT License. Logitech, MX Vertical, Unifying, Bolt and Logi Options+ are trademarks of Logitech. Upright is not affiliated with or endorsed by Logitech.")
+                Text("Released under the MIT License. Logitech, MX, Unifying, Bolt, Logi Options+ and other Logitech product names are trademarks of Logitech. Upright is not affiliated with or endorsed by Logitech.")
                     .font(.callout)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)

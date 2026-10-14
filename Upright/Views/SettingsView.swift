@@ -1,5 +1,7 @@
 import SwiftUI
 
+/// The Settings sidebar. `.device` is the Mice pane (every mouse, its speed and its log); the
+/// case keeps its name so links to it (e.g. "Edit Presets…") keep working.
 enum SettingsPane: String, CaseIterable, Identifiable {
     case buttons
     case scrolling
@@ -14,7 +16,7 @@ enum SettingsPane: String, CaseIterable, Identifiable {
         switch self {
         case .buttons: return String(localized: "Buttons")
         case .scrolling: return String(localized: "Scrolling")
-        case .device: return String(localized: "Device")
+        case .device: return String(localized: "Mice")
         case .general: return String(localized: "General")
         case .permissions: return String(localized: "Permissions")
         case .about: return String(localized: "About")
@@ -25,7 +27,7 @@ enum SettingsPane: String, CaseIterable, Identifiable {
         switch self {
         case .buttons: return "computermouse.fill"
         case .scrolling: return "scroll.fill"
-        case .device: return "waveform.path.ecg"
+        case .device: return "dot.radiowaves.left.and.right"
         case .general: return "gearshape.fill"
         case .permissions: return "hand.raised.fill"
         case .about: return "info.circle.fill"

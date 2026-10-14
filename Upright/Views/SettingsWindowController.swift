@@ -15,9 +15,15 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
 
     var isVisible: Bool { window?.isVisible == true }
 
-    func show(pane: SettingsPane? = nil) {
+    /// Opens Settings, optionally on a pane and, for the Mice pane, with one mouse selected.
+    /// Never opens anything while Demo Mode is exporting snapshots.
+    func show(pane: SettingsPane? = nil, device: DeviceAddress? = nil) {
+        guard !DemoMode.isExporting else { return }
         let model = AppModel.shared
         if let pane { model.selectedPane = pane }
+        if let device, model.devices.records.contains(where: { $0.address == device && $0.role != .unsupported }) {
+            model.selectedDevice = device
+        }
 
         let window = self.window ?? makeWindow()
         self.window = window
@@ -35,7 +41,9 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         window?.performClose(nil)
     }
 
-    private static func rootView(model: AppModel) -> some View {
+    /// The settings content with everything its panes read from the environment. Also used by
+    /// the snapshot exporter, so exported images show the same view tree as the window.
+    static func rootView(model: AppModel) -> some View {
         SettingsView()
             .environmentObject(model)
             .environmentObject(model.devices)

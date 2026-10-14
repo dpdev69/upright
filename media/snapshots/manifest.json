@@ -1,0 +1,1746 @@
+[
+  {
+    "appearance" : "light",
+    "file" : "buttons.global.light.png",
+    "id" : "buttons.global",
+    "rects" : {
+      "inEffect" : {
+        "h" : 15,
+        "w" : 350.5,
+        "x" : 174,
+        "y" : 256.25
+      },
+      "modelPicker" : {
+        "h" : 17.25,
+        "w" : 532,
+        "x" : 218,
+        "y" : 98
+      },
+      "profilePicker" : {
+        "h" : 17.25,
+        "w" : 448,
+        "x" : 174,
+        "y" : 215.63
+      },
+      "row.0052" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 511.25
+      },
+      "row.0053" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 337.25
+      },
+      "row.0056" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 395.25
+      },
+      "row.00FD" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 453.25
+      }
+    },
+    "scale" : 2,
+    "size" : {
+      "h" : 560,
+      "w" : 780
+    }
+  },
+  {
+    "appearance" : "dark",
+    "file" : "buttons.global.dark.png",
+    "id" : "buttons.global",
+    "rects" : {
+      "inEffect" : {
+        "h" : 15,
+        "w" : 350.5,
+        "x" : 174,
+        "y" : 256.25
+      },
+      "modelPicker" : {
+        "h" : 17.25,
+        "w" : 532,
+        "x" : 218,
+        "y" : 98
+      },
+      "profilePicker" : {
+        "h" : 17.25,
+        "w" : 448,
+        "x" : 174,
+        "y" : 215.63
+      },
+      "row.0052" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 511.25
+      },
+      "row.0053" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 337.25
+      },
+      "row.0056" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 395.25
+      },
+      "row.00FD" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 453.25
+      }
+    },
+    "scale" : 2,
+    "size" : {
+      "h" : 560,
+      "w" : 780
+    }
+  },
+  {
+    "appearance" : "light",
+    "file" : "buttons.global.1.light.png",
+    "id" : "buttons.global.1",
+    "rects" : {
+      "inEffect" : {
+        "h" : 15,
+        "w" : 350.5,
+        "x" : 174,
+        "y" : 256.38
+      },
+      "modelPicker" : {
+        "h" : 17.25,
+        "w" : 532,
+        "x" : 218,
+        "y" : 98.13
+      },
+      "profilePicker" : {
+        "h" : 17.25,
+        "w" : 448,
+        "x" : 174,
+        "y" : 215.75
+      },
+      "row.0052" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 511.38
+      },
+      "row.0053" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 337.38
+      },
+      "row.0056" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 395.38
+      },
+      "row.00FD" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 453.38
+      }
+    },
+    "scale" : 2,
+    "size" : {
+      "h" : 560,
+      "w" : 780
+    }
+  },
+  {
+    "appearance" : "dark",
+    "file" : "buttons.global.1.dark.png",
+    "id" : "buttons.global.1",
+    "rects" : {
+      "inEffect" : {
+        "h" : 15,
+        "w" : 350.5,
+        "x" : 174,
+        "y" : 256.38
+      },
+      "modelPicker" : {
+        "h" : 17.25,
+        "w" : 532,
+        "x" : 218,
+        "y" : 98.13
+      },
+      "profilePicker" : {
+        "h" : 17.25,
+        "w" : 448,
+        "x" : 174,
+        "y" : 215.75
+      },
+      "row.0052" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 511.38
+      },
+      "row.0053" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 337.38
+      },
+      "row.0056" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 395.38
+      },
+      "row.00FD" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 453.38
+      }
+    },
+    "scale" : 2,
+    "size" : {
+      "h" : 560,
+      "w" : 780
+    }
+  },
+  {
+    "appearance" : "light",
+    "file" : "buttons.global.2.light.png",
+    "id" : "buttons.global.2",
+    "rects" : {
+      "inEffect" : {
+        "h" : 15,
+        "w" : 350.5,
+        "x" : 174,
+        "y" : 256.38
+      },
+      "modelPicker" : {
+        "h" : 17.25,
+        "w" : 532,
+        "x" : 218,
+        "y" : 98.13
+      },
+      "profilePicker" : {
+        "h" : 17.25,
+        "w" : 448,
+        "x" : 174,
+        "y" : 215.75
+      },
+      "row.0052" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 511.38
+      },
+      "row.0053" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 337.38
+      },
+      "row.0056" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 395.38
+      },
+      "row.00FD" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 453.38
+      }
+    },
+    "scale" : 2,
+    "size" : {
+      "h" : 560,
+      "w" : 780
+    }
+  },
+  {
+    "appearance" : "dark",
+    "file" : "buttons.global.2.dark.png",
+    "id" : "buttons.global.2",
+    "rects" : {
+      "inEffect" : {
+        "h" : 15,
+        "w" : 350.5,
+        "x" : 174,
+        "y" : 256.38
+      },
+      "modelPicker" : {
+        "h" : 17.25,
+        "w" : 532,
+        "x" : 218,
+        "y" : 98.13
+      },
+      "profilePicker" : {
+        "h" : 17.25,
+        "w" : 448,
+        "x" : 174,
+        "y" : 215.75
+      },
+      "row.0052" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 511.38
+      },
+      "row.0053" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 337.38
+      },
+      "row.0056" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 395.38
+      },
+      "row.00FD" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 453.38
+      }
+    },
+    "scale" : 2,
+    "size" : {
+      "h" : 560,
+      "w" : 780
+    }
+  },
+  {
+    "appearance" : "light",
+    "file" : "buttons.global.3.light.png",
+    "id" : "buttons.global.3",
+    "rects" : {
+      "inEffect" : {
+        "h" : 15,
+        "w" : 350.5,
+        "x" : 174,
+        "y" : 256.38
+      },
+      "modelPicker" : {
+        "h" : 17.25,
+        "w" : 532,
+        "x" : 218,
+        "y" : 98.13
+      },
+      "profilePicker" : {
+        "h" : 17.25,
+        "w" : 448,
+        "x" : 174,
+        "y" : 215.75
+      },
+      "row.0052" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 511.38
+      },
+      "row.0053" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 337.38
+      },
+      "row.0056" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 395.38
+      },
+      "row.00FD" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 453.38
+      }
+    },
+    "scale" : 2,
+    "size" : {
+      "h" : 560,
+      "w" : 780
+    }
+  },
+  {
+    "appearance" : "dark",
+    "file" : "buttons.global.3.dark.png",
+    "id" : "buttons.global.3",
+    "rects" : {
+      "inEffect" : {
+        "h" : 15,
+        "w" : 350.5,
+        "x" : 174,
+        "y" : 256.38
+      },
+      "modelPicker" : {
+        "h" : 17.25,
+        "w" : 532,
+        "x" : 218,
+        "y" : 98.13
+      },
+      "profilePicker" : {
+        "h" : 17.25,
+        "w" : 448,
+        "x" : 174,
+        "y" : 215.75
+      },
+      "row.0052" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 511.38
+      },
+      "row.0053" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 337.38
+      },
+      "row.0056" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 395.38
+      },
+      "row.00FD" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 453.38
+      }
+    },
+    "scale" : 2,
+    "size" : {
+      "h" : 560,
+      "w" : 780
+    }
+  },
+  {
+    "appearance" : "light",
+    "file" : "buttons.global.4.light.png",
+    "id" : "buttons.global.4",
+    "rects" : {
+      "inEffect" : {
+        "h" : 15,
+        "w" : 350.5,
+        "x" : 174,
+        "y" : 256.38
+      },
+      "modelPicker" : {
+        "h" : 17.25,
+        "w" : 532,
+        "x" : 218,
+        "y" : 98.13
+      },
+      "profilePicker" : {
+        "h" : 17.25,
+        "w" : 448,
+        "x" : 174,
+        "y" : 215.75
+      },
+      "row.0052" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 511.38
+      },
+      "row.0053" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 337.38
+      },
+      "row.0056" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 395.38
+      },
+      "row.00FD" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 453.38
+      }
+    },
+    "scale" : 2,
+    "size" : {
+      "h" : 560,
+      "w" : 780
+    }
+  },
+  {
+    "appearance" : "dark",
+    "file" : "buttons.global.4.dark.png",
+    "id" : "buttons.global.4",
+    "rects" : {
+      "inEffect" : {
+        "h" : 15,
+        "w" : 350.5,
+        "x" : 174,
+        "y" : 256.38
+      },
+      "modelPicker" : {
+        "h" : 17.25,
+        "w" : 532,
+        "x" : 218,
+        "y" : 98.13
+      },
+      "profilePicker" : {
+        "h" : 17.25,
+        "w" : 448,
+        "x" : 174,
+        "y" : 215.75
+      },
+      "row.0052" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 511.38
+      },
+      "row.0053" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 337.38
+      },
+      "row.0056" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 395.38
+      },
+      "row.00FD" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 453.38
+      }
+    },
+    "scale" : 2,
+    "size" : {
+      "h" : 560,
+      "w" : 780
+    }
+  },
+  {
+    "appearance" : "light",
+    "file" : "buttons.global.5.light.png",
+    "id" : "buttons.global.5",
+    "rects" : {
+      "inEffect" : {
+        "h" : 15,
+        "w" : 350.5,
+        "x" : 174,
+        "y" : 256.38
+      },
+      "modelPicker" : {
+        "h" : 17.25,
+        "w" : 532,
+        "x" : 218,
+        "y" : 98.13
+      },
+      "profilePicker" : {
+        "h" : 17.25,
+        "w" : 448,
+        "x" : 174,
+        "y" : 215.75
+      },
+      "row.0052" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 511.38
+      },
+      "row.0053" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 337.38
+      },
+      "row.0056" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 395.38
+      },
+      "row.00FD" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 453.38
+      }
+    },
+    "scale" : 2,
+    "size" : {
+      "h" : 560,
+      "w" : 780
+    }
+  },
+  {
+    "appearance" : "dark",
+    "file" : "buttons.global.5.dark.png",
+    "id" : "buttons.global.5",
+    "rects" : {
+      "inEffect" : {
+        "h" : 15,
+        "w" : 350.5,
+        "x" : 174,
+        "y" : 256.38
+      },
+      "modelPicker" : {
+        "h" : 17.25,
+        "w" : 532,
+        "x" : 218,
+        "y" : 98.13
+      },
+      "profilePicker" : {
+        "h" : 17.25,
+        "w" : 448,
+        "x" : 174,
+        "y" : 215.75
+      },
+      "row.0052" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 511.38
+      },
+      "row.0053" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 337.38
+      },
+      "row.0056" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 395.38
+      },
+      "row.00FD" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 453.38
+      }
+    },
+    "scale" : 2,
+    "size" : {
+      "h" : 560,
+      "w" : 780
+    }
+  },
+  {
+    "appearance" : "light",
+    "file" : "buttons.global.6.light.png",
+    "id" : "buttons.global.6",
+    "rects" : {
+      "inEffect" : {
+        "h" : 15,
+        "w" : 350.5,
+        "x" : 174,
+        "y" : 256.38
+      },
+      "modelPicker" : {
+        "h" : 17.25,
+        "w" : 532,
+        "x" : 218,
+        "y" : 98.13
+      },
+      "profilePicker" : {
+        "h" : 17.25,
+        "w" : 448,
+        "x" : 174,
+        "y" : 215.75
+      },
+      "row.0052" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 511.38
+      },
+      "row.0053" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 337.38
+      },
+      "row.0056" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 395.38
+      },
+      "row.00FD" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 453.38
+      }
+    },
+    "scale" : 2,
+    "size" : {
+      "h" : 560,
+      "w" : 780
+    }
+  },
+  {
+    "appearance" : "dark",
+    "file" : "buttons.global.6.dark.png",
+    "id" : "buttons.global.6",
+    "rects" : {
+      "inEffect" : {
+        "h" : 15,
+        "w" : 350.5,
+        "x" : 174,
+        "y" : 256.38
+      },
+      "modelPicker" : {
+        "h" : 17.25,
+        "w" : 532,
+        "x" : 218,
+        "y" : 98.13
+      },
+      "profilePicker" : {
+        "h" : 17.25,
+        "w" : 448,
+        "x" : 174,
+        "y" : 215.75
+      },
+      "row.0052" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 511.38
+      },
+      "row.0053" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 337.38
+      },
+      "row.0056" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 395.38
+      },
+      "row.00FD" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 453.38
+      }
+    },
+    "scale" : 2,
+    "size" : {
+      "h" : 560,
+      "w" : 780
+    }
+  },
+  {
+    "appearance" : "light",
+    "file" : "buttons.profile.light.png",
+    "id" : "buttons.profile",
+    "rects" : {
+      "inEffect" : {
+        "h" : 15,
+        "w" : 178,
+        "x" : 174,
+        "y" : 353.38
+      },
+      "modelPicker" : {
+        "h" : 17.25,
+        "w" : 532,
+        "x" : 218,
+        "y" : 98.13
+      },
+      "override.0053" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 434.38
+      },
+      "override.0056" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 492.38
+      },
+      "profilePicker" : {
+        "h" : 17.25,
+        "w" : 448,
+        "x" : 174,
+        "y" : 215.75
+      },
+      "row.0053" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 434.38
+      },
+      "row.0056" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 492.38
+      },
+      "row.00FD" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 550.38
+      }
+    },
+    "scale" : 2,
+    "size" : {
+      "h" : 560,
+      "w" : 780
+    }
+  },
+  {
+    "appearance" : "dark",
+    "file" : "buttons.profile.dark.png",
+    "id" : "buttons.profile",
+    "rects" : {
+      "inEffect" : {
+        "h" : 15,
+        "w" : 178,
+        "x" : 174,
+        "y" : 353.38
+      },
+      "modelPicker" : {
+        "h" : 17.25,
+        "w" : 532,
+        "x" : 218,
+        "y" : 98.13
+      },
+      "override.0053" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 434.38
+      },
+      "override.0056" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 492.38
+      },
+      "profilePicker" : {
+        "h" : 17.25,
+        "w" : 448,
+        "x" : 174,
+        "y" : 215.75
+      },
+      "row.0053" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 434.38
+      },
+      "row.0056" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 492.38
+      },
+      "row.00FD" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 550.38
+      }
+    },
+    "scale" : 2,
+    "size" : {
+      "h" : 560,
+      "w" : 780
+    }
+  },
+  {
+    "appearance" : "light",
+    "file" : "buttons.profile.2.light.png",
+    "id" : "buttons.profile.2",
+    "rects" : {
+      "inEffect" : {
+        "h" : 15,
+        "w" : 178.5,
+        "x" : 174,
+        "y" : 353.38
+      },
+      "modelPicker" : {
+        "h" : 17.25,
+        "w" : 532,
+        "x" : 218,
+        "y" : 98.13
+      },
+      "override.0053" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 434.38
+      },
+      "override.0056" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 492.38
+      },
+      "profilePicker" : {
+        "h" : 17.25,
+        "w" : 448,
+        "x" : 174,
+        "y" : 215.75
+      },
+      "row.0053" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 434.38
+      },
+      "row.0056" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 492.38
+      },
+      "row.00FD" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 550.38
+      }
+    },
+    "scale" : 2,
+    "size" : {
+      "h" : 560,
+      "w" : 780
+    }
+  },
+  {
+    "appearance" : "dark",
+    "file" : "buttons.profile.2.dark.png",
+    "id" : "buttons.profile.2",
+    "rects" : {
+      "inEffect" : {
+        "h" : 15,
+        "w" : 178.5,
+        "x" : 174,
+        "y" : 353.38
+      },
+      "modelPicker" : {
+        "h" : 17.25,
+        "w" : 532,
+        "x" : 218,
+        "y" : 98.13
+      },
+      "override.0053" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 434.38
+      },
+      "override.0056" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 492.38
+      },
+      "profilePicker" : {
+        "h" : 17.25,
+        "w" : 448,
+        "x" : 174,
+        "y" : 215.75
+      },
+      "row.0053" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 434.38
+      },
+      "row.0056" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 492.38
+      },
+      "row.00FD" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 550.38
+      }
+    },
+    "scale" : 2,
+    "size" : {
+      "h" : 560,
+      "w" : 780
+    }
+  },
+  {
+    "appearance" : "light",
+    "file" : "gesture.editor.light.png",
+    "id" : "gesture.editor",
+    "rects" : {
+      "gesture.down" : {
+        "h" : 20.25,
+        "w" : 576,
+        "x" : 174,
+        "y" : 382.5
+      },
+      "gesture.left" : {
+        "h" : 20.25,
+        "w" : 576,
+        "x" : 174,
+        "y" : 423.75
+      },
+      "gesture.right" : {
+        "h" : 20.25,
+        "w" : 576,
+        "x" : 174,
+        "y" : 465
+      },
+      "gesture.tap" : {
+        "h" : 20.25,
+        "w" : 576,
+        "x" : 174,
+        "y" : 300
+      },
+      "gesture.up" : {
+        "h" : 20.25,
+        "w" : 576,
+        "x" : 174,
+        "y" : 341.25
+      },
+      "row.0052" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 132
+      },
+      "row.0056" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 16
+      },
+      "row.00FD" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 74
+      }
+    },
+    "scale" : 2,
+    "size" : {
+      "h" : 560,
+      "w" : 780
+    }
+  },
+  {
+    "appearance" : "dark",
+    "file" : "gesture.editor.dark.png",
+    "id" : "gesture.editor",
+    "rects" : {
+      "gesture.down" : {
+        "h" : 20.25,
+        "w" : 576,
+        "x" : 174,
+        "y" : 382.5
+      },
+      "gesture.left" : {
+        "h" : 20.25,
+        "w" : 576,
+        "x" : 174,
+        "y" : 423.75
+      },
+      "gesture.right" : {
+        "h" : 20.25,
+        "w" : 576,
+        "x" : 174,
+        "y" : 465
+      },
+      "gesture.tap" : {
+        "h" : 20.25,
+        "w" : 576,
+        "x" : 174,
+        "y" : 300
+      },
+      "gesture.up" : {
+        "h" : 20.25,
+        "w" : 576,
+        "x" : 174,
+        "y" : 341.25
+      },
+      "row.0052" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 132
+      },
+      "row.0056" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 16
+      },
+      "row.00FD" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 74
+      }
+    },
+    "scale" : 2,
+    "size" : {
+      "h" : 560,
+      "w" : 780
+    }
+  },
+  {
+    "appearance" : "light",
+    "file" : "device.pointer.light.png",
+    "id" : "device.pointer",
+    "rects" : {
+      "device.1" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 122.13
+      },
+      "device.2" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 180.13
+      },
+      "device.3" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 238.13
+      },
+      "dpiPresets" : {
+        "h" : 99,
+        "w" : 576,
+        "x" : 174,
+        "y" : 1016.13
+      },
+      "dpiSlider" : {
+        "h" : 18,
+        "w" : 201.8,
+        "x" : 433.2,
+        "y" : 834.13
+      }
+    },
+    "scale" : 2,
+    "size" : {
+      "h" : 1265,
+      "w" : 780
+    }
+  },
+  {
+    "appearance" : "dark",
+    "file" : "device.pointer.dark.png",
+    "id" : "device.pointer",
+    "rects" : {
+      "device.1" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 122.13
+      },
+      "device.2" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 180.13
+      },
+      "device.3" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 238.13
+      },
+      "dpiPresets" : {
+        "h" : 99,
+        "w" : 576,
+        "x" : 174,
+        "y" : 1016.13
+      },
+      "dpiSlider" : {
+        "h" : 18,
+        "w" : 201.8,
+        "x" : 433.2,
+        "y" : 834.13
+      }
+    },
+    "scale" : 2,
+    "size" : {
+      "h" : 1265,
+      "w" : 780
+    }
+  },
+  {
+    "appearance" : "light",
+    "file" : "device.pointer.800.light.png",
+    "id" : "device.pointer.800",
+    "rects" : {
+      "device.1" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 122.13
+      },
+      "device.2" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 180.13
+      },
+      "device.3" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 238.13
+      },
+      "dpiPresets" : {
+        "h" : 99,
+        "w" : 576,
+        "x" : 174,
+        "y" : 1016.13
+      },
+      "dpiSlider" : {
+        "h" : 18,
+        "w" : 201.8,
+        "x" : 433.2,
+        "y" : 834.13
+      }
+    },
+    "scale" : 2,
+    "size" : {
+      "h" : 1265,
+      "w" : 780
+    }
+  },
+  {
+    "appearance" : "dark",
+    "file" : "device.pointer.800.dark.png",
+    "id" : "device.pointer.800",
+    "rects" : {
+      "device.1" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 122.13
+      },
+      "device.2" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 180.13
+      },
+      "device.3" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 238.13
+      },
+      "dpiPresets" : {
+        "h" : 99,
+        "w" : 576,
+        "x" : 174,
+        "y" : 1016.13
+      },
+      "dpiSlider" : {
+        "h" : 18,
+        "w" : 201.8,
+        "x" : 433.2,
+        "y" : 834.13
+      }
+    },
+    "scale" : 2,
+    "size" : {
+      "h" : 1265,
+      "w" : 780
+    }
+  },
+  {
+    "appearance" : "light",
+    "file" : "device.pointer.1600.light.png",
+    "id" : "device.pointer.1600",
+    "rects" : {
+      "device.1" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 122.13
+      },
+      "device.2" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 180.13
+      },
+      "device.3" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 238.13
+      },
+      "dpiPresets" : {
+        "h" : 99,
+        "w" : 576,
+        "x" : 174,
+        "y" : 1016.13
+      },
+      "dpiSlider" : {
+        "h" : 18,
+        "w" : 201.8,
+        "x" : 433.2,
+        "y" : 834.13
+      }
+    },
+    "scale" : 2,
+    "size" : {
+      "h" : 1265,
+      "w" : 780
+    }
+  },
+  {
+    "appearance" : "dark",
+    "file" : "device.pointer.1600.dark.png",
+    "id" : "device.pointer.1600",
+    "rects" : {
+      "device.1" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 122.13
+      },
+      "device.2" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 180.13
+      },
+      "device.3" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 238.13
+      },
+      "dpiPresets" : {
+        "h" : 99,
+        "w" : 576,
+        "x" : 174,
+        "y" : 1016.13
+      },
+      "dpiSlider" : {
+        "h" : 18,
+        "w" : 201.8,
+        "x" : 433.2,
+        "y" : 834.13
+      }
+    },
+    "scale" : 2,
+    "size" : {
+      "h" : 1265,
+      "w" : 780
+    }
+  },
+  {
+    "appearance" : "light",
+    "file" : "device.pointer.3200.light.png",
+    "id" : "device.pointer.3200",
+    "rects" : {
+      "device.1" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 122.13
+      },
+      "device.2" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 180.13
+      },
+      "device.3" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 238.13
+      },
+      "dpiPresets" : {
+        "h" : 99,
+        "w" : 576,
+        "x" : 174,
+        "y" : 1016.13
+      },
+      "dpiSlider" : {
+        "h" : 18,
+        "w" : 201.8,
+        "x" : 433.2,
+        "y" : 834.13
+      }
+    },
+    "scale" : 2,
+    "size" : {
+      "h" : 1265,
+      "w" : 780
+    }
+  },
+  {
+    "appearance" : "dark",
+    "file" : "device.pointer.3200.dark.png",
+    "id" : "device.pointer.3200",
+    "rects" : {
+      "device.1" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 122.13
+      },
+      "device.2" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 180.13
+      },
+      "device.3" : {
+        "h" : 37,
+        "w" : 576,
+        "x" : 174,
+        "y" : 238.13
+      },
+      "dpiPresets" : {
+        "h" : 99,
+        "w" : 576,
+        "x" : 174,
+        "y" : 1016.13
+      },
+      "dpiSlider" : {
+        "h" : 18,
+        "w" : 201.8,
+        "x" : 433.2,
+        "y" : 834.13
+      }
+    },
+    "scale" : 2,
+    "size" : {
+      "h" : 1265,
+      "w" : 780
+    }
+  },
+  {
+    "appearance" : "light",
+    "file" : "device.activity.light.png",
+    "id" : "device.activity",
+    "rects" : {
+
+    },
+    "scale" : 2,
+    "size" : {
+      "h" : 560,
+      "w" : 780
+    }
+  },
+  {
+    "appearance" : "dark",
+    "file" : "device.activity.dark.png",
+    "id" : "device.activity",
+    "rects" : {
+
+    },
+    "scale" : 2,
+    "size" : {
+      "h" : 560,
+      "w" : 780
+    }
+  },
+  {
+    "appearance" : "light",
+    "file" : "scrolling.light.png",
+    "id" : "scrolling",
+    "rects" : {
+      "scroll.reverseVertical" : {
+        "h" : 31,
+        "w" : 576,
+        "x" : 174,
+        "y" : 122.13
+      },
+      "scroll.smooth" : {
+        "h" : 31,
+        "w" : 576,
+        "x" : 174,
+        "y" : 321.38
+      },
+      "scroll.speed" : {
+        "h" : 19.25,
+        "w" : 576,
+        "x" : 174,
+        "y" : 281.13
+      }
+    },
+    "scale" : 2,
+    "size" : {
+      "h" : 560,
+      "w" : 780
+    }
+  },
+  {
+    "appearance" : "dark",
+    "file" : "scrolling.dark.png",
+    "id" : "scrolling",
+    "rects" : {
+      "scroll.reverseVertical" : {
+        "h" : 31,
+        "w" : 576,
+        "x" : 174,
+        "y" : 122.13
+      },
+      "scroll.smooth" : {
+        "h" : 31,
+        "w" : 576,
+        "x" : 174,
+        "y" : 321.38
+      },
+      "scroll.speed" : {
+        "h" : 19.25,
+        "w" : 576,
+        "x" : 174,
+        "y" : 281.13
+      }
+    },
+    "scale" : 2,
+    "size" : {
+      "h" : 560,
+      "w" : 780
+    }
+  },
+  {
+    "appearance" : "light",
+    "file" : "general.behavior.light.png",
+    "id" : "general.behavior",
+    "rects" : {
+      "behavior.note" : {
+        "h" : 30,
+        "w" : 566,
+        "x" : 174,
+        "y" : 436
+      },
+      "behavior.quit" : {
+        "h" : 16,
+        "w" : 576,
+        "x" : 174,
+        "y" : 400
+      },
+      "behavior.sleep" : {
+        "h" : 16,
+        "w" : 576,
+        "x" : 174,
+        "y" : 363
+      }
+    },
+    "scale" : 2,
+    "size" : {
+      "h" : 560,
+      "w" : 780
+    }
+  },
+  {
+    "appearance" : "dark",
+    "file" : "general.behavior.dark.png",
+    "id" : "general.behavior",
+    "rects" : {
+      "behavior.note" : {
+        "h" : 30,
+        "w" : 566,
+        "x" : 174,
+        "y" : 436
+      },
+      "behavior.quit" : {
+        "h" : 16,
+        "w" : 576,
+        "x" : 174,
+        "y" : 400
+      },
+      "behavior.sleep" : {
+        "h" : 16,
+        "w" : 576,
+        "x" : 174,
+        "y" : 363
+      }
+    },
+    "scale" : 2,
+    "size" : {
+      "h" : 560,
+      "w" : 780
+    }
+  },
+  {
+    "appearance" : "light",
+    "file" : "menubar.panel.light.png",
+    "id" : "menubar.panel",
+    "rects" : {
+      "battery.1" : {
+        "h" : 40,
+        "w" : 328,
+        "x" : 6,
+        "y" : 69.26
+      },
+      "battery.2" : {
+        "h" : 40,
+        "w" : 328,
+        "x" : 6,
+        "y" : 110.26
+      },
+      "battery.3" : {
+        "h" : 40,
+        "w" : 328,
+        "x" : 6,
+        "y" : 151.26
+      }
+    },
+    "scale" : 2,
+    "size" : {
+      "h" : 537,
+      "w" : 340
+    }
+  },
+  {
+    "appearance" : "dark",
+    "file" : "menubar.panel.dark.png",
+    "id" : "menubar.panel",
+    "rects" : {
+      "battery.1" : {
+        "h" : 40,
+        "w" : 328,
+        "x" : 6,
+        "y" : 69.26
+      },
+      "battery.2" : {
+        "h" : 40,
+        "w" : 328,
+        "x" : 6,
+        "y" : 110.26
+      },
+      "battery.3" : {
+        "h" : 40,
+        "w" : 328,
+        "x" : 6,
+        "y" : 151.26
+      }
+    },
+    "scale" : 2,
+    "size" : {
+      "h" : 537,
+      "w" : 340
+    }
+  },
+  {
+    "appearance" : "light",
+    "file" : "menubar.panel.lowbattery.light.png",
+    "id" : "menubar.panel.lowbattery",
+    "rects" : {
+      "battery.1" : {
+        "h" : 40,
+        "w" : 328,
+        "x" : 6,
+        "y" : 69.26
+      },
+      "battery.2" : {
+        "h" : 40,
+        "w" : 328,
+        "x" : 6,
+        "y" : 110.26
+      },
+      "battery.3" : {
+        "h" : 40,
+        "w" : 328,
+        "x" : 6,
+        "y" : 151.26
+      }
+    },
+    "scale" : 2,
+    "size" : {
+      "h" : 537,
+      "w" : 340
+    }
+  },
+  {
+    "appearance" : "dark",
+    "file" : "menubar.panel.lowbattery.dark.png",
+    "id" : "menubar.panel.lowbattery",
+    "rects" : {
+      "battery.1" : {
+        "h" : 40,
+        "w" : 328,
+        "x" : 6,
+        "y" : 69.26
+      },
+      "battery.2" : {
+        "h" : 40,
+        "w" : 328,
+        "x" : 6,
+        "y" : 110.26
+      },
+      "battery.3" : {
+        "h" : 40,
+        "w" : 328,
+        "x" : 6,
+        "y" : 151.26
+      }
+    },
+    "scale" : 2,
+    "size" : {
+      "h" : 537,
+      "w" : 340
+    }
+  },
+  {
+    "appearance" : "light",
+    "file" : "menubar.label.light.png",
+    "id" : "menubar.label",
+    "rects" : {
+
+    },
+    "scale" : 6,
+    "size" : {
+      "h" : 22,
+      "w" : 55.833333333333336
+    }
+  },
+  {
+    "appearance" : "dark",
+    "file" : "menubar.label.dark.png",
+    "id" : "menubar.label",
+    "rects" : {
+
+    },
+    "scale" : 6,
+    "size" : {
+      "h" : 22,
+      "w" : 55.833333333333336
+    }
+  }
+]
