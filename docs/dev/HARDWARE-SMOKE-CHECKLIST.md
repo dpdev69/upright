@@ -128,8 +128,16 @@ If macOS grants Input Monitoring again after this (you click Allow), note that t
 5. Repeat steps 1-3 with the mouse on its Bluetooth channel.
    - Expected: the same latency.
    - The menu still shows one MX Vertical row, which may read "Bluetooth · Connected · also on Unifying".
+6. Long absence, Easy-Switch (receiver link-up, not polling). With the mouse on its Unifying channel, Easy-Switch it to another computer (or to its Bluetooth channel) and leave it there for at least 2 minutes. That is longer than the old 30 s poll, so a slow poll cannot hide a missing link-up. Then switch it back to the receiver channel and press a remapped button.
+   - Expected: it works within about 1-2 s.
+   - The log shows `Slot N link restored` (or `Slot N sent a report; checking the device there`).
+   - What reconnected it must **not** be a `Trying again in 300.0 s` retry.
+7. Long absence, power switch. Switch the mouse off with its power switch for at least 2 minutes, switch it back on, click once, then press a remapped button.
+   - Expected: the same as step 6 (about 1-2 s, `Slot N link restored`, no `Trying again in 300.0 s` line doing the reconnect).
 
-**Paste back:** the approximate latency for each case (with 2.x for comparison if you remember it), and the Activity log copied after this step.
+Why steps 6 and 7 matter: once the receiver's link notifications are on, an absent slot is only polled about every 5 minutes (the backoff caps at about 300 s), so reconnecting has to come from the receiver's 0x41 link-up notification or the mouse's first report. This has only been verified in the simulator.
+
+**Paste back:** the approximate latency for each case (with 2.x for comparison if you remember it), the latency for steps 6 and 7 (how long you were away, and the time from switching back to the remapped button working), and the Activity log copied after this step.
 
 ## 6. Easy-Switch between receiver and Bluetooth inside the app (same-unit dedupe)
 

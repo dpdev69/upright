@@ -267,6 +267,7 @@ final class MultiDeviceControllerTests: XCTestCase {
         tuning.probeTimeout = 0.3
         tuning.retryBaseDelay = 5
         tuning.retryMaxDelay = 5
+        tuning.retryMaxDelayWithNotifications = 5
         let hub = makeHub(receiver, tuning: tuning)
         let began = Date()
         hub.start()
@@ -287,10 +288,14 @@ final class MultiDeviceControllerTests: XCTestCase {
         receiver.setDropsRequests(true, slot: 2)
         var tuning = ControllerTuning.fastTests
         tuning.probeTimeout = 0.1
+        // The receiver accepts notifications, so absent slot 1 backs off up to
+        // `retryMaxDelayWithNotifications`; held equal to `retryMaxDelay` here so it keeps probing.
+        tuning.retryMaxDelayWithNotifications = tuning.retryMaxDelay
         let hub = makeHub(receiver, tuning: tuning)
         hub.start()
 
         await eventually("both retried", timeout: 5) { receiver.pingCount(slot: 1) >= 2 && receiver.pingCount(slot: 2) >= 2 }
+        XCTAssertNotEqual(receiver.notificationFlags[1] & 0x01, 0, "wireless notifications are on")
         receiver.setDropsRequests(false, slot: 2)
         await eventually("slot 2 connected by its own retry", timeout: 5) { isConnected(hub, at: 2) }
         let slot2Pings = receiver.pingCount(slot: 2)
@@ -301,6 +306,56 @@ final class MultiDeviceControllerTests: XCTestCase {
         XCTAssertGreaterThan(receiver.pingCount(slot: 1), slot1Pings, "slot 1 keeps retrying on its own")
         XCTAssertEqual(state(hub, at: 1), .waitingForDevice)
         XCTAssertTrue(isConnected(hub, at: 2))
+    }
+
+    func testAbsentSlotBacksOffFurtherOnceReceiverNotificationsAreOn() async {
+        let receiver = SimulatedReceiver.unifying([1: DeviceProfiles.mxVertical, 2: DeviceProfiles.lift])
+        receiver.setDropsRequests(true, slot: 1)
+        var tuning = ControllerTuning.fastTests
+        tuning.probeTimeout = 0.1
+        tuning.retryBaseDelay = 0.05
+        tuning.retryMaxDelay = 0.1
+        tuning.retryMaxDelayWithNotifications = 5
+        let hub = makeHub(receiver, tuning: tuning)
+        hub.start()
+
+        // Probes follow delays of 0.05, 0.1, 0.2, 0.4, 0.8 s (plus a 0.1 s timeout each): after
+        // the fifth, the next one is at least 0.9 s away. With the 0.1 s cap it would be 0.2 s.
+        await eventually("slot 2 connected and slot 1 backed off", timeout: 5) {
+            isConnected(hub, at: 2) && receiver.pingCount(slot: 1) >= 5
+        }
+        XCTAssertNotEqual(receiver.notificationFlags[1] & 0x01, 0, "wireless notifications are on")
+        let pings = receiver.pingCount(slot: 1)
+        await pause(0.4)
+        XCTAssertEqual(receiver.pingCount(slot: 1), pings, "no probe past retryMaxDelay while notifications are on")
+        XCTAssertEqual(state(hub, at: 1), .waitingForDevice)
+
+        // The link-up notification brings it back, well before the next poll.
+        receiver.setDropsRequests(false, slot: 1)
+        receiver.wakeUp(slot: 1, clearingDiversion: true)
+        await eventually("slot 1 connected after link-up") { isConnected(hub, at: 1) }
+    }
+
+    func testAbsentSlotKeepsRetryMaxDelayWithoutReceiverNotifications() async {
+        let receiver = SimulatedReceiver.unifying([1: DeviceProfiles.mxVertical, 2: DeviceProfiles.lift])
+        receiver.supportsNotificationFlags = false
+        receiver.setDropsRequests(true, slot: 1)
+        var tuning = ControllerTuning.fastTests
+        tuning.probeTimeout = 0.1
+        tuning.retryBaseDelay = 0.05
+        tuning.retryMaxDelay = 0.1
+        tuning.retryMaxDelayWithNotifications = 5
+        let hub = makeHub(receiver, tuning: tuning)
+        hub.start()
+
+        await eventually("slot 2 connected and slot 1 backed off", timeout: 5) {
+            isConnected(hub, at: 2) && receiver.pingCount(slot: 1) >= 5
+        }
+        XCTAssertEqual(receiver.notificationFlags, [0, 0, 0])
+        let pings = receiver.pingCount(slot: 1)
+        await pause(0.8)
+        XCTAssertGreaterThanOrEqual(receiver.pingCount(slot: 1), pings + 2, "slot 1 keeps probing every retryMaxDelay")
+        XCTAssertEqual(state(hub, at: 1), .waitingForDevice)
     }
 
     func testWakePingPongKeepsBothSessions() async {

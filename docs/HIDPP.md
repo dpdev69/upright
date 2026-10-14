@@ -595,6 +595,10 @@ battery, after re-enabling receiver notifications if the slot had lost its link.
 unit that is served elsewhere), `unsupported` or `pending` (not identified yet).
 
 - **Backoff.** Retries wait 1 s, then 2 s, 4 s… doubling up to 30 s, and then repeat every 30 s.
+  A receiver slot whose mouse is absent (no session: switched off, or Easy-Switched to another
+  computer) backs off further, up to 300 s, once the receiver's notifications are on, because a
+  `41` link-up or any report from the slot reconnects it without polling; the 30 s cap stays
+  when the receiver refuses the notification flags.
   They never stop while the HID interface is open, and are independent per endpoint. A signal
   that the mouse is awake (a report, `41`, `0x1D4B`, Mac wake) cancels the wait and reconfigures
   after the 0.6 s coalescing delay. The hub itself only rediscovers (with the same backoff) when

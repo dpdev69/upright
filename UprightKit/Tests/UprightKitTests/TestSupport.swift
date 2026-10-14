@@ -15,6 +15,7 @@ extension ControllerTuning {
         tuning.reconnectDelay = 0
         tuning.retryBaseDelay = 0.05
         tuning.retryMaxDelay = 0.2
+        tuning.retryMaxDelayWithNotifications = 0.2
         tuning.announcementWait = 0.05
         return tuning
     }
