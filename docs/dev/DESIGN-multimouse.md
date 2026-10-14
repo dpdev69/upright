@@ -502,7 +502,7 @@ struct PressedControl { var cid: UInt16; var source: DeviceAddress; var date: Da
 7. **Events.**
    - The endpoint stamps `ButtonEvent.source` and `PointerDelta.source` with its address.
    - DeviceManager drops events whose `registry.isActive(source)` is false.
-   - `AppModel.handle(event)` records `focusedDevice` and `lastPressedControl`, then calls `engine.handle(event)`.
+   - `AppModel.handle(event)` records `focusedDevice` and appends to the press feed (`presses.last`), then calls `engine.handle(event)`.
    - Inside the engine:
      - `mappingsProvider(source)` resolves to `library.effectiveMappings(model: registry.record(source)?.model, bundleID: frontmost)`.
      - On press, the effect is snapshotted into `held[ControlKey]`. `gestureSourceFor(source, cid)` reads that device's own `ControlInfo.supportsRawXY`. `rawThresholdProvider(source)` uses that device's `dpi.current`. Both are captured per gesture.
@@ -595,7 +595,7 @@ Stored payload (key `mappingProfiles.v3`) and export format:
 | `PointerSpeedSection.swift` | Bound to the selected device's DPI and `DPIInfo`. Hidden when the device has no 0x2201. "Use Suggested" writes the global presets from the selected device. "Let the Mouse Decide" clears only this device's preference. |
 | `Components.swift` (DeviceHeader, BatteryLabel, ConnectionHint) | Take a `Record` or snapshot parameter. Copy is model-neutral. The Input Monitoring callout is driven by `needsInputMonitoring` and names the blocked interface. |
 | `ButtonsPane.swift` | A "Configure: [MX Vertical ▾]" model picker, listing connected models, then remembered models, then catalog models (so a mouse can be set up before it arrives). Rows come from `controls(for: selectedModel, address:)`. When two or more units of the model are present, a caption reads "Applies to every MX Vertical". The footer is generated from `ControlCatalog` text. A "Copy setup from…" menu and "Use this setup for all my mice" are added. The raw-XY note uses the selected device's controls. The empty state says "Connect a Logitech mouse". |
-| `ButtonRow.swift`, `GestureEditor.swift` | Take `model:`. Names, symbols and details come from `ControlDescriptor(cid:model:)`. Rows flash only for `lastPressedControl` whose source belongs to the selected model. |
+| `ButtonRow.swift`, `GestureEditor.swift` | Take `model:`. Names, symbols and details come from `ControlDescriptor(cid:model:)`. Rows flash only for the latest press (`presses.last`) whose source belongs to the selected model. |
 | `ProfileSection.swift` | The app-profile list is per model (`library[selectedModel].apps`). |
 | `ActionPicker.swift` | Easy-Switch channels follow the selected device's `hosts.count` (falling back to 3 when offline). The Pointer Speed submenu is hidden when the selected device lacks 0x2201. "Set to N DPI" is validated against that device's range. |
 | `GeneralPane.swift` | The import review shows the model per item, and adds the target-model picker for v2/v1 files. Battery-in-menu-bar copy says "lowest battery". |

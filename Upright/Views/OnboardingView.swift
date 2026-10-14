@@ -376,7 +376,7 @@ private struct SetupStep: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
 
-            TryItLine()
+            TryItLine(presses: model.presses)
         }
     }
 
@@ -462,6 +462,7 @@ private struct SetupStep: View {
 private struct TryItLine: View {
     @EnvironmentObject private var model: AppModel
     @EnvironmentObject private var devices: DeviceManager
+    @ObservedObject var presses: PressFeed
     /// Presses from before this step are old news.
     @State private var shownSince = Date()
 
@@ -488,7 +489,7 @@ private struct TryItLine: View {
     }
 
     private var pressed: AppModel.PressedControl? {
-        model.lastPressedControl.flatMap { $0.date >= shownSince ? $0 : nil }
+        presses.last.flatMap { $0.date >= shownSince ? $0 : nil }
     }
 
     /// For example "MX Master 3S: Back Button → ⌘[".

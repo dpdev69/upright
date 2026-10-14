@@ -88,9 +88,9 @@ final class AppModel: ObservableObject {
         }
     }
 
-    /// The latest diverted-button press, whether or not remapping is on or the button is mapped.
-    /// Buttons left to the mouse don't report.
-    @Published private(set) var lastPressedControl: PressedControl?
+    /// The latest diverted-button press, published on its own so a press doesn't re-render
+    /// every view of this model.
+    let presses = PressFeed()
 
     let environment: AppEnvironment
     /// The defaults everything in this model reads and writes (Demo Mode has its own suite).
@@ -722,8 +722,8 @@ final class AppModel: ObservableObject {
         if event.phase == .press {
             // DeviceManager drops presses of standby/unsupported endpoints; double-check.
             guard devices.isActive(event.source) else { return }
-            focusedDevice = event.source
-            lastPressedControl = PressedControl(cid: event.cid, source: event.source, model: model(of: event.source), date: Date())
+            if focusedDevice != event.source { focusedDevice = event.source }
+            presses.record(PressedControl(cid: event.cid, source: event.source, model: model(of: event.source), date: Date()))
         }
         engine.handle(event)
         updateMovementMonitor()
@@ -939,5 +939,20 @@ private final class PointerMovementMonitor {
         remainder = (x - Double(dx), y - Double(dy))
         guard dx != 0 || dy != 0 else { return }
         onDelta?(dx, dy)
+    }
+}
+
+/// Diverted-button presses, whether or not remapping is on or the button is mapped.
+/// Buttons left to the mouse don't report.
+@MainActor
+final class PressFeed: ObservableObject {
+    /// The latest press.
+    @Published private(set) var last: AppModel.PressedControl?
+    /// Every press as it happens; unlike `$last`, a new subscriber isn't sent an old one.
+    let pressed = PassthroughSubject<AppModel.PressedControl, Never>()
+
+    func record(_ press: AppModel.PressedControl) {
+        last = press
+        pressed.send(press)
     }
 }

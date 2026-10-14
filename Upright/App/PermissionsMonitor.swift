@@ -25,7 +25,7 @@ final class PermissionsMonitor: ObservableObject {
     /// moved and macOS still lists the old copy as allowed; resetting the entry fixes it.
     @Published private(set) var accessibilityGrantIsStale = false
     @Published private(set) var isResettingAccessibility = false
-    /// Set while the mouse is blocked for lack of Input Monitoring, so a grant is noticed quickly.
+    /// Set while the mouse is blocked for lack of Input Monitoring; with a window open, a grant is then noticed within a second.
     /// Input Monitoring is optional and usually never decided, which alone doesn't warrant fast polling.
     var needsInputMonitoring = false {
         didSet { if needsInputMonitoring != oldValue { reschedulePollingIfNeeded() } }
@@ -33,14 +33,18 @@ final class PermissionsMonitor: ObservableObject {
 
     private static let wasTrustedKey = "accessibilityWasTrusted"
     private static let promptShownKey = "accessibilityPromptShown"
-    private static let pollWhileMissing: TimeInterval = 1
-    private static let pollWhenSettled: TimeInterval = 5
+    private static let pollWhileWaiting: TimeInterval = 1
+    private static let pollWhenIdle: TimeInterval = 60
+    /// How long asking for a permission keeps polling fast with no window open.
+    private static let fastPollWindow: TimeInterval = 120
 
     private let defaults: UserDefaults
     private let environment: AppEnvironment
     private let launcher = ProcessLauncher()
     private let logger = Logger(subsystem: "Upright", category: "Permissions")
     private var timer: Timer?
+    /// Fast polling continues until then (set when Upright asks for a permission).
+    private var fastPollUntil: Date?
     private var observers: [NSObjectProtocol] = []
 
     init(defaults: UserDefaults = .standard, environment: AppEnvironment = .live) {
@@ -57,11 +61,17 @@ final class PermissionsMonitor: ObservableObject {
     }
 
     /// Starts watching for changes. There is no public change notification for these
-    /// permissions, so this polls: quickly while something is missing, gently otherwise.
+    /// permissions, so this polls (see `pollInterval`) and also checks when Upright becomes
+    /// active and when the Mac wakes.
     func start() {
         guard environment.checksPermissions, observers.isEmpty else { return }
         observers.append(NotificationCenter.default.addObserver(
             forName: NSApplication.didBecomeActiveNotification, object: nil, queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in self?.refresh() }
+        })
+        observers.append(NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.didWakeNotification, object: nil, queue: .main
         ) { [weak self] _ in
             Task { @MainActor in self?.refresh() }
         })
@@ -90,16 +100,29 @@ final class PermissionsMonitor: ObservableObject {
         reschedulePollingIfNeeded()
     }
 
-    /// Fast while something the user is likely setting up right now is missing, or while one of
-    /// Upright's windows is open (the app is a regular app only then); gentle otherwise.
+    /// Called when one of Upright's windows opens or closes (the activation policy changes).
+    func windowsChanged() {
+        reschedulePollingIfNeeded()
+    }
+
+    /// Every second while a grant is awaited and the user is likely granting it right now: one
+    /// of Upright's windows is open (the app is a regular app only then), or Upright asked for a
+    /// permission in the last two minutes. Once a minute otherwise.
     private var pollInterval: TimeInterval {
         let waitingForGrant = !isAccessibilityTrusted || (needsInputMonitoring && inputMonitoring != .granted)
         let windowOpen = NSApp?.activationPolicy() == .regular
-        return waitingForGrant || windowOpen ? Self.pollWhileMissing : Self.pollWhenSettled
+        let recentlyAsked = fastPollUntil.map { Date() < $0 } ?? false
+        return waitingForGrant && (windowOpen || recentlyAsked) ? Self.pollWhileWaiting : Self.pollWhenIdle
     }
 
     private func reschedulePollingIfNeeded() {
         if timer != nil, timer?.timeInterval != pollInterval { schedulePolling() }
+    }
+
+    /// Polls fast for a while after Upright sends the user to grant something.
+    private func pollFastForAWhile() {
+        fastPollUntil = Date().addingTimeInterval(Self.fastPollWindow)
+        if timer != nil { schedulePolling() }
     }
 
     private func schedulePolling() {
@@ -119,6 +142,7 @@ final class PermissionsMonitor: ObservableObject {
     /// so this opens the Accessibility list instead. Never both at once.
     func requestAccessibility() {
         guard environment.checksPermissions else { return }
+        pollFastForAWhile()
         if !defaults.bool(forKey: Self.promptShownKey) {
             promptForAccessibility()
         } else if !AXIsProcessTrusted() {
@@ -129,6 +153,7 @@ final class PermissionsMonitor: ObservableObject {
 
     func openAccessibilitySettings() {
         guard environment.checksPermissions else { return }
+        pollFastForAWhile()
         open("x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")
     }
 
@@ -136,6 +161,7 @@ final class PermissionsMonitor: ObservableObject {
     func resetAccessibilityPermission() {
         guard environment.checksPermissions, !isResettingAccessibility, let bundleID = Bundle.main.bundleIdentifier else { return }
         isResettingAccessibility = true
+        pollFastForAWhile()
         launcher.run("/usr/bin/tccutil", arguments: ["reset", "Accessibility", bundleID]) { [weak self] status in
             guard let self else { return }
             self.isResettingAccessibility = false
@@ -160,6 +186,7 @@ final class PermissionsMonitor: ObservableObject {
     /// Shows the system prompt while access is undecided; otherwise opens the Input Monitoring list.
     func requestInputMonitoring() {
         guard environment.checksPermissions else { return }
+        pollFastForAWhile()
         refresh()
         if inputMonitoring == .notDetermined {
             HIDDeviceMonitor.requestInputMonitoringAccess()
@@ -171,6 +198,7 @@ final class PermissionsMonitor: ObservableObject {
 
     func openInputMonitoringSettings() {
         guard environment.checksPermissions else { return }
+        pollFastForAWhile()
         open("x-apple.systempreferences:com.apple.preference.security?Privacy_ListenEvent")
     }
 

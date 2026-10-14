@@ -140,9 +140,9 @@ struct ButtonsPane: View {
         } message: { item in
             confirmationMessage(item)
         }
-        .onChange(of: model.lastPressedControl) { pressed in
+        .onReceive(model.presses.pressed) { pressed in
             // Only presses of a mouse of the model on screen light up a row.
-            guard let pressed, pressed.model == model.selectedModel else { return }
+            guard pressed.model == model.selectedModel else { return }
             flash(pressed.cid)
         }
         .onChange(of: model.selectedModel) { newModel in

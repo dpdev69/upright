@@ -33,12 +33,18 @@ final class AppSettings: ObservableObject {
     /// Notify at 15% and 5%. Notification permission is requested when this is turned on, or
     /// before the first alert if it was never turned off.
     @Published var batteryAlertsEnabled: Bool {
-        didSet { defaults.set(batteryAlertsEnabled, forKey: Key.batteryAlertsEnabled) }
+        didSet {
+            guard batteryAlertsEnabled != oldValue else { return }
+            defaults.set(batteryAlertsEnabled, forKey: Key.batteryAlertsEnabled)
+        }
     }
 
     /// Show "NN%" next to the menu bar icon while a battery level is known.
     @Published var showBatteryInMenuBar: Bool {
-        didSet { defaults.set(showBatteryInMenuBar, forKey: Key.showBatteryInMenuBar) }
+        didSet {
+            guard showBatteryInMenuBar != oldValue else { return }
+            defaults.set(showBatteryInMenuBar, forKey: Key.showBatteryInMenuBar)
+        }
     }
 
     /// Upright 2.x's one pointer speed for "the" mouse. Legacy: it only seeds the MX Vertical's
@@ -46,6 +52,7 @@ final class AppSettings: ObservableObject {
     /// Per-mouse speeds live in `devicePreferences`; set them through `AppModel`.
     @Published var preferredDPI: Int? {
         didSet {
+            guard preferredDPI != oldValue else { return }
             if let preferredDPI, DeviceAction.dpiRange.contains(preferredDPI) {
                 defaults.set(preferredDPI, forKey: Key.preferredDPI)
             } else {
@@ -57,6 +64,7 @@ final class AppSettings: ObservableObject {
     /// The speeds "Cycle Pointer Speed" steps through, ascending, without duplicates.
     @Published var dpiPresets: [Int] {
         didSet {
+            guard dpiPresets != oldValue else { return }
             // Assigning inside didSet doesn't re-run the observer.
             let clean = Self.sanitized(dpiPresets)
             if clean != dpiPresets { dpiPresets = clean }
@@ -66,7 +74,10 @@ final class AppSettings: ObservableObject {
 
     /// The first-run window was finished or dismissed. Upgrading users never see it.
     @Published var hasCompletedOnboarding: Bool {
-        didSet { defaults.set(hasCompletedOnboarding, forKey: Key.hasCompletedOnboarding) }
+        didSet {
+            guard hasCompletedOnboarding != oldValue else { return }
+            defaults.set(hasCompletedOnboarding, forKey: Key.hasCompletedOnboarding)
+        }
     }
 
     /// Every mouse's own settings (by `DeviceID`) and the per-model seeds for mice seen for the

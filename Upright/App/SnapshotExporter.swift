@@ -417,7 +417,7 @@ extension SnapshotExporter {
         func showActivityAfterWake() async {
             pretendFrontmost(DemoMode.Scenario.finder)
             model.selectedPane = .device
-            model.devices.clearLog()
+            model.devices.activity.clear()
             model.devices.reconnect(nil)
             do {
                 try await waitForMice()

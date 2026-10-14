@@ -45,7 +45,7 @@ struct DevicePane: View {
                 PointerSpeedSection(address: nil, dpi: nil)
             }
 
-            DeviceActivitySection()
+            DeviceActivitySection(activity: devices.activity)
         }
         .formStyle(.grouped)
         .onAppear { devices.refreshDeviceInfo() }
@@ -510,6 +510,7 @@ private struct ControlInfoRow: View {
 /// The activity log of every device, each line labelled with its device, with a device filter.
 private struct DeviceActivitySection: View {
     @EnvironmentObject private var devices: DeviceManager
+    @ObservedObject var activity: DeviceActivityLog
     /// nil shows every line.
     @State private var filter: DeviceAddress?
 
@@ -544,7 +545,7 @@ private struct DeviceActivitySection: View {
                 }
                 .controlSize(.small)
                 .help("Copies the lines shown")
-                Button("Clear") { devices.clearLog() }
+                Button("Clear") { activity.clear() }
                     .controlSize(.small)
             }
         }
@@ -555,8 +556,8 @@ private struct DeviceActivitySection: View {
 
     /// Lines about the chosen device, plus lines about the interface it is on (its receiver).
     private var filtered: [DeviceManager.LogEntry] {
-        guard let filter else { return devices.log }
-        return devices.log.filter { entry in
+        guard let filter else { return activity.entries }
+        return activity.entries.filter { entry in
             if let address = entry.address { return address == filter }
             return entry.link == filter.link
         }

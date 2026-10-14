@@ -19,12 +19,16 @@ struct RememberedDevice: Identifiable, Hashable {
         preferences.lastConnection.flatMap(ConnectionKind.init(rawValue:))
     }
 
+    private static let relativeFormatter: RelativeDateTimeFormatter = {
+        let formatter = RelativeDateTimeFormatter()
+        formatter.unitsStyle = .full
+        return formatter
+    }()
+
     /// "Last seen 3 days ago", or "Not connected" when it never was.
     var lastSeenText: String {
         guard let date = preferences.lastSeen else { return String(localized: "Not connected") }
-        let formatter = RelativeDateTimeFormatter()
-        formatter.unitsStyle = .full
-        let relative = formatter.localizedString(for: date, relativeTo: Date())
+        let relative = Self.relativeFormatter.localizedString(for: date, relativeTo: Date())
         return String(localized: "Last seen \(relative)", comment: "When a remembered mouse was last connected, e.g. Last seen 3 days ago")
     }
 
