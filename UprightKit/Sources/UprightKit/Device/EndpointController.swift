@@ -14,6 +14,8 @@ protocol EndpointHub: AnyObject {
     /// A receiver slot is coming back after losing its link: make sure the receiver still
     /// sends notifications (coalesced across slots).
     func endpointNeedsReceiverNotifications(_ endpoint: EndpointController) async
+    /// True once the receiver has accepted the notification flags (0x41 link changes arrive).
+    var receiverNotificationsEnabled: Bool { get }
     func endpoint(_ endpoint: EndpointController, log text: String)
     /// True for an observer (`upright-probe` without `--divert`): button reporting is only
     /// written once this process has asked for a diversion, never just to make it native.
@@ -447,11 +449,17 @@ public final class EndpointController {
     }
 
     /// Exponential backoff, capped at `retryMaxDelay`. Never gives up while the transport is open.
+    /// An absent receiver slot (no session) backs off up to `retryMaxDelayWithNotifications`
+    /// once the receiver sends link notifications, since a 0x41 link-up or a report from the
+    /// slot reconnects it without polling.
     private func scheduleRetry() {
         guard !isShutDown, !isUnsupported, retryTimer == nil else { return }
-        let delay = min(tuning.retryBaseDelay * pow(2, Double(min(retryAttempt, 16))), tuning.retryMaxDelay)
+        let cap = isReceiver && session == nil && hub?.receiverNotificationsEnabled == true
+            ? tuning.retryMaxDelayWithNotifications
+            : tuning.retryMaxDelay
+        let delay = min(tuning.retryBaseDelay * pow(2, Double(min(retryAttempt, 16))), cap)
         retryAttempt += 1
-        if delay < tuning.retryMaxDelay || retryAttempt <= 1 || retryAttempt % 10 == 0 {
+        if delay < cap || retryAttempt <= 1 || retryAttempt % 10 == 0 {
             log(String(format: "Trying again in %.1f s", delay))
         }
         retryTimer = Task { [weak self] in
@@ -957,6 +965,10 @@ public final class MXVerticalController {
     public var retryMaxDelay: TimeInterval {
         get { link.tuning.retryMaxDelay }
         set { link.tuning.retryMaxDelay = newValue }
+    }
+    public var retryMaxDelayWithNotifications: TimeInterval {
+        get { link.tuning.retryMaxDelayWithNotifications }
+        set { link.tuning.retryMaxDelayWithNotifications = newValue }
     }
     public var batteryRefreshInterval: TimeInterval {
         get { link.tuning.batteryRefreshInterval }

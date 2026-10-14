@@ -9,6 +9,7 @@ final class ControllerTests: XCTestCase {
         controller.reconnectDelay = 0
         controller.retryBaseDelay = 0.05
         controller.retryMaxDelay = 0.2
+        controller.retryMaxDelayWithNotifications = 0.2
         controller.announcementWait = 0.05
         controller.client.defaultTimeout = 0.2
         controller.client.busyRetryDelay = 0.01

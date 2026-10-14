@@ -559,7 +559,9 @@ reapplies it (and the kept pointer speed) when:
 
 Signals that arrive close together are coalesced into one pass. If a mouse stops answering, its
 endpoint keeps the session, shows *Asleep* and retries with exponential backoff (1 s, doubling
-to 30 s), independently of the other mice. Controller work runs on the main actor through a
+to 30 s), independently of the other mice. A receiver slot whose mouse is away for good (off, or
+switched to another computer) backs off to about 5 minutes once the receiver sends link
+notifications, which announce the mouse when it returns. Controller work runs on the main actor through a
 serial operation queue per endpoint, so probes and reconfigurations of one mouse never
 interleave. Requests to one HID interface go through a gate that allows one in flight (with a
 lane for interactive changes), because it is unverified whether receivers tolerate more.

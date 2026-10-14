@@ -9,6 +9,10 @@ public struct ControllerTuning: Hashable, Sendable {
     /// First retry delay while a mouse doesn't answer; doubles per attempt up to `retryMaxDelay`.
     public var retryBaseDelay: TimeInterval = 1
     public var retryMaxDelay: TimeInterval = 30
+    /// Cap for an absent receiver slot while the receiver sends link notifications: a 0x41
+    /// link-up or any report from the slot reconnects it, so polling only backs that up.
+    /// `retryMaxDelay` still applies when the receiver doesn't send them.
+    public var retryMaxDelayWithNotifications: TimeInterval = 300
     /// How often the battery level is re-read while connected (0 disables).
     public var batteryRefreshInterval: TimeInterval = 600
     /// How long to listen for slot announcements when a receiver can't list its pairings.
@@ -575,6 +579,8 @@ extension HIDPPLink: EndpointHub {
     func endpointNeedsReceiverNotifications(_ endpoint: EndpointController) async {
         await ensureNotifications()
     }
+
+    var receiverNotificationsEnabled: Bool { notificationsEnabled }
 
     func endpoint(_ endpoint: EndpointController, log text: String) {
         log(endpoint.address, text)

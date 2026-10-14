@@ -627,6 +627,7 @@ public final class SimulatedReceiver: SimulatedHIDPPTransport, @unchecked Sendab
     private var _supportsPairingInfo = true
     private var _notificationFlags: [UInt8] = [0, 0, 0]
     private var _linkNotificationsNeedFlag = false
+    private var _supportsNotificationFlags = true
     private var _maxSlots: UInt8 = 6
 
     /// `connection` is Bolt for the Bolt layout, Unifying for C52B and C532, Nano otherwise.
@@ -681,6 +682,13 @@ public final class SimulatedReceiver: SimulatedHIDPPTransport, @unchecked Sendab
     public var linkNotificationsNeedFlag: Bool {
         get { synchronized { _linkNotificationsNeedFlag } }
         set { synchronized { _linkNotificationsNeedFlag = newValue } }
+    }
+
+    /// Whether the receiver accepts register 0x00 (notification flags). When false, reads and
+    /// writes of it fail with "invalid address", as on receivers that don't have it.
+    public var supportsNotificationFlags: Bool {
+        get { synchronized { _supportsNotificationFlags } }
+        set { synchronized { _supportsNotificationFlags = newValue } }
     }
 
     /// What receiver information (0xB5 sub-register 0x03) reports. Slots 1...6 work regardless.
@@ -778,6 +786,8 @@ public final class SimulatedReceiver: SimulatedHIDPPTransport, @unchecked Sendab
         func error(_ code: UInt8) -> Outcome { Outcome(reply: Self.error10(request, code: code)) }
 
         switch (request.subID, request.address) {
+        case (0x80, 0x00) where !_supportsNotificationFlags, (0x81, 0x00) where !_supportsNotificationFlags:
+            return error(0x02)
         case (0x80, 0x00):
             _notificationFlags = Array(p.prefix(3))
             return Outcome(reply: request)

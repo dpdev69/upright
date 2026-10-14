@@ -456,6 +456,7 @@ final class EndToEndRoutingTests: XCTestCase {
         tuning.probeTimeout = 0.05
         tuning.retryBaseDelay = 0.02
         tuning.retryMaxDelay = 0.1
+        tuning.retryMaxDelayWithNotifications = 0.1
         tuning.announcementWait = 0.02
         tuning.batteryRefreshInterval = 0
         let fleet = makeFleet(library: Self.fuzzLibrary(), tuning: tuning)
