@@ -320,7 +320,10 @@ extension SnapshotExporter {
         /// Live addresses of the three mice.
         private(set) var addresses: [DemoMode.Fleet.Mouse: DeviceAddress] = [:]
         /// The login item as an installed copy of Upright sees it (no "move to Applications" warning).
-        private let loginItem = LoginItemController(bundleURL: URL(fileURLWithPath: "/Applications/Upright.app", isDirectory: true))
+        private let loginItem = LoginItemController(
+            environment: .demo,
+            bundleURL: URL(fileURLWithPath: "/Applications/Upright.app", isDirectory: true)
+        )
 
         private init(fleet: DemoMode.Fleet, model: AppModel) {
             self.fleet = fleet

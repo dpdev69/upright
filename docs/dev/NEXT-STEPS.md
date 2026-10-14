@@ -17,37 +17,79 @@ Design: [`DESIGN-multimouse.md`](DESIGN-multimouse.md) (final, judged from three
 | 1 | Catalog, classifier + IOKit matching, HID++ identity reads, multi-source engine, mapping schema v3 + migration, Kit simulator, per-device preferences | Done, green (307 tests), committed |
 | 2 | DeviceSession capability gate, DeviceRegistry, ConfigurationPlanner | Done, green (352 tests), committed |
 | 3 | HIDPPLink hub + per-endpoint EndpointController, request gate, upright-probe `--all`, end-to-end routing tests + 1000-step fuzz | Done (383 tests); see the wave-3 commit for its gate result |
-| 4 | App core: DeviceManager (records, LinkSource injection), AppModel (per-model bindings, planner, demo environment), peripherals | **Next** |
-| 5 | UI: Mice pane, Buttons model picker, onboarding/copy, Kit cleanup | To do |
-| 5b | Demo Mode + `--export-snapshots` (real-UI PNGs for the video/README) | To do |
-| 6 | Strings catalog, docs (supported-devices table), pbxproj rename EndpointController.swift, full build/test | To do |
-| 7 | Final Opus audit + hardware smoke checklist | To do |
-| Video | 30 s launch video; pre-production done ([`launch-video-spec.json`](launch-video-spec.json)) | Waiting for wave 5b snapshots |
+| 4 | App core: DeviceManager (records, LinkSource injection), AppModel (per-model bindings, planner, demo environment), peripherals | Done, committed (`8f2e02c`) |
+| 5 | UI: Mice pane, Buttons model picker, onboarding/copy, Kit cleanup | Done, committed (`88a66aa`) |
+| 5b | Demo Mode + `--export-snapshots` (real-UI PNGs for the video/README) | Done, committed (`30bbb2b`); snapshot export (`make snapshots`) writes real-UI PNGs plus `manifest.json` to `media/snapshots/` |
+| 6 | Strings catalog, docs (supported-devices table), pbxproj rename EndpointController.swift, full build/test | Done, committed (`06f15a2`); 388 Kit tests green after the wave 7 audit fixes |
+| 7 | Final Opus audit + hardware smoke checklist | Done: audit (two lenses, see "Audit outcome") and [`HARDWARE-SMOKE-CHECKLIST.md`](HARDWARE-SMOKE-CHECKLIST.md) written; audit fixes may still be uncommitted in the working tree |
+| Video | 30 s launch video; pre-production done ([`launch-video-spec.json`](launch-video-spec.json)) | Unblocked: `media/snapshots/manifest.json` exists (not yet run) |
 
-The app target still builds through compatibility shims (`MXVerticalController`, compat `status`/`snapshot`), so the
-current branch runs like before with one MX Vertical; the multi-mouse UI arrives in waves 4–5.
+The multi-mouse app is in: per-model bindings, the Mice and Buttons UI, Demo Mode (`Upright --demo`) and the
+snapshot exporter (`make snapshots`). None of the multi-mouse code (HIDPPLink/EndpointController, the request gate,
+generic vendor-046D usage matching, mapping v3 migration) has run on real hardware yet (see the smoke checklist).
 
-## How to resume (next Claude Code session)
+## Remaining work
 
-1. Check out `multi-mouse`, run `swift test --package-path UprightKit` (expect 383+ green) and `make app`.
-2. Run waves 4, 5 and 5b with the saved workflow script (it reads the design docs from `docs/dev/`):
-   `Workflow({ scriptPath: "<repo>/docs/dev/workflows/multi-mouse-app.js", args: { scratch: "<new session scratchpad>", kitReport: "<one-paragraph summary of waves 0-3>" } })`
-   It has a build/test/`make app` gate after each wave, a fix loop (max 2 rounds) and local checkpoint commits.
-3. Wave 6 (parallel: strings, docs, project rename, then build/test) and wave 7 (final audit) per §H of the design.
-4. Video: run `docs/dev/workflows/launch-video.js` with the same args the launch-video skill uses plus
-   `spec: <contents of launch-video-spec.json>` (skips pre-production) once `media/snapshots/manifest.json` exists.
-   Brief/visuals/CTA text used for the spec is in the spec itself; size `M`, format `16:9`.
-5. Merge `multi-mouse` into `main` once CI is green on the branch (Linux Swift 6.0 + macOS Xcode 16.2).
+Waves 0-7 are done. What is left, in order:
+
+1. **Owner hardware smoke test** on the one MX Vertical: follow [`HARDWARE-SMOKE-CHECKLIST.md`](HARDWARE-SMOKE-CHECKLIST.md)
+   (about 30-40 minutes; never run `upright-probe --divert`). Record the result and date here and in the commit message.
+2. **Push the branch and run CI** (Linux Swift 6.0 + macOS Xcode 16.2). Not run yet: CI only triggers on pushes to
+   `main` and on pull requests, so push `multi-mouse` and open a draft PR against `main` (needs the owner's go-ahead).
+   Green CI is the merge gate. The Linux Swift 6.0 job has never seen this branch (no docker or 6.0 toolchain locally;
+   only static checks were done, see "Audit outcome").
+3. **Launch video**: `docs/dev/workflows/launch-video.js` is now unblocked because `media/snapshots/manifest.json`
+   exists. Run it with the same args the launch-video skill uses plus `spec: <contents of launch-video-spec.json>`
+   (skips pre-production). Size `M`, format `16:9`.
+4. **Merge** `multi-mouse` into `main` once CI is green and the smoke test has passed.
+
+How to resume: check out `multi-mouse`, run `swift test --package-path UprightKit` and `make app`, commit any
+uncommitted audit fixes, then continue from item 1 above.
+
+Historical note: waves 4, 5 and 5b were run with `docs/dev/workflows/multi-mouse-app.js`; it is not needed any more.
 
 ## Hardware checks only the owner can do (one MX Vertical available)
 
-- `make probe ARGS=--all` over the receiver and over Bluetooth: confirms the 0x0003 unit ID is identical across
-  transports (same-unit dedupe), reports raw-XY capability per control, and that the generic IOKit matching still
-  finds the mouse. Read-only; does not divert buttons.
-- After wave 4: run the app with the MX Vertical and confirm behaviour is unchanged (mappings migrated, fast reconnect
-  after sleep/power-cycle, no Input Monitoring prompt at launch).
+The full step-by-step list, with expected output and what to paste back, is in
+[`HARDWARE-SMOKE-CHECKLIST.md`](HARDWARE-SMOKE-CHECKLIST.md). Summary of what it must settle:
+
+- Same unit ID over Bluetooth and Unifying (same-unit dedupe); raw-XY flags per control.
+- Mappings, app profiles and pointer speed migrate unchanged from 2.x; no Input Monitoring prompt at launch.
+- Reconnect latency after sleep, power-cycle and Easy-Switch is as fast as 2.x; quit restores native buttons; no stuck
+  keys when toggling "Remap buttons".
+- Interface opening changed in the wave 7 audit: the IOHIDManager is no longer opened, only the interfaces the
+  classifier accepts are (one `IOHIDDeviceOpen` each). Confirm the mouse is still found and button reports still
+  arrive over the receiver, USB and Bluetooth (`tccutil reset ListenEvent io.github.upright.Upright` to test with
+  Input Monitoring undecided).
 - Everything about other models and two physical mice at once is simulator-verified only until a contributor with
   that hardware reports `upright-probe --all` output (README marks those models "untested on hardware").
+
+## Audit outcome
+
+Final audit at `06f15a2`, two lenses (A: transport, hub, engine, app; B: data, UI, build). Read-only verification:
+`swift test` 383 tests, 0 failures (the only warnings are the expected `onlyWhileMXVerticalConnected` deprecation
+warnings in ScrollTransformTests); `xcodebuild` Debug and Release (universal, ad-hoc, hardened runtime) build
+succeeded; no change to deployment target, signing, entitlements or `Package.swift`. Static Swift 6.0 / Linux lint
+passed (async `@MainActor` tests, typed integer literals, Foundation-only Kit outside `Platform/`). Not run: Linux
+swift:6.0 and CI on the branch.
+
+Accepted limitations and deferred items:
+
+- **A1 (should-fix)**: the login item is not isolated in Demo Mode.
+- **A2 (plausible risk, hardware check)**: manager-level `IOHIDManagerOpen` may implicitly open interfaces of
+  Lightspeed and 27 MHz receivers that get no HID++ traffic (`IOKitHID.swift`); also the implicit Input Monitoring
+  prompt risk. Covered by the checklist.
+- **A5**: AppKit UI-state keys land in the real defaults domain during an interactive demo.
+- **A6**: the shortcut main key is not refcounted across devices (modifiers and mouse buttons are).
+- **A9**: cursor-fallback gestures cannot be attributed to a device.
+- **A11**: transient-ID corner case for per-unit DPI.
+- Request gate priority is strict, so background requests could starve under sustained interactive load; not realistic
+  (interactive bursts are bounded).
+- The legacy `MXVerticalController` facade is used only by tests; the app and `upright-probe` use `HIDPPLink` directly.
+- No restore is sent by design on unpair, replaced slot, or transport close (nothing reachable to send to).
+- Hardware-unverified: same unit ID across BT and Unifying (checklist step 2), raw-XY v5 first-report drop (D16).
+- **B1**: the branch has never run in CI.
+- Only the MX Vertical is verified on hardware; all other models are simulator-verified only.
 
 ## Known decisions worth remembering
 

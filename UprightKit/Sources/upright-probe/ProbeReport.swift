@@ -76,6 +76,10 @@ struct ProbeOptions: Equatable {
 
     Interfaces Upright serves are handled the way the app handles them: a receiver gets its
     notification flags turned on (read-modify-write), and --divert changes button reporting.
+    Without --divert, button reporting is never written.
+
+    Quit Upright first: both use HID++ software ID 0x0A on the same shared interface, so each
+    could take the other's replies.
     """
 }
 
@@ -563,6 +567,9 @@ final class ProbeRunner {
         link.onButtonEvent = { [weak self] event in
             self?.buttonEvent(event)
         }
+        // Read-only unless this run diverts: a mouse the probe doesn't divert keeps whatever
+        // reporting it has (Upright's diversion included) instead of being forced native.
+        link.leavesReportingAlone = true
         if options.divert {
             link.configurationProvider = { [weak self] address, snapshot in
                 self?.configuration(for: address, snapshot: snapshot) ?? .native

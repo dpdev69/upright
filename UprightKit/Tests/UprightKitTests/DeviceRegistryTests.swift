@@ -28,22 +28,6 @@ private func identified(
     )
 }
 
-/// A same-shaped stand-in for `EndpointController.State` once W3.1 adds the unsupported case.
-private enum PlannedState {
-    case probing
-    case connected(DeviceSnapshot)
-    case failed(String)
-    case unsupported(UnsupportedReason, DeviceSnapshot?)
-}
-
-private enum LabeledState {
-    case unsupported(reason: UnsupportedReason, partial: DeviceSnapshot?)
-}
-
-private enum ReasonOnlyState {
-    case unsupported(UnsupportedReason)
-}
-
 @MainActor
 final class DeviceRegistryTests: XCTestCase {
     private let receiver = DeviceAddress(link: 1, index: 1)
@@ -267,27 +251,40 @@ final class DeviceRegistryTests: XCTestCase {
         XCTAssertEqual(registry.records.last?.address, bluetooth)
     }
 
-    func testUnsupportedStateIsRecognizedByShape() async {
+    func testUnsupportedStateIsDecodedThroughPublicUpdate() async {
+        let registry = makeRegistry()
         let partial = identified(DeviceProfiles.mxKeys, connection: .bolt, at: receiver)
-        let withPartial = DeviceRegistry.unsupportedPayload(of: PlannedState.unsupported(.notAPointer(.keyboard), partial))
-        XCTAssertEqual(withPartial?.reason, .notAPointer(.keyboard))
-        XCTAssertEqual(withPartial?.partial, partial)
+        registry.update(receiver, connection: .bolt, state: .unsupported(.notAPointer(.keyboard), partial))
+        registry.update(receiverSlot2, connection: .unifying, state: .unsupported(.hidpp10(major: 1, minor: 0), nil))
+        registry.update(receiverSlot3, connection: .unifying, state: .probing)
+        connect(registry, DeviceProfiles.mxVertical, .usb, at: usb)
 
-        let bare = DeviceRegistry.unsupportedPayload(of: PlannedState.unsupported(.hidpp10(major: 1, minor: 0), nil))
-        XCTAssertEqual(bare?.reason, .hidpp10(major: 1, minor: 0))
-        XCTAssertNil(bare?.partial ?? nil)
+        XCTAssertEqual(registry.records.map(\.address), [receiverSlot3, usb, receiver, receiverSlot2])
+        XCTAssertEqual(registry.records.map(\.role), [.pending, .active, .unsupported, .unsupported])
+        XCTAssertFalse(registry.isActive(receiver))
+        XCTAssertFalse(registry.isActive(receiverSlot2))
 
-        XCTAssertEqual(DeviceRegistry.unsupportedPayload(of: LabeledState.unsupported(reason: .noReprogControls, partial: partial))?.partial, partial)
-        XCTAssertEqual(DeviceRegistry.unsupportedPayload(of: ReasonOnlyState.unsupported(.noConfigurableControls))?.reason, .noConfigurableControls)
-
-        XCTAssertNil(DeviceRegistry.unsupportedPayload(of: PlannedState.probing))
-        XCTAssertNil(DeviceRegistry.unsupportedPayload(of: PlannedState.connected(partial)))
-        XCTAssertNil(DeviceRegistry.unsupportedPayload(of: PlannedState.failed("unsupported")))
-        let today: [EndpointController.State] = [.probing, .waitingForDevice, .connected(partial), .asleep(partial), .failed("unsupported")]
-        for state in today {
-            XCTAssertNil(DeviceRegistry.unsupportedPayload(of: state), "\(state)")
+        // The partial snapshot is kept: the keyboard is named and identified from it.
+        let keys = registry.record(receiver)
+        XCTAssertEqual(keys?.displayName, DeviceProfiles.mxKeys.name)
+        XCTAssertNotNil(keys?.model)
+        XCTAssertNotEqual(keys?.model, .mxVertical)
+        if case .unsupported(let reason, let kept)? = keys?.state {
+            XCTAssertEqual(reason, .notAPointer(.keyboard))
+            XCTAssertEqual(kept, partial)
+        } else {
+            XCTFail("expected the unsupported state, got \(String(describing: keys?.state))")
         }
-        XCTAssertNil(DeviceRegistry.unsupportedPayload(of: "unsupported"))
+        XCTAssertNil(registry.record(receiverSlot2)?.model)
+        XCTAssertEqual(registry.record(receiverSlot2)?.displayName, "Logitech device")
+        XCTAssertEqual(registry.summary.problems, [])
+
+        // A failure that merely says "unsupported", and probing, are not the verdict.
+        registry.update(receiver, connection: .bolt, state: .failed("unsupported"))
+        registry.update(receiverSlot2, connection: .unifying, state: .probing)
+        XCTAssertNotEqual(registry.record(receiver)?.role, .unsupported)
+        XCTAssertNotEqual(registry.record(receiverSlot2)?.role, .unsupported)
+        XCTAssertEqual(registry.records.filter { $0.role == .unsupported }, [])
     }
 
     // MARK: Summary

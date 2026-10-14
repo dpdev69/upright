@@ -117,6 +117,53 @@ final class MultiDeviceControllerTests: XCTestCase {
         XCTAssertEqual(receiver.diverted(slot: 2), configurable(DeviceProfiles.mxVertical))
     }
 
+    // MARK: Observers (upright-probe)
+
+    func testObserverWithoutConfigurationNeverWritesReporting() async {
+        let receiver = SimulatedReceiver.unifying([1: DeviceProfiles.mxVertical, 2: DeviceProfiles.mxMaster3])
+        let hub = makeLink(receiver)
+        hub.client.defaultTimeout = ControllerTuning.fastTests.probeTimeout
+        hub.client.busyRetryDelay = 0.01
+        hub.leavesReportingAlone = true
+        hub.start()
+
+        await eventually("both connected") { isConnected(hub, at: 1) && isConnected(hub, at: 2) }
+        await hub.waitUntilIdle()
+        // A link-up reconfigures the slot; still nothing is written.
+        receiver.announceLink(slot: 1, up: true)
+        await pause(0.2)
+        await hub.waitUntilIdle()
+        XCTAssertEqual(receiver.setReportingCount(slot: 1), 0)
+        XCTAssertEqual(receiver.setReportingCount(slot: 2), 0)
+    }
+
+    func testObserverStillDivertsWhatItIsAskedTo() async {
+        let receiver = SimulatedReceiver.unifying([1: DeviceProfiles.mxVertical, 2: DeviceProfiles.mxMaster3])
+        let hub = makeHub(receiver) { snapshot in
+            snapshot.modelKey == .mxVertical ? MultiDeviceControllerTests.divertAll(snapshot) : .native
+        }
+        hub.leavesReportingAlone = true
+        hub.start()
+
+        await eventually("both connected") { isConnected(hub, at: 1) && isConnected(hub, at: 2) }
+        await hub.waitUntilIdle()
+        XCTAssertEqual(receiver.diverted(slot: 1), configurable(DeviceProfiles.mxVertical))
+        XCTAssertEqual(receiver.setReportingCount(slot: 2), 0)
+    }
+
+    func testAppHubForcesNativeReportingOnConnect() async {
+        // Not an observer: a natively served mouse still has every control written native, so
+        // a diversion left behind by a crashed earlier session is cleared.
+        let receiver = SimulatedReceiver.unifying([1: DeviceProfiles.mxVertical])
+        let hub = makeHub(receiver) { _ in .native }
+        hub.start()
+
+        await eventually("connected") { isConnected(hub, at: 1) }
+        await hub.waitUntilIdle()
+        XCTAssertGreaterThan(receiver.setReportingCount(slot: 1), 0)
+        XCTAssertTrue(receiver.diverted(slot: 1).isEmpty)
+    }
+
     // MARK: Unsupported devices
 
     func testHIDPP10DeviceIsUnsupportedAndNotRetried() async {

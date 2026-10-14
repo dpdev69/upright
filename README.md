@@ -150,7 +150,7 @@ and are not expected to work.
 
 | Receiver | Status |
 | --- | --- |
-| **Unifying** (`046D:C52B`, `C532`) | Supported. A mouse is found in any of the 6 slots. The MX Vertical is verified on hardware behind one; other mice are unverified. |
+| **Unifying** (`046D:C52B`, `C532`) | Supported. A mouse is found in any of the 6 slots. The MX Vertical is verified on hardware (1.0) behind one; other mice are unverified. |
 | **Bolt** (`046D:C548`) | Implemented from Solaar's documentation and **simulator-tested only**. Not verified on a real Bolt receiver. The MX Vertical can't pair with Bolt. |
 | **Nano** (12 product IDs, see [docs/DEVICES.md](docs/DEVICES.md#receivers)) | Opened and read with the Unifying pairing layout. **Unverified on hardware.** |
 | **Lightspeed** (G and PRO mice) | **Never opened.** The mice behind Lightspeed receivers in the research data have no programmable-button feature (`0x1B04`), the `C53A` receiver also carries a PowerPlay chip, and Logitech G HUB owns them. Upright leaves them completely alone. |
@@ -160,15 +160,16 @@ and are not expected to work.
 
 | Connection | Status |
 | --- | --- |
-| USB cable | Supported. The MX Vertical (`046D:C08A`) is verified on hardware; other models are unverified. |
+| USB cable | Supported. The MX Vertical (`046D:C08A`) is verified on hardware (1.0); other models are unverified. |
 | Bluetooth | Best effort. Depends on macOS exposing the mouse's HID++ collection, and may need Input Monitoring. The MX Vertical (`046D:B020`) is the model it was built for; other models are unverified. |
 | Receivers | See above. |
 
 ### Report your mouse
 
 If you own a model other than the MX Vertical, you can help move it from "published data" to
-"verified": run `make probe ARGS=--all` (read-only, no button is diverted) and use **Settings →
-Mice → Copy Device Report** while the mouse is connected, then open an issue on GitHub with both
+"verified": use **Settings → Mice → Copy Device Report** while the mouse is connected, then quit
+Upright and run `make probe ARGS=--all` (no button is diverted; Upright and the probe must not run
+at the same time), then open an issue on GitHub with both
 (see `.github/ISSUE_TEMPLATE`).
 
 ## Using several mice
@@ -190,13 +191,13 @@ and receivers, including several mice on one receiver. Upright opens each one se
   mouse at a time and show its name in the section header: the mouse that last sent a button
   press, else the one selected in **Settings → Mice**, else the first connected.
 - **Verification.** Multi-mouse behavior is covered by the simulator and by end-to-end tests with
-  several simulated mice. On hardware it has been tried with a single MX Vertical. **Two real mice
-  at once is unverified.**
+  several simulated mice. Upright 1.0 was tested on hardware with a single MX Vertical; this
+  multi-mouse build has not yet been run on real hardware. **Two real mice at once is unverified.**
 
 ## Requirements
 
 - macOS 13 Ventura or later (Apple silicon or Intel)
-- Xcode 15 or later to build (CI builds with Xcode 16.2)
+- Xcode 15.3 or later to build (CI builds with Xcode 16.2)
 - A Logitech mouse that speaks HID++ 2.0 with programmable buttons. The MX Vertical is the one
   verified on hardware; see [Supported devices](#supported-devices).
 
@@ -565,7 +566,7 @@ lane for interactive changes), because it is unverified whether receivers tolera
 
 **Why the app compiles UprightKit's sources directly.** The Xcode project references the files
 in `UprightKit/Sources/UprightKit` instead of linking the package. That keeps the project
-buildable on any Xcode 15+ without package resolution. Meanwhile `swift test` exercises exactly
+buildable on any Xcode 15.3+ without package resolution. Meanwhile `swift test` exercises exactly
 the same code, on Linux too. New Kit files must therefore be added to `project.pbxproj`; see
 [CONTRIBUTING.md](CONTRIBUTING.md).
 

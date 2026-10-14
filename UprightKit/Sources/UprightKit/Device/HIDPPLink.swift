@@ -71,6 +71,12 @@ public final class HIDPPLink {
         endpoints.keys.sorted().compactMap { endpoints[$0] }
     }
 
+    /// For observers such as `upright-probe` without `--divert`: endpoints whose configuration
+    /// diverts nothing leave button reporting untouched instead of forcing every control
+    /// native. Upright leaves this false, so a mouse it serves natively still has a diversion
+    /// left by a crashed earlier session cleared.
+    public var leavesReportingAlone = false
+
     /// Asked synchronously, right after an endpoint is identified and before anything is
     /// diverted, for the configuration to apply. Nil means `.native`.
     public var configurationProvider: (@MainActor (DeviceAddress, DeviceSnapshot) -> EndpointConfiguration)?

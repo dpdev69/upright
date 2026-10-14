@@ -15,6 +15,9 @@ protocol EndpointHub: AnyObject {
     /// sends notifications (coalesced across slots).
     func endpointNeedsReceiverNotifications(_ endpoint: EndpointController) async
     func endpoint(_ endpoint: EndpointController, log text: String)
+    /// True for an observer (`upright-probe` without `--divert`): button reporting is only
+    /// written once this process has asked for a diversion, never just to make it native.
+    var leavesReportingAlone: Bool { get }
 }
 
 /// Keeps one mouse configured: a receiver slot (1...6) or a directly connected device (0xFF).
@@ -655,6 +658,14 @@ public final class EndpointController {
     private func applyDesiredDiversion(to session: DeviceSession, force: Bool) async throws {
         let wanted = desiredDiversion
         let rawXY = desiredRawXY
+        // An observer that diverts nothing (and never did through this session) writes nothing:
+        // forcing every control native would undo another process's diversion (Upright running
+        // next to upright-probe). The app never sets this, so it still clears a diversion left
+        // behind by a crashed earlier session.
+        if hub?.leavesReportingAlone == true, wanted.isEmpty, rawXY.isEmpty,
+           session.divertedControls.isEmpty, session.rawXYControls.isEmpty {
+            return
+        }
         let failures = try await HIDPPClient.$lane.withValue(.interactive) {
             try await session.applyDiversion(wanted, rawXY: rawXY, force: force)
         }
