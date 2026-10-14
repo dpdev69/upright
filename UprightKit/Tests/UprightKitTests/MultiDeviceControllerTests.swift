@@ -6,7 +6,7 @@ import XCTest
 @MainActor
 final class MultiDeviceControllerTests: XCTestCase {
     /// Diverts every configurable control of whatever connects.
-    static func divertAll(_ snapshot: DeviceSnapshot) -> EndpointConfiguration {
+    nonisolated static func divertAll(_ snapshot: DeviceSnapshot) -> EndpointConfiguration {
         EndpointConfiguration(divert: Set(snapshot.configurableControls.map(\.cid)))
     }
 
