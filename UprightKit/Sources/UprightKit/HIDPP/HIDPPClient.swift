@@ -50,6 +50,8 @@ public final class HIDPPClient: @unchecked Sendable {
     private struct Pending {
         let request: HIDPPMessage
         let continuation: CheckedContinuation<HIDPPMessage, Error>
+        /// Fails the request after its timeout; cancelled once the request finishes otherwise.
+        let timeout: DispatchWorkItem
     }
 
     private let lock = NSLock()
@@ -91,13 +93,16 @@ public final class HIDPPClient: @unchecked Sendable {
     private func sendOnce(_ request: HIDPPMessage, timeout: TimeInterval?) async throws -> HIDPPMessage {
         let id = UUID()
         return try await withCheckedThrowingContinuation { continuation in
+            let timeoutItem = DispatchWorkItem { [weak self] in
+                self?.finish(id, with: .failure(HIDPPError.timeout))
+            }
             lock.lock()
             if closed {
                 lock.unlock()
                 continuation.resume(throwing: HIDPPError.transportClosed)
                 return
             }
-            pending[id] = Pending(request: request, continuation: continuation)
+            pending[id] = Pending(request: request, continuation: continuation, timeout: timeoutItem)
             order.append(id)
             lock.unlock()
 
@@ -108,9 +113,8 @@ public final class HIDPPClient: @unchecked Sendable {
                 finish(id, with: .failure(error))
                 return
             }
-            DispatchQueue.global().asyncAfter(deadline: .now() + (timeout ?? defaultTimeout)) { [weak self] in
-                self?.finish(id, with: .failure(HIDPPError.timeout))
-            }
+            // A reply that already arrived has cancelled the item, so it never runs.
+            DispatchQueue.global().asyncAfter(deadline: .now() + (timeout ?? defaultTimeout), execute: timeoutItem)
         }
     }
 
@@ -149,7 +153,10 @@ public final class HIDPPClient: @unchecked Sendable {
         order.removeAll()
         lock.unlock()
         gate.close()
-        all.forEach { $0.continuation.resume(throwing: HIDPPError.transportClosed) }
+        all.forEach {
+            $0.timeout.cancel()
+            $0.continuation.resume(throwing: HIDPPError.transportClosed)
+        }
         onClose?()
     }
 
@@ -174,6 +181,7 @@ public final class HIDPPClient: @unchecked Sendable {
             onUnsolicited?(message)
             return
         }
+        request.timeout.cancel()
         switch match {
         case .success: request.continuation.resume(returning: message)
         case .hidpp10Error(let code): request.continuation.resume(throwing: HIDPPError.hidpp10(code))
@@ -186,6 +194,7 @@ public final class HIDPPClient: @unchecked Sendable {
         let entry = pending.removeValue(forKey: id)
         order.removeAll { $0 == id }
         lock.unlock()
+        entry?.timeout.cancel()
         entry?.continuation.resume(with: result)
     }
 }

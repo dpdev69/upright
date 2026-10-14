@@ -191,14 +191,32 @@ final class SystemActionPerformer: ActionPerforming {
 
     // MARK: Apps and processes
 
+    /// Mission Control.app, looked up once.
+    private lazy var missionControlURL: URL? = {
+        if let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: "com.apple.exposelauncher") {
+            return url
+        }
+        let url = URL(fileURLWithPath: "/System/Applications/Mission Control.app")
+        return FileManager.default.fileExists(atPath: url.path) ? url : nil
+    }()
+
     private func openMissionControl(_ mode: MissionControlMode) {
         // Mission Control.app is arm64e-only. Executing it from this arm64 app is
-        // killed immediately, so LaunchServices has to start it.
-        var arguments = ["-a", "Mission Control"]
-        if !mode.rawValue.isEmpty {
-            arguments += ["--args", mode.rawValue]
+        // killed immediately, so LaunchServices (NSWorkspace) has to start it.
+        let arguments = mode.rawValue.isEmpty ? [] : [mode.rawValue]
+        guard let url = missionControlURL else {
+            let openArguments = ["-a", "Mission Control"] + (arguments.isEmpty ? [] : ["--args"] + arguments)
+            launcher.run("/usr/bin/open", arguments: openArguments)
+            return
         }
-        launcher.run("/usr/bin/open", arguments: arguments)
+        let configuration = NSWorkspace.OpenConfiguration()
+        configuration.arguments = arguments
+        configuration.addsToRecentItems = false
+        NSWorkspace.shared.openApplication(at: url, configuration: configuration) { [logger] _, error in
+            if let error {
+                logger.error("Could not open Mission Control: \(error.localizedDescription, privacy: .public)")
+            }
+        }
     }
 
     private func launch(_ app: AppReference) {
@@ -266,73 +284,98 @@ final class ProcessLauncher {
 }
 
 /// While a synthetic mouse button is held, rewrites pointer movement into drags of that button
-/// with an active session event tap. The tap exists only while a button is held.
+/// with an active session event tap. The tap is created on the first press and then only
+/// enabled while a button is held.
 @MainActor
 final class MouseDragRewriter {
-    /// Shared with the tap callback, which runs on the main run loop.
-    fileprivate final class State {
-        var buttonNumber: Int64 = 0
-        var tap: CFMachPort?
-    }
-
-    private let state = State()
-    private var runLoopSource: CFRunLoopSource?
+    private var tap: DragEventTap?
 
     func setButton(_ buttonNumber: Int64?) {
         guard let buttonNumber else {
-            stop()
+            tap?.disable()
             return
         }
-        state.buttonNumber = buttonNumber
-        if state.tap == nil { start() }
-    }
-
-    private func start() {
-        let mask = CGEventMask(1 << CGEventType.mouseMoved.rawValue)
-        guard let tap = CGEvent.tapCreate(
-            tap: .cgSessionEventTap,
-            place: .headInsertEventTap,
-            options: .defaultTap,
-            eventsOfInterest: mask,
-            callback: dragTapCallback,
-            userInfo: Unmanaged.passUnretained(state).toOpaque()
-        ) else { return }
-        let source = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, tap, 0)
-        CFRunLoopAddSource(CFRunLoopGetMain(), source, .commonModes)
-        CGEvent.tapEnable(tap: tap, enable: true)
-        state.tap = tap
-        runLoopSource = source
-    }
-
-    private func stop() {
-        if let tap = state.tap {
-            CGEvent.tapEnable(tap: tap, enable: false)
-            CFMachPortInvalidate(tap)
+        // A tap whose port macOS invalidated (e.g. after an Accessibility reset) is dropped; its run loop exits on its own once its only source is gone.
+        if tap?.isValid != true {
+            let tap = DragEventTap()
+            guard tap.start() else { return }
+            self.tap = tap
         }
-        if let runLoopSource {
-            CFRunLoopRemoveSource(CFRunLoopGetMain(), runLoopSource, .commonModes)
-        }
-        state.tap = nil
-        runLoopSource = nil
+        tap?.enable(button: buttonNumber)
     }
 }
 
-private func dragTapCallback(
-    proxy: CGEventTapProxy,
-    type: CGEventType,
-    event: CGEvent,
-    userInfo: UnsafeMutableRawPointer?
-) -> Unmanaged<CGEvent>? {
-    guard let userInfo else { return Unmanaged.passUnretained(event) }
-    let state = Unmanaged<MouseDragRewriter.State>.fromOpaque(userInfo).takeUnretainedValue()
-    switch type {
-    case .tapDisabledByTimeout, .tapDisabledByUserInput:
-        if let tap = state.tap { CGEvent.tapEnable(tap: tap, enable: true) }
-    case .mouseMoved:
-        event.type = .otherMouseDragged
-        event.setIntegerValueField(.mouseEventButtonNumber, value: state.buttonNumber)
-    default:
-        break
+/// The drag tap. Runs on its own thread so pointer movement never waits on the main thread.
+/// `start`, `enable` and `disable` are called from the main actor; the callback runs on the tap
+/// thread. `button` is shared through its lock, so a release stops rewriting before the
+/// synthetic mouse-up is posted. `port` is set on the tap thread before `start` returns and
+/// never changes afterwards.
+private final class DragEventTap: @unchecked Sendable {
+    private let button = OSAllocatedUnfairLock<Int64?>(initialState: nil)
+    private var port: CFMachPort?
+
+    var isValid: Bool { port.map { CFMachPortIsValid($0) } ?? false }
+
+    /// Creates the tap on a new thread and waits until it is listening. False when macOS refused.
+    func start() -> Bool {
+        let ready = DispatchSemaphore(value: 0)
+        let thread = Thread { [self] in
+            let mask = CGEventMask(1) << CGEventType.mouseMoved.rawValue
+            guard let port = CGEvent.tapCreate(
+                tap: .cgSessionEventTap,
+                place: .headInsertEventTap,
+                options: .defaultTap,
+                eventsOfInterest: mask,
+                callback: { _, type, event, userInfo in
+                    guard let userInfo else { return Unmanaged.passUnretained(event) }
+                    return Unmanaged<DragEventTap>.fromOpaque(userInfo).takeUnretainedValue().handle(type, event)
+                },
+                userInfo: Unmanaged.passUnretained(self).toOpaque()
+            ) else {
+                ready.signal()
+                return
+            }
+            CFRunLoopAddSource(CFRunLoopGetCurrent(), CFMachPortCreateRunLoopSource(nil, port, 0), .commonModes)
+            self.port = port
+            ready.signal()
+            CFRunLoopRun()
+        }
+        thread.name = "Upright drag tap"
+        thread.qualityOfService = .userInteractive
+        thread.start()
+        ready.wait()
+        return port != nil
     }
-    return Unmanaged.passUnretained(event)
+
+    /// Enabling synchronously (rather than on the tap thread) means the tap is listening before
+    /// the caller posts the synthetic mouse-down, so no early movement escapes as a plain move.
+    func enable(button number: Int64) {
+        button.withLock { $0 = number }
+        if let port { CGEvent.tapEnable(tap: port, enable: true) }
+    }
+
+    func disable() {
+        button.withLock { $0 = nil }
+        if let port { CGEvent.tapEnable(tap: port, enable: false) }
+    }
+
+    // MARK: Tap thread
+
+    private func handle(_ type: CGEventType, _ event: CGEvent) -> Unmanaged<CGEvent>? {
+        switch type {
+        case .tapDisabledByTimeout, .tapDisabledByUserInput:
+            guard let port, button.withLock({ $0 }) != nil else { break }
+            CGEvent.tapEnable(tap: port, enable: true)
+            // Main may have released the button meanwhile; don't leave the tap on with nothing held.
+            if button.withLock({ $0 }) == nil { CGEvent.tapEnable(tap: port, enable: false) }
+        case .mouseMoved:
+            if let number = button.withLock({ $0 }) {
+                event.type = .otherMouseDragged
+                event.setIntegerValueField(.mouseEventButtonNumber, value: number)
+            }
+        default:
+            break
+        }
+        return Unmanaged.passUnretained(event)
+    }
 }

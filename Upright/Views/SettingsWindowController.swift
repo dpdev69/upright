@@ -78,6 +78,8 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
     func windowWillClose(_ notification: Notification) {
         guard let window = notification.object as? NSWindow, window === self.window else { return }
         AppActivation.windowWillClose(window)
+        // Raw HID++ traffic is only shown in Settings; stop formatting it.
+        AppModel.shared.devices.logsTraffic = false
         // Drop the SwiftUI hierarchy after AppKit has finished closing the window.
         DispatchQueue.main.async { [weak window] in
             guard let window, !window.isVisible else { return }
@@ -99,6 +101,7 @@ enum AppActivation {
             NSApp.setActivationPolicy(.regular)
         }
         activate()
+        AppModel.shared.permissions.windowsChanged()
     }
 
     static func windowWillClose(_ window: NSWindow) {
@@ -106,6 +109,7 @@ enum AppActivation {
         if openWindows.isEmpty, NSApp.activationPolicy() != .accessory {
             NSApp.setActivationPolicy(.accessory)
         }
+        AppModel.shared.permissions.windowsChanged()
     }
 
     static func activate() {

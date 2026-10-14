@@ -25,24 +25,15 @@ final class DeviceManager: ObservableObject {
         case failed(String)
     }
 
-    struct LogEntry: Identifiable, Equatable {
-        let id: Int
-        let date: Date
-        /// Prefixed with the label of the device or interface the line is about.
-        let text: String
-        let isTraffic: Bool
-        /// The device the line is about; nil for a line about an interface or the app.
-        var address: DeviceAddress?
-        /// The interface the line is about; nil for a line about the app.
-        var link: UInt32?
-    }
+    typealias LogEntry = DeviceActivityLog.Entry
 
     /// Every endpoint: pointers first by first-seen order, unsupported devices last.
     @Published private(set) var records: [DeviceRegistry.Record] = []
     @Published private(set) var summary = FleetSummary()
     /// Names of the interfaces macOS refused to open (Input Monitoring).
     @Published private(set) var blockedInterfaces: [String] = []
-    @Published private(set) var log: [LogEntry] = []
+    /// The activity log, observed on its own so a new line doesn't re-render every view of the fleet.
+    let activity = DeviceActivityLog()
     /// Raw HID++ traffic is only formatted (and its handler installed) while this is on.
     @Published var logsTraffic = false {
         didSet {
@@ -98,9 +89,7 @@ final class DeviceManager: ObservableObject {
     private var recoveryAttempts: [String: Int] = [:]
     private var recoveryTasks: [String: Task<Void, Never>] = [:]
     private var started = false
-    private var nextLogID = 0
     private var observers: [NSObjectProtocol] = []
-    private static let maxLogEntries = 600
     private static let maxRecoveries = 3
 
     /// `source` nil: the simulated fleet in Demo Mode, otherwise IOKit.
@@ -270,16 +259,6 @@ final class DeviceManager: ObservableObject {
         guard !entries.isEmpty else { return }
         append(String(localized: "Mac woke up; reapplying button configuration"))
         orderedEntries.forEach { $0.link.refresh() }
-    }
-
-    func clearLog() {
-        log.removeAll()
-    }
-
-    var logText: String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "HH:mm:ss.SSS"
-        return log.map { "\(formatter.string(from: $0.date))  \($0.text)" }.joined(separator: "\n")
     }
 
     // MARK: Source and interfaces
@@ -612,18 +591,12 @@ final class DeviceManager: ObservableObject {
         } else {
             label = nil
         }
-        nextLogID += 1
-        log.append(LogEntry(
-            id: nextLogID,
-            date: Date(),
+        activity.append(
             text: label.map { "\($0): \(text)" } ?? text,
             isTraffic: isTraffic,
             address: address == .unassigned ? nil : address,
             link: number
-        ))
-        if log.count > Self.maxLogEntries {
-            log.removeFirst(log.count - Self.maxLogEntries)
-        }
+        )
     }
 
     private func entry(forLink number: UInt32) -> Entry? {
@@ -722,6 +695,43 @@ final class DeviceManager: ObservableObject {
     private func refreshDesiredDPI() {
         let value = primaryAddress.flatMap { endpoint(at: $0)?.desiredDPI }
         if value != desiredDPI { desiredDPI = value }
+    }
+}
+
+/// The fleet's activity log: the newest `maxEntries` lines (a few more between trims).
+@MainActor
+final class DeviceActivityLog: ObservableObject {
+    struct Entry: Identifiable, Equatable {
+        let id: Int
+        let date: Date
+        /// Prefixed with the label of the device or interface the line is about.
+        let text: String
+        let isTraffic: Bool
+        /// The device the line is about; nil for a line about an interface or the app.
+        var address: DeviceAddress?
+        /// The interface the line is about; nil for a line about the app.
+        var link: UInt32?
+    }
+
+    private(set) var entries: [Entry] = []
+
+    private var nextID = 0
+    private static let maxEntries = 600
+    /// Trimming waits for this many extra lines, so the O(n) shift isn't paid on every append.
+    private static let trimSlack = 60
+
+    func append(text: String, isTraffic: Bool, address: DeviceAddress?, link: UInt32?) {
+        objectWillChange.send()
+        nextID += 1
+        entries.append(Entry(id: nextID, date: Date(), text: text, isTraffic: isTraffic, address: address, link: link))
+        if entries.count > Self.maxEntries + Self.trimSlack {
+            entries.removeFirst(entries.count - Self.maxEntries)
+        }
+    }
+
+    func clear() {
+        objectWillChange.send()
+        entries.removeAll()
     }
 }
 

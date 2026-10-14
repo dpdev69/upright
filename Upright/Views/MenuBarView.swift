@@ -92,8 +92,7 @@ struct MenuBarView: View {
             devices.refreshDeviceInfo()
         }
         .onReceive(panel.didBecomeKey) { devices.refreshDeviceInfo() }
-        .onChange(of: model.lastPressedControl) { pressed in
-            guard let pressed else { return }
+        .onReceive(model.presses.pressed) { pressed in
             // Only buttons of the mouse whose summary is shown flash.
             guard pressed.source == model.menuDevice || (pressed.model != nil && pressed.model == menuModel) else { return }
             flash(pressed.cid)
