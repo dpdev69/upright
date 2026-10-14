@@ -21,7 +21,7 @@ Design: [`DESIGN-multimouse.md`](DESIGN-multimouse.md) (final, judged from three
 | 5 | UI: Mice pane, Buttons model picker, onboarding/copy, Kit cleanup | Done, committed (`88a66aa`) |
 | 5b | Demo Mode + `--export-snapshots` (real-UI PNGs for the video/README) | Done, committed (`30bbb2b`); snapshot export (`make snapshots`) writes real-UI PNGs plus `manifest.json` to `media/snapshots/` |
 | 6 | Strings catalog, docs (supported-devices table), pbxproj rename EndpointController.swift, full build/test | Done, committed (`06f15a2`); 388 Kit tests green after the wave 7 audit fixes |
-| 7 | Final Opus audit + hardware smoke checklist | Done: audit (two lenses, see "Audit outcome") and [`HARDWARE-SMOKE-CHECKLIST.md`](HARDWARE-SMOKE-CHECKLIST.md) written; audit fixes may still be uncommitted in the working tree |
+| 7 | Final Opus audit + hardware smoke checklist | Done, committed (`c6a3900`): audit (two lenses, see "Audit outcome") fixes and [`HARDWARE-SMOKE-CHECKLIST.md`](HARDWARE-SMOKE-CHECKLIST.md); 388 tests green, `make app` green. Remaining: push branch + CI, owner hardware smoke test, launch video, merge |
 | Video | 30 s launch video; pre-production done ([`launch-video-spec.json`](launch-video-spec.json)) | Unblocked: `media/snapshots/manifest.json` exists (not yet run) |
 
 The multi-mouse app is in: per-model bindings, the Mice and Buttons UI, Demo Mode (`Upright --demo`) and the
@@ -43,8 +43,9 @@ Waves 0-7 are done. What is left, in order:
    (skips pre-production). Size `M`, format `16:9`.
 4. **Merge** `multi-mouse` into `main` once CI is green and the smoke test has passed.
 
-How to resume: check out `multi-mouse`, run `swift test --package-path UprightKit` and `make app`, commit any
-uncommitted audit fixes, then continue from item 1 above.
+How to resume: check out `multi-mouse` (wave 7 is done in `c6a3900`: 388 tests green, `make app` green; nothing is
+uncommitted), run `swift test --package-path UprightKit` and `make app` to re-confirm, then continue from item 1 above
+(the remaining items are: owner hardware smoke test, push the branch + CI, launch video, merge).
 
 Historical note: waves 4, 5 and 5b were run with `docs/dev/workflows/multi-mouse-app.js`; it is not needed any more.
 
@@ -57,10 +58,10 @@ The full step-by-step list, with expected output and what to paste back, is in
 - Mappings, app profiles and pointer speed migrate unchanged from 2.x; no Input Monitoring prompt at launch.
 - Reconnect latency after sleep, power-cycle and Easy-Switch is as fast as 2.x; quit restores native buttons; no stuck
   keys when toggling "Remap buttons".
-- Interface opening changed in the wave 7 audit: the IOHIDManager is no longer opened, only the interfaces the
+- **Highest priority** (checklist section 4): interface opening changed in the wave 7 audit: the IOHIDManager is no longer opened, only the interfaces the
   classifier accepts are (one `IOHIDDeviceOpen` each). Confirm the mouse is still found and button reports still
   arrive over the receiver, USB and Bluetooth (`tccutil reset ListenEvent io.github.upright.Upright` to test with
-  Input Monitoring undecided).
+  Input Monitoring undecided; expect no prompt and no "macOS is blocking access" banner).
 - Everything about other models and two physical mice at once is simulator-verified only until a contributor with
   that hardware reports `upright-probe --all` output (README marks those models "untested on hardware").
 
@@ -75,10 +76,11 @@ swift:6.0 and CI on the branch.
 
 Accepted limitations and deferred items:
 
-- **A1 (should-fix)**: the login item is not isolated in Demo Mode.
-- **A2 (plausible risk, hardware check)**: manager-level `IOHIDManagerOpen` may implicitly open interfaces of
-  Lightspeed and 27 MHz receivers that get no HID++ traffic (`IOKitHID.swift`); also the implicit Input Monitoring
-  prompt risk. Covered by the checklist.
+- **A1** (fixed in `c6a3900`): Demo Mode no longer registers or reads the login item.
+- **A2** (fixed in `c6a3900`, hardware check outstanding): `IOHIDManagerOpen` is gone, so interfaces the classifier
+  rejects are no longer opened implicitly and the implicit Input Monitoring prompt risk is removed in code; still to be
+  confirmed on the MX Vertical (checklist section 4).
+- **A3** (fixed in `c6a3900`): `upright-probe` without `--divert` is read-only for button reporting.
 - **A5**: AppKit UI-state keys land in the real defaults domain during an interactive demo.
 - **A6**: the shortcut main key is not refcounted across devices (modifiers and mouse buttons are).
 - **A9**: cursor-fallback gestures cannot be attributed to a device.
