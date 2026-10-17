@@ -6,6 +6,17 @@ All notable changes to Upright are listed here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- **A receiver mouse could stay disconnected after the Mac slept or after an Easy-Switch
+  away and back.** When its link dropped, Upright waited only for the receiver's link-up
+  notification; if that notification was missed, nothing ever looked for the mouse again. A
+  dropped link is now retried with the usual backoff (up to 30 s), so the mouse is found even
+  without the notification.
+- If re-enabling a receiver's link notifications fails (for example right after the Mac
+  wakes), absent mice go back to being probed every 30 s instead of every 5 minutes.
+- Simulator-tested only; not yet verified on hardware.
+
 ## [1.1.1] - 2026-10-14
 
 ### Changed
