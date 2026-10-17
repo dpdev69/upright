@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Upright: your Logitech mouse on macOS, without Logi Options+</title>
-<meta name="description" content="Upright is a free, open-source macOS menu-bar app that remaps the buttons on Logitech mice over HID++, without Logi Options+. No account, no daemon, no kernel extension.">
+<title>Upright: a free Logi Options+ alternative for Mac</title>
+<meta name="description" content="Remap the buttons on your Logitech mouse on a Mac without Logi Options+. Upright is a free, open-source menu-bar app, verified on the MX Vertical, with gestures, per-app profiles, DPI and battery alerts.">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#fbfbfd" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
@@ -28,8 +28,11 @@
 
 <link rel="icon" type="image/png" href="assets/favicon.png">
 <link rel="apple-touch-icon" href="assets/icon-256.png">
-<link rel="stylesheet" href="assets/site.css?v=3">
+<link rel="stylesheet" href="assets/site.css?v=4">
 <script>document.documentElement.classList.add('js');</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "Upright", "description": "A free, open-source macOS menu-bar app that remaps the buttons on Logitech mice over HID++, without Logi Options+.", "applicationCategory": "UtilitiesApplication", "operatingSystem": "macOS 13 or later", "softwareVersion": "1.1.2", "url": "https://dpdev69.github.io/upright/", "downloadUrl": "https://github.com/dpdev69/upright/releases/latest", "installUrl": "https://github.com/dpdev69/upright/releases/latest", "image": "https://dpdev69.github.io/upright/assets/og-image.png", "screenshot": "https://dpdev69.github.io/upright/assets/og-image.png", "license": "https://opensource.org/licenses/MIT", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "author": {"@type": "Organization", "name": "Upright contributors", "url": "https://github.com/dpdev69/upright"}, "sameAs": ["https://github.com/dpdev69/upright"]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebSite", "name": "Upright", "url": "https://dpdev69.github.io/upright/"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Is Upright free?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. It's open source under the MIT license, with no account and no subscription."}}, {"@type": "Question", "name": "Which mice work?", "acceptedAnswer": {"@type": "Answer", "text": "The MX Vertical is verified on real hardware. Other Logitech mice that speak HID++ 2.0 and have programmable buttons are expected to work, including the MX Master, MX Anywhere, MX Ergo and Lift families, but they haven't been verified on hardware yet. Upright decides by what a mouse answers, not by its name, so mice outside the catalog can work too."}}, {"@type": "Question", "name": "macOS won't open Upright the first time. What do I do?", "acceptedAnswer": {"@type": "Answer", "text": "A build that isn't notarized is blocked by Gatekeeper on first launch. Right-click Upright.app, choose Open, then Open again. You only need to do this once."}}, {"@type": "Question", "name": "Do I need to remove Logi Options+?", "acceptedAnswer": {"@type": "Answer", "text": "Quit it and take it out of your login items while you use Upright. Logi Options+, Solaar and LogiOps divert the same buttons, and only one app can have them."}}, {"@type": "Question", "name": "Does it change my mouse permanently?", "acceptedAnswer": {"@type": "Answer", "text": "No. Nothing is written to the mouse's memory. Quit Upright and your buttons go back to normal straight away."}}, {"@type": "Question", "name": "What permissions does it ask for?", "acceptedAnswer": {"@type": "Answer", "text": "Accessibility, to send the shortcuts, clicks and media keys your buttons are mapped to. Input Monitoring only if macOS hides a mouse over Bluetooth. Mission Control actions, opening apps and pointer speed work without either."}}, {"@type": "Question", "name": "Can I build it myself?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Open Upright.xcodeproj in Xcode 15.3 or later and press ⌘R. You don't need an Apple Developer account."}}, {"@type": "Question", "name": "How do I uninstall it?", "acceptedAnswer": {"@type": "Answer", "text": "Turn off Open at login in Settings → General if you turned it on, quit Upright and delete Upright.app. Nothing was written to the mouse, so there's nothing to undo there. The install guide also shows how to remove its settings."}}]}</script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -115,7 +118,7 @@
           </div>
         </div>
       </div>
-      <p class="hero-note">No account, no background daemon and no kernel extension. Upright talks to the mouse directly.</p>
+      <p class="hero-note">No account, no background daemon and no kernel extension. Upright talks to the mouse directly. Built and verified on the <a href="mx-vertical.html">Logitech MX Vertical</a>.</p>
     </div>
   </section>
 
@@ -269,7 +272,7 @@
           <span class="seal"><svg aria-hidden="true"><use href="#i-check"/></svg></span>
           <span class="m-name">MX Vertical</span>
           <span class="badge badge-verified">Verified</span>
-          <span class="m-note">Tested on real hardware</span>
+          <span class="m-note">Tested on real hardware · <a href="mx-vertical.html">MX Vertical on Mac</a></span>
         </li>
         <li><span class="m-name">MX Master 3S</span><span class="badge">Published data</span></li>
         <li><span class="m-name">MX Master 4</span><span class="badge">Published data</span></li>
@@ -434,6 +437,7 @@ open build/Build/Products/Release/Upright.app</code></pre>
         <a href="#mice">Supported mice</a>
         <a href="#download">Install</a>
         <a href="#faq">FAQ</a>
+        <a href="mx-vertical.html">MX Vertical on Mac</a>
       </nav>
       <nav aria-labelledby="f-project">
         <p class="f-title" id="f-project">Project</p>
@@ -457,7 +461,7 @@ open build/Build/Products/Release/Upright.app</code></pre>
   </div>
 </footer>
 
-<script src="assets/site.js?v=3" defer></script>
-<script src="assets/page.js?v=3" defer></script>
+<script src="assets/site.js?v=4" defer></script>
+<script src="assets/page.js?v=4" defer></script>
 </body>
 </html>

@@ -2,6 +2,8 @@
 
 **Open-source button remapping for Logitech mice on macOS, without Logi Options+.**
 
+**Website:** [dpdev69.github.io/upright](https://dpdev69.github.io/upright/) · [MX Vertical on Mac](https://dpdev69.github.io/upright/mx-vertical.html) · [Download](https://github.com/dpdev69/upright/releases/latest)
+
 Upright is a small native SwiftUI menu-bar app. **It remaps Logitech mice over HID++**: the
 thumb buttons, the top (DPI) button, the wheel click and any other button a mouse lets software
 take over. It also adds pointer-speed, scrolling and battery features. It talks to the mouse
