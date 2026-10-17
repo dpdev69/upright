@@ -179,7 +179,10 @@ public final class EndpointController {
     func receive(_ message: HIDPPMessage) {
         guard !isShutDown, !isUnsupported else { return }
         if let session, session.handle(message) {
-            if case .asleep = state { scheduleReconfigure("The mouse is sending reports again") }
+            switch state {
+            case .asleep, .failed: scheduleReconfigure("The mouse is sending reports again")
+            default: break
+            }
             return
         }
         noteActivity(from: message)
@@ -823,12 +826,32 @@ public final class EndpointController {
     /// until it powers off), release anything held, and retry with backoff.
     private func becameUnreachable(_ session: DeviceSession, _ error: Error) {
         // Once per absence: the retries that follow are logged by `scheduleRetry`.
-        if case .asleep = state {} else { log("The mouse isn't answering (\(error)); will retry") }
+        switch state {
+        case .asleep, .failed: break
+        default: log("The mouse isn't answering (\(error)); will retry")
+        }
         linkWasLost = true
         session.releaseAll()
         session.invalidateAppliedState()
-        if let snapshot = session.snapshot { transition(.asleep(snapshot)) }
+        if isRefusedByTransport(error) {
+            // Retrying on this interface won't help: macOS refuses reports on a handle that went
+            // stale (a Bluetooth mouse after the Mac slept). `.failed` lets the owner reopen it.
+            transition(.failed(Self.reportsRefusedMessage))
+        } else if let snapshot = session.snapshot {
+            transition(.asleep(snapshot))
+        }
         scheduleRetry()
+    }
+
+    /// macOS refused to send a report to a directly connected mouse. A receiver's slot can be
+    /// asleep behind a working interface, so this only counts on a direct link.
+    private func isRefusedByTransport(_ error: Error) -> Bool {
+        guard !isReceiver, case HIDPPError.sendFailed = error else { return false }
+        return true
+    }
+
+    private static var reportsRefusedMessage: String {
+        NSLocalizedString("macOS isn't accepting reports for the mouse; opening it again", comment: "Connection status shown when macOS refuses HID reports for a Bluetooth or USB mouse")
     }
 
     // MARK: Events

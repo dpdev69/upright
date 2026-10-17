@@ -90,7 +90,11 @@ final class IOKitLinkSource: LinkSource {
     }
 
     func start() throws {
-        let monitor = self.monitor ?? HIDDeviceMonitor()
+        // A new manager every time. One that is stopped and scheduled again doesn't report the
+        // devices it already had, so Reconnect All found nothing for a Bluetooth mouse that
+        // stayed connected the whole time.
+        self.monitor?.stop()
+        let monitor = HIDDeviceMonitor()
         self.monitor = monitor
         monitor.onMatch = { [weak self] device in
             MainActorDelivery.run { self?.deliver(device) }
@@ -114,6 +118,7 @@ final class IOKitLinkSource: LinkSource {
 
     func stop() {
         monitor?.stop()
+        monitor = nil
         devices.removeAll()
     }
 
