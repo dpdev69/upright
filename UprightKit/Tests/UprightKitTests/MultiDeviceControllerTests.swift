@@ -358,6 +358,32 @@ final class MultiDeviceControllerTests: XCTestCase {
         XCTAssertEqual(state(hub, at: 1), .waitingForDevice)
     }
 
+    func testAbsentSlotPollsAgainWhenNotificationFlagsCanNotBeRestored() async {
+        let receiver = SimulatedReceiver.unifying([1: DeviceProfiles.mxVertical, 2: DeviceProfiles.lift])
+        receiver.setDropsRequests(true, slot: 1)
+        var tuning = ControllerTuning.fastTests
+        tuning.probeTimeout = 0.1
+        tuning.retryBaseDelay = 0.05
+        tuning.retryMaxDelay = 0.1
+        tuning.retryMaxDelayWithNotifications = 5
+        let hub = makeHub(receiver, tuning: tuning)
+        hub.start()
+        await eventually("slot 2 connected and slot 1 backed off", timeout: 5) {
+            isConnected(hub, at: 2) && receiver.pingCount(slot: 1) >= 5
+        }
+
+        // The Mac wakes, but rewriting the flags fails: no link-up can be counted on to
+        // announce slot 1, so it goes back to the short poll.
+        receiver.supportsNotificationFlags = false
+        hub.refresh()
+        let before = receiver.pingCount(slot: 1)
+        await eventually("slot 1 probed again after the wake", timeout: 5) { receiver.pingCount(slot: 1) >= before + 5 }
+        let pings = receiver.pingCount(slot: 1)
+        await pause(0.4)
+        XCTAssertGreaterThan(receiver.pingCount(slot: 1), pings, "slot 1 keeps probing every retryMaxDelay")
+        XCTAssertEqual(state(hub, at: 1), .waitingForDevice)
+    }
+
     func testWakePingPongKeepsBothSessions() async {
         let receiver = SimulatedReceiver.unifying([1: DeviceProfiles.mxVertical, 2: DeviceProfiles.mxMaster3])
         let hub = makeHub(receiver)
@@ -463,6 +489,21 @@ final class MultiDeviceControllerTests: XCTestCase {
         receiver.hold([], slot: 3)
         await eventually("connected from the report") { isConnected(hub, at: 3) }
         XCTAssertEqual(receiver.diverted(slot: 3), configurable(DeviceProfiles.mxMaster3))
+    }
+
+    func testSlotBackWithoutLinkUpOrReportIsFoundByPolling() async {
+        let receiver = SimulatedReceiver.unifying([1: DeviceProfiles.mxVertical])
+        let hub = makeHub(receiver)
+        hub.start()
+        await eventually("connected") { isConnected(hub, at: 1) }
+
+        // The link-down arrives, but the link-up after an Easy-Switch back (or a Mac wake) is
+        // missed and the mouse sends nothing, so only polling can find it again.
+        receiver.goToSleep(slot: 1)
+        await eventually("asleep") { isAsleep(hub, at: 1) }
+        receiver.wakeUp(slot: 1, clearingDiversion: true, announce: false)
+        await eventually("reconnected by polling") { isConnected(hub, at: 1) }
+        XCTAssertEqual(receiver.diverted(slot: 1), configurable(DeviceProfiles.mxVertical))
     }
 
     func testAnnouncementEchoSuppressionIsPerSlot() async {

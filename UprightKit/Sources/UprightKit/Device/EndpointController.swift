@@ -199,6 +199,9 @@ public final class EndpointController {
                 linkWasLost = true
                 session.releaseAll()
                 if let snapshot = session.snapshot { transition(.asleep(snapshot)) }
+                // The link-up normally brings it back, but it can be missed (dropped while the
+                // Mac wakes, or the receiver's notification flags were lost), so keep polling.
+                scheduleRetry()
             }
             return
         }
@@ -819,7 +822,8 @@ public final class EndpointController {
     /// The mouse stopped answering. Keep the session (its buttons stay diverted on the device
     /// until it powers off), release anything held, and retry with backoff.
     private func becameUnreachable(_ session: DeviceSession, _ error: Error) {
-        log("The mouse isn't answering (\(error)); will retry")
+        // Once per absence: the retries that follow are logged by `scheduleRetry`.
+        if case .asleep = state {} else { log("The mouse isn't answering (\(error)); will retry") }
         linkWasLost = true
         session.releaseAll()
         session.invalidateAppliedState()

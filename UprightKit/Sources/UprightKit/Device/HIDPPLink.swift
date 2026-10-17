@@ -405,6 +405,9 @@ public final class HIDPPLink {
         } catch HIDPPError.transportClosed {
             return
         } catch {
+            // The flags may be off now (a write after the Mac woke can fail), so absent slots
+            // go back to the short poll instead of waiting for a link-up that may never come.
+            notificationsEnabled = false
             log(nil, "Receiver notifications unavailable: \(error)")
         }
     }
