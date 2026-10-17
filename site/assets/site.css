@@ -1320,6 +1320,72 @@ img { max-width: 100%; }
   50% { transform: scale(0.9); }
 }
 
+/* Interactive hero */
+.canvas .tap { cursor: pointer; }
+.canvas .fw.tap { cursor: default; }
+.mp-row.tap:hover::before { opacity: 0.08; }
+.mp-row.tap.flash::before { opacity: 0.18; }
+.mp-chip.tap:hover { background: color-mix(in srgb, var(--m-control) 82%, var(--m-text-2)); }
+.mbar .mbi.tap:hover { background: rgba(127, 127, 127, 0.2); }
+.mp-label.blab { display: flex; align-items: center; gap: 8px; }
+.mp-pause { display: none; align-items: center; gap: 4px; margin-left: auto; }
+.mp-pause .i { font-size: 12px; }
+.mp.paused .mp-pause { display: inline-flex; }
+.mp.paused .mp-row[data-c] .val:not(.def) { text-decoration: line-through; opacity: 0.7; }
+.mp.paused .mp-sub .dot { background: var(--m-text-2); }
+.mmenu.pick.open { pointer-events: auto; }
+.mmenu.pick .mmi:hover { background: var(--m-blue); color: #fff; }
+.mmenu.pick .mmi:hover .ic { opacity: 1; }
+.mouse.live .hit { fill: transparent; stroke: none; cursor: pointer; pointer-events: all; }
+.mouse .part.hover { fill: color-mix(in srgb, var(--m-blue) 30%, var(--mouse-part)); }
+.mouse .part.hot { fill: var(--m-blue); }
+.ptag { pointer-events: none; }
+
+.demo-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px 28px;
+  margin-top: 18px;
+}
+.demo-hint { margin: 0; max-width: 50ch; font-size: 15px; line-height: 1.5; color: var(--ink-2); }
+.demo-hint b { font-weight: 650; color: var(--ink); }
+.demo-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; }
+.seg-wrap { display: flex; align-items: center; gap: 9px; }
+.seg-label {
+  font: 500 11.5px/1 var(--mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.seg {
+  display: inline-flex;
+  padding: 3px;
+  border-radius: 11px;
+  background: var(--paper-2);
+  box-shadow: 0 0 0 1px var(--rule) inset;
+}
+.seg button {
+  appearance: none;
+  height: 32px;
+  padding: 0 13px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink-2);
+  font: 500 14px/1 var(--body);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.seg button:hover { color: var(--ink); }
+.seg button[aria-checked="true"] {
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12), 0 0 0 1px var(--rule);
+}
+.seg button.pressed { background: var(--blue); color: var(--blue-ink); }
+
 /* Cursor */
 .cur {
   position: absolute;

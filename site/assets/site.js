@@ -6,6 +6,8 @@
 
   const RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const ICON = 'assets/icon-256.png';
+  const CANCEL = new Error('autoplay interrupted');
+  const IDLE_MS = 30000;
 
   // ---------- Helpers ----------
 
@@ -96,6 +98,7 @@
     envelope: '<rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="M3.5 7l8.5 6 8.5-6"/>',
     note: '<rect x="5" y="3.5" width="14" height="17" rx="2"/><path d="M8.5 8h7M8.5 11.5h7M8.5 15h4"/>',
     revert: '<path d="M9 14 4.5 9.5 9 5"/><path d="M4.5 9.5H14a5.5 5.5 0 0 1 0 11h-2"/>',
+    pause: '<circle cx="12" cy="12" r="8.5"/><path d="M10 9v6M14 9v6"/>',
   };
   const ic = (n, cls = '') => `<svg class="i${cls ? ' ' + cls : ''}" viewBox="0 0 24 24" aria-hidden="true">${P[n]}</svg>`;
   const batt = (pct) =>
@@ -119,6 +122,7 @@
     spaceR: { t: 'Space Right', i: 'space-r' },
     gestures: { t: 'Gestures', i: 'hand' },
     cycle: { t: 'Cycle Pointer Speed', i: 'gauge' },
+    none: { t: 'Do Nothing', i: 'nosign' },
   };
 
   // The MX Vertical's four divertable controls, as the Buttons pane names them.
@@ -214,9 +218,35 @@
     gate() {
       return this.running ? Promise.resolve() : new Promise((r) => this.waiters.push(r));
     }
+    // Hands the stage to the visitor: the autoplay stops at its next step and comes back after
+    // a while without input.
+    interrupt() {
+      if (!this.manual) {
+        this.manual = true;
+        this.cur.style.opacity = '0';
+        if (this.onManual) this.onManual();
+      }
+      clearTimeout(this.idleTimer);
+      this.idleTimer = setTimeout(() => this.resume(), IDLE_MS);
+    }
+    resume() {
+      this.manual = false;
+      if (this.onResume) this.onResume();
+      this.cur.style.opacity = '1';
+      const w = this.idleWaiters || [];
+      this.idleWaiters = [];
+      w.forEach((f) => f());
+    }
+    untilIdle() {
+      if (!this.manual) return Promise.resolve();
+      return new Promise((r) => (this.idleWaiters = (this.idleWaiters || []).concat(r)));
+    }
     async wait(ms) {
+      if (this.manual) throw CANCEL;
       await sleep(ms);
+      if (this.manual) throw CANCEL;
       await this.gate();
+      if (this.manual) throw CANCEL;
     }
     place(x, y, dur) {
       this.cur.style.transitionDuration = dur + 'ms';
@@ -267,14 +297,17 @@
     if (RM) return;
     (async () => {
       await dir.gate();
-      await dir.wait(450);
-      for (;;) {
+      for (let first = true; ; first = false) {
         try {
+          if (first) await dir.wait(450);
           await body();
         } catch (err) {
-          console.error(err);
-          await sleep(1500);
+          if (err !== CANCEL) {
+            console.error(err);
+            await sleep(1500);
+          }
         }
+        await dir.untilIdle();
       }
     })();
   }
@@ -355,7 +388,7 @@
       </div>
       <div class="mp-sep"></div>
       <div class="mp-section">
-        <div class="mp-label blab">Buttons · MX Vertical</div>
+        <div class="mp-label blab"><span class="bl">Buttons · MX Vertical</span><span class="mp-pause">${ic('pause')}Paused — mouse defaults</span></div>
         ${CONTROLS.map((c) => `<div class="mp-row" data-c="${c.id}">${ic(c.i)}<span>${c.name}</span><span class="val"></span></div>`).join('')}
       </div>
       <div class="mp-sep"></div>
@@ -375,7 +408,8 @@
     const headDot = el.querySelector('.mp-head .dot');
     const ind = el.querySelector('.mp-ind');
     const dpiv = el.querySelector('.dpiv');
-    const blab = el.querySelector('.blab');
+    const blab = el.querySelector('.blab .bl');
+    const tog = el.querySelector('.mp-head .mtog');
     const actHTML = (k) => (k === 'gestures' ? `${ic('hand')}${ACT[k].t}` : ACT[k].t);
 
     const api = {
@@ -408,8 +442,14 @@
         const chip = api.chip(v);
         if (chip) ind.style.transform = `translateX(${chip.offsetLeft - 4 + (chip.offsetWidth - 26) / 2}px)`;
       },
+      tog,
+      pause(on) {
+        el.classList.toggle('paused', on);
+        tog.classList.toggle('on', !on);
+      },
       act(c, k, animate) {
         const v = api.row(c).querySelector('.val');
+        v.classList.toggle('def', k === 'default');
         if (animate) swap(v, actHTML(k));
         else v.innerHTML = actHTML(k);
       },
@@ -605,9 +645,21 @@
     const pageEls = Array.from(el.querySelectorAll('.page'));
     const tabEls = Array.from(el.querySelectorAll('.tab'));
     let at = 0;
+    const visits = pages.map(() => 0);
     return {
       el,
       geo,
+      // Back or forward within the current tab: the page slides out and a different one comes in.
+      hist(d) {
+        const pg = pageEls[at];
+        if (!pg.animate) return;
+        const out = pg.animate([{ transform: 'translateX(0)', opacity: 1 }, { transform: `translateX(${-d * 36}px)`, opacity: 0 }], { duration: 160, easing: 'ease-in' });
+        out.onfinish = () => {
+          visits[at] = (visits[at] + (d > 0 ? 1 : pages.length - 1)) % pages.length;
+          pg.innerHTML = pages[(at + visits[at]) % pages.length];
+          pg.animate([{ transform: `translateX(${d * 36}px)`, opacity: 0 }, { transform: 'translateX(0)', opacity: 1 }], { duration: 220, easing: 'ease-out' });
+        };
+      },
       go(i) {
         at = Math.max(0, Math.min(pageEls.length - 1, i));
         pageEls.forEach((p, j) => (p.style.transform = `translateX(${(j - at) * 105}%)`));
@@ -749,6 +801,8 @@
 
   // ---------- Scenes ----------
 
+  // The hero is a working demo: the visitor can press the mouse's buttons, use the panel and
+  // switch apps. Until they do, it plays itself.
   function sceneHero(host) {
     const st = stage(host, 1100, 620, { x: 500, w: 600 });
     const sc = st.screen;
@@ -757,13 +811,15 @@
       { t: 'Screenshots', x: 30, y: 140 },
     ]);
     const web = appWindow('browser', { x: 300, y: 76, w: 520, h: 360 });
-    const notes = appWindow('notes', { x: 120, y: 250, w: 330, h: 270 }, { title: 'Notes' });
-    sc.append(notes.el, web.el);
-    const wins = [web, notes];
+    const finder = appWindow('finder', { x: 110, y: 250, w: 360, h: 270 }, { title: 'Documents' });
+    web.el.style.zIndex = '1';
+    finder.el.style.zIndex = '3';
+    sc.append(web.el, finder.el);
+    const wins = { Safari: web, Finder: finder };
     const dim = h('<div class="dim" style="z-index:-1"></div>');
     const spaces = spacesStrip();
     sc.append(dim, spaces);
-    const mb = menuBar('Safari');
+    const mb = menuBar('Finder');
     sc.append(mb.el);
     const p = panel({ dpi: 1600 });
     pos(p.el, 752, 31);
@@ -771,68 +827,317 @@
     mb.up.classList.add('on');
 
     const mouse = mouseArt(false);
+    mouse.el.classList.add('live');
     pos(mouse.el, 520, 330, 210, 284);
+    mouse.el.style.zIndex = '28';
     sc.append(mouse.el);
     const tag = pressTag(st, (v) => Math.max(470, v.x + 24), 560);
     const dir = new Director(st, 930, 470);
 
-    const mc = async (on) => {
-      dim.classList.toggle('on', on);
-      spaces.classList.toggle('on', on);
-      mb.el.style.opacity = on ? '0' : '1';
-      if (on) {
-        fly(web, 400, 300, 0.56);
-        fly(notes, 720, 310, 0.6);
-      } else wins.forEach(home);
-      await dir.wait(650);
+    const NAMES = { back: 'Back Button', fwd: 'Forward Button', top: 'Top Button', wheel: 'Wheel Click' };
+    const CIDS = Object.keys(NAMES);
+    const GLOBAL = { back: 'default', fwd: 'forward', top: 'gestures', wheel: 'mc' };
+    const SAFARI = { back: 'prevTab', fwd: 'nextTab' };
+    let global = { ...GLOBAL };
+    let safari = { ...SAFARI };
+    let app = 'Finder';
+    let paused = false;
+    let mode = null;
+    let panelBeforeMode = false;
+    const shown = {};
+
+    const effective = (c) => (app === 'Safari' && safari[c]) || global[c];
+    const panelOpen = () => !p.el.classList.contains('closed');
+    const showPanel = (on) => {
+      p.el.classList.toggle('closed', !on);
+      mb.up.classList.toggle('on', on);
     };
 
+    const refreshPanel = (animate) => {
+      const head = app === 'Safari' ? 'In Safari · MX Vertical' : 'Buttons · MX Vertical';
+      if (shown.head !== head) {
+        p.header(head, animate);
+        shown.head = head;
+      }
+      for (const c of CIDS) {
+        const k = effective(c);
+        if (shown[c] === k) continue;
+        p.act(c, k, animate);
+        shown[c] = k;
+        if (animate) setTimeout(() => p.flash(c), 180);
+      }
+    };
+    refreshPanel(false);
+
+    const bar = document.querySelector('.demo-bar');
+    const syncBar = () => {
+      if (!bar) return;
+      bar.querySelectorAll('[data-app]').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.app === app)));
+    };
+
+    const front = (name) => {
+      if (app === name) return;
+      app = name;
+      web.el.style.zIndex = name === 'Safari' ? '3' : '1';
+      finder.el.style.zIndex = name === 'Finder' ? '3' : '1';
+      mb.app(name);
+      syncBar();
+      refreshPanel(true);
+    };
+
+    // Mission Control, App Exposé and Show Desktop. Asking for the one that's showing turns it off.
+    const setMode = (m) => {
+      const next = m && m !== mode ? m : null;
+      if (!mode && next) panelBeforeMode = panelOpen();
+      if (next) showPanel(false);
+      else if (mode && panelBeforeMode) showPanel(true);
+      mode = next;
+      dim.classList.toggle('on', next === 'mc' || next === 'expose');
+      dim.style.zIndex = next === 'expose' ? '2' : '-1';
+      spaces.classList.toggle('on', next === 'mc');
+      mb.el.style.opacity = next === 'mc' ? '0' : '1';
+      home(web);
+      home(finder);
+      if (next === 'mc') {
+        fly(web, 420, 300, 0.56);
+        fly(finder, 760, 320, 0.6);
+      } else if (next === 'expose') {
+        fly(wins[app], 520, 320, 0.74);
+      } else if (next === 'desktop') {
+        shove(web, 760, 190);
+        shove(finder, -430, 330);
+      }
+    };
+
+    const nav = (d) => {
+      if (app === 'Safari') web.hist(d);
+      else finder.go(finder.page + d);
+    };
+
+    // What happens on the desktop when a button is pressed, given its current mapping.
+    const press = (c) => {
+      mouse.press(c);
+      const k = paused ? 'default' : effective(c);
+      if (!paused) p.flash(c);
+      const MODES = ['mc', 'expose', 'desktop'];
+      if (mode && !MODES.includes(k) && k !== 'gestures') setMode(null);
+      let label;
+      switch (k) {
+        case 'default':
+          if (c === 'back') {
+            nav(-1);
+            label = 'Back';
+          } else if (c === 'fwd') {
+            nav(1);
+            label = 'Forward';
+          } else if (c === 'top') {
+            const next = DPI_PRESETS[(DPI_PRESETS.indexOf(currentDPI) + 1) % DPI_PRESETS.length] || 800;
+            setDPI(next);
+            label = `Pointer speed ${nf(next)} DPI`;
+          } else {
+            label = 'Middle Click';
+          }
+          if (paused) label += ' (paused)';
+          break;
+        case 'back':
+        case 'forward':
+          nav(k === 'back' ? -1 : 1);
+          label = ACT[k].t;
+          break;
+        case 'prevTab':
+        case 'nextTab':
+          if (app === 'Safari') web.go((web.page + (k === 'nextTab' ? 1 : 2)) % 3);
+          label = ACT[k].t;
+          break;
+        case 'gestures':
+          setMode('mc');
+          label = 'Gestures · Click → Mission Control';
+          break;
+        case 'none':
+          label = 'Do Nothing';
+          break;
+        default:
+          setMode(k);
+          label = ACT[k].t;
+      }
+      tag.show(c, NAMES[c], label);
+      tag.hide(1500);
+    };
+
+    let currentDPI = 1600;
+    const setDPI = (v) => {
+      currentDPI = v;
+      p.dpi(v);
+    };
+
+    // The action picker, opened from a button row.
+    const PICK = ['default', 'none', '-', 'back', 'forward', 'prevTab', 'nextTab', '-', 'mc', 'expose', 'desktop', '-', 'gestures'];
+    const picker = h(`<div class="mmenu pick">${PICK.map((k) =>
+      k === '-'
+        ? '<div class="mms"></div>'
+        : `<div class="mmi tap" data-k="${k}"><span class="ck">${ic('check')}</span><span class="ic">${ic(ACT[k].i)}</span><span>${k === 'gestures' ? 'Gestures…' : ACT[k].t}</span></div>`
+    ).join('')}</div>`);
+    sc.append(picker);
+    let picking = null;
+    const closePicker = () => {
+      picker.classList.remove('open');
+      picking = null;
+    };
+    const openPicker = (c) => {
+      picking = c;
+      const cur = effective(c);
+      picker.querySelectorAll('.mmi').forEach((e) => e.classList.toggle('sel', e.dataset.k === cur));
+      const pr = rel(st, p.el);
+      const rr = rel(st, p.row(c));
+      const mh = picker.offsetHeight;
+      pos(picker, Math.round(pr.x - picker.offsetWidth - 6), Math.round(Math.max(32, Math.min(st.H - mh - 8, rr.y - 60))));
+      picker.style.transformOrigin = '100% 30%';
+      picker.classList.add('open');
+    };
+    picker.addEventListener('click', (e) => {
+      const it = e.target.closest('.mmi');
+      if (!it || !picking) return;
+      const c = picking;
+      if (app === 'Safari' && (c === 'back' || c === 'fwd')) safari[c] = it.dataset.k;
+      else global[c] = it.dataset.k;
+      closePicker();
+      refreshPanel(true);
+    });
+
+    // ----- Pointer input -----
+    st.canvas.addEventListener('pointerdown', (e) => {
+      dir.interrupt();
+      if (picking && !picker.contains(e.target)) closePicker();
+    }, true);
+
+    const g = mouse.el.querySelector('g');
+    const HITS = { wheel: [100, 78, 30], top: [100, 120, 22], fwd: [34, 164, 26], back: [34, 206, 26] };
+    for (const [c, [cx, cy, r]] of Object.entries(HITS)) {
+      const hit = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      hit.setAttribute('class', 'hit');
+      hit.setAttribute('cx', cx);
+      hit.setAttribute('cy', cy);
+      hit.setAttribute('r', r);
+      g.append(hit);
+      const part = mouse.el.querySelector(`[data-p="${c}"]`);
+      hit.addEventListener('pointerenter', () => part.classList.add('hover'));
+      hit.addEventListener('pointerleave', () => part.classList.remove('hover'));
+      hit.addEventListener('click', () => press(c));
+    }
+
+    mb.up.classList.add('tap');
+    mb.up.addEventListener('click', () => {
+      if (mode) setMode(null);
+      showPanel(!panelOpen());
+    });
+    p.el.querySelectorAll('.mp-chip').forEach((chip) => {
+      chip.classList.add('tap');
+      chip.addEventListener('click', () => setDPI(+chip.dataset.v));
+    });
+    p.tog.classList.add('tap');
+    p.tog.addEventListener('click', () => {
+      paused = !paused;
+      p.pause(paused);
+    });
+    for (const c of CIDS) {
+      const row = p.row(c);
+      row.classList.add('tap');
+      row.addEventListener('click', () => (picking === c ? closePicker() : openPicker(c)));
+    }
+    const footRows = p.el.querySelectorAll('.mp-section:last-child .mp-row');
+    footRows.forEach((r) => r.classList.add('tap'));
+    footRows[0].addEventListener('click', () => {
+      const f = document.getElementById('features');
+      if (f) f.scrollIntoView({ behavior: RM ? 'auto' : 'smooth' });
+    });
+    footRows[1].addEventListener('click', () => {
+      for (const id of Object.keys(p.rows)) {
+        p.connecting(id, true);
+        setTimeout(() => p.connecting(id, false), 700 + Math.random() * 700);
+      }
+    });
+    footRows[2].addEventListener('click', () => showPanel(false));
+
+    for (const [name, w] of Object.entries(wins)) {
+      w.el.classList.add('tap');
+      w.el.addEventListener('click', () => {
+        if (mode) setMode(null);
+        front(name);
+      });
+    }
+    sc.addEventListener('click', (e) => {
+      if (mode && (e.target === sc || spaces.contains(e.target))) setMode(null);
+    });
+
+    if (bar) {
+      bar.querySelectorAll('[data-press]').forEach((b) =>
+        b.addEventListener('click', () => {
+          dir.interrupt();
+          press(b.dataset.press);
+          b.classList.add('pressed');
+          setTimeout(() => b.classList.remove('pressed'), 180);
+        })
+      );
+      bar.querySelectorAll('[data-app]').forEach((b) =>
+        b.addEventListener('click', () => {
+          dir.interrupt();
+          if (mode) setMode(null);
+          front(b.dataset.app);
+        })
+      );
+    }
+
+    dir.onManual = () => tag.hide(0);
+    dir.onResume = () => {
+      closePicker();
+      setMode(null);
+      global = { ...GLOBAL };
+      safari = { ...SAFARI };
+      paused = false;
+      p.pause(false);
+      front('Finder');
+      setDPI(1600);
+      finder.go(0);
+      web.go(0);
+      showPanel(true);
+      refreshPanel(false);
+    };
+
+    // ----- Autoplay -----
     let fast = true;
     loop(dir, async () => {
-      await dir.wait(800);
-      mouse.press('fwd');
-      p.flash('fwd');
-      tag.show('fwd', 'Forward Button', 'Forward');
-      web.go(web.page + 1);
-      tag.hide(1500);
-      await dir.wait(1700);
+      await dir.wait(900);
+      press('fwd');
+      await dir.wait(1500);
 
       const target = fast ? 2400 : 1600;
       fast = !fast;
       await dir.move(p.chip(target));
       await dir.click();
-      p.dpi(target);
-      await dir.wait(1200);
+      setDPI(target);
+      await dir.wait(1000);
 
-      await dir.move(mb.up);
+      await dir.move(web.el, { fx: 0.62, fy: 0.05 });
       await dir.click();
-      p.close();
-      mb.up.classList.remove('on');
-      await dir.wait(400);
-      await dir.move({ x: 660, y: 470 });
-      await dir.wait(300);
-
-      mouse.press('wheel');
-      tag.show('wheel', 'Wheel Click', 'Mission Control');
-      await mc(true);
+      front('Safari');
       await dir.wait(1500);
-      mouse.press('wheel');
-      tag.show('wheel', 'Wheel Click', 'Mission Control');
-      await mc(false);
-      tag.hide(600);
-      await dir.wait(900);
+      press('fwd');
+      await dir.wait(1300);
+      press('back');
+      await dir.wait(1300);
 
-      mouse.press('back');
-      tag.show('back', 'Back Button', 'Default');
-      web.go(web.page - 1);
-      tag.hide(1300);
-      await dir.wait(1600);
+      await dir.move({ x: 690, y: 590 });
+      press('wheel');
+      await dir.wait(2000);
+      press('wheel');
+      await dir.wait(1100);
 
-      await dir.move(mb.up);
+      await dir.move(finder.el, { fx: 0.3, fy: 0.05 });
       await dir.click();
-      mb.up.classList.add('on');
-      p.open();
-      await dir.wait(700);
+      front('Finder');
+      await dir.wait(1200);
+      press('back');
+      await dir.wait(1600);
       await dir.move({ x: 1000, y: 360 });
     });
   }
@@ -884,7 +1189,7 @@
       async desktop(on) {
         if (on) {
           shove(win, -652, -474);
-          shove(web, 600, -60);
+          shove(web, 600, 40);
           shove(notes, 420, 360);
         } else all.forEach(home);
         await dir.wait(700);
