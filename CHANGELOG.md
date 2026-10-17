@@ -6,6 +6,11 @@ All notable changes to Upright are listed here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- The website moved to [upright.hellobasalt.dev](https://upright.hellobasalt.dev/). The old
+  dpdev69.github.io/upright address redirects there.
+
 ## [1.1.2] - 2026-10-17
 
 ### Fixed
