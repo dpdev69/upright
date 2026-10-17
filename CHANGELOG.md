@@ -12,6 +12,7 @@ All notable changes to Upright are listed here. The format follows
   dpdev69.github.io/upright address redirects there.
 - The website footer now follows the shared Basalt layout, with a More from Basalt column
   linking the other Basalt apps and a support address.
+- The More from Basalt column now also links ByeWall and KahveDrop.
 
 ## [1.1.2] - 2026-10-17
 
