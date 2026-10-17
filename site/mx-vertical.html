@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Logitech MX Vertical on Mac without Logi Options+ · Upright</title>
+<meta name="description" content="Remap the Logitech MX Vertical's buttons on your Mac without Logi Options+. Upright is free and open source, and the MX Vertical is the mouse it's verified on: back, forward, the top DPI button and the wheel click.">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#fbfbfd" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<link rel="canonical" href="https://dpdev69.github.io/upright/mx-vertical.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Upright">
+<meta property="og:url" content="https://dpdev69.github.io/upright/mx-vertical.html">
+<meta property="og:title" content="Your MX Vertical on a Mac, without Logi Options+">
+<meta property="og:description" content="Remap the Logitech MX Vertical's buttons on your Mac without Logi Options+. Upright is free and open source, and the MX Vertical is the mouse it's verified on: back, forward, the top DPI button and the wheel click.">
+<meta property="og:image" content="https://dpdev69.github.io/upright/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Upright: your Logitech mouse, without Logi Options+. The menu-bar panel lists three mice with their battery levels.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Your MX Vertical on a Mac, without Logi Options+">
+<meta name="twitter:description" content="Remap the Logitech MX Vertical's buttons on your Mac without Logi Options+. Upright is free and open source, and the MX Vertical is the mouse it's verified on: back, forward, the top DPI button and the wheel click.">
+<meta name="twitter:image" content="https://dpdev69.github.io/upright/assets/og-image.png">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="apple-touch-icon" href="assets/icon-256.png">
+<link rel="stylesheet" href="assets/site.css?v=4">
+<script>document.documentElement.classList.add('js');</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Upright", "item": "https://dpdev69.github.io/upright/"}, {"@type": "ListItem", "position": 2, "name": "MX Vertical on Mac", "item": "https://dpdev69.github.io/upright/mx-vertical.html"}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Can I use the Logitech MX Vertical on a Mac without Logi Options+?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Upright talks to the MX Vertical directly over Logitech's HID++ protocol, so you can remap its buttons and set its pointer speed with no Logitech software, no account and no background daemon."}}, {"@type": "Question", "name": "How do I remap the MX Vertical's top (DPI) button on a Mac?", "acceptedAnswer": {"@type": "Answer", "text": "Open Upright's Settings → Buttons, choose MX Vertical under Configure, and pick an action for Top Button. It can run Mission Control, a keyboard shortcut, an app, a URL or a Shortcuts.app shortcut, cycle your pointer-speed presets, or become a Gestures button with five actions."}}, {"@type": "Question", "name": "Can the MX Vertical's back and forward buttons do something else?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Back and Forward can be mapped to any action, and per-app profiles let them do something different in one app, such as switching tabs in Safari while they go back and forward everywhere else."}}, {"@type": "Question", "name": "Does the MX Vertical work with Upright over Bluetooth?", "acceptedAnswer": {"@type": "Answer", "text": "USB cable and the Unifying receiver are verified on real hardware. Bluetooth is best effort: it depends on macOS exposing the mouse's HID++ interface, and macOS may ask for Input Monitoring. The MX Vertical can't pair with a Bolt receiver."}}, {"@type": "Question", "name": "Does Upright change my MX Vertical permanently?", "acceptedAnswer": {"@type": "Answer", "text": "No. Nothing is written to the mouse's memory. Buttons are only diverted while Upright runs; quit it, or switch the mouse off and on, and every button is back to factory behavior."}}, {"@type": "Question", "name": "Do I need to uninstall Logi Options+?", "acceptedAnswer": {"@type": "Answer", "text": "Quit it and take it out of your login items while you use Upright. Logi Options+, Solaar and LogiOps divert the same buttons, and only one app can have them."}}]}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="mouse-grad" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" class="g0"></stop>
+      <stop offset="1" class="g1"></stop>
+    </linearGradient>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11M7 10.5l5 5 5-5M5 20h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-github" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.48 2 2 6.58 2 12.23c0 4.52 2.87 8.35 6.84 9.7.5.1.68-.22.68-.49l-.01-1.7c-2.78.62-3.37-1.37-3.37-1.37-.46-1.18-1.11-1.5-1.11-1.5-.91-.64.07-.62.07-.62 1 .07 1.53 1.06 1.53 1.06.9 1.57 2.35 1.12 2.92.85.09-.67.35-1.12.64-1.38-2.22-.26-4.56-1.14-4.56-5.07 0-1.12.39-2.04 1.03-2.76-.1-.26-.45-1.3.1-2.71 0 0 .84-.28 2.75 1.05a9.4 9.4 0 0 1 5 0c1.91-1.33 2.75-1.05 2.75-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.64 1.03 2.76 0 3.94-2.34 4.81-4.57 5.06.36.32.68.94.68 1.9l-.01 2.81c0 .27.18.6.69.49A10.14 10.14 0 0 0 22 12.23C22 6.58 17.52 2 12 2Z"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="8.5" y="8.5" width="11" height="11" rx="2.5"/><path d="M15.5 8.5V6.5A2 2 0 0 0 13.5 4.5h-7a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h2"/></g></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5 10 17.5 19 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6.5 9.5 5.5 5.5 5.5-5.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  </defs>
+</svg>
+
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="./" aria-label="Upright home">
+      <img src="assets/icon-256.png" alt="" width="28" height="28">
+      <span>Upright</span>
+    </a>
+    <nav class="nav-links" aria-label="Sections">
+      <a href="./#features">Features</a>
+      <a href="./#mice">Mice</a>
+      <a href="./#faq">FAQ</a>
+    </nav>
+    <div class="nav-end">
+      <a class="nav-gh" href="https://github.com/dpdev69/upright" aria-label="GitHub"><svg aria-hidden="true"><use href="#i-github"/></svg><span>GitHub</span></a>
+      <a class="btn btn-primary btn-sm" href="https://github.com/dpdev69/upright/releases/latest">Download</a>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+  <section class="hero" id="top">
+    <div class="wrap">
+      <div class="hero-copy">
+        <nav class="crumbs" aria-label="Breadcrumb"><a href="./">Upright</a><span aria-hidden="true">/</span><span aria-current="page">MX Vertical</span></nav>
+        <h1>Your MX Vertical on a&nbsp;Mac,<br class="br-wide"> without Logi Options+.</h1>
+        <p class="lede">Upright was built on the Logitech MX Vertical, and it's the one mouse verified on real hardware.</p>
+        <div class="actions">
+          <a class="btn btn-primary btn-lg" href="https://github.com/dpdev69/upright/releases/latest">
+            <svg aria-hidden="true"><use href="#i-download"/></svg>
+            Download for Mac
+          </a>
+          <a class="btn btn-secondary btn-lg" href="./#download">Install steps</a>
+        </div>
+        <p class="trust-line">Free · MIT · No account · Apple silicon and Intel</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section mxv-buttons" aria-labelledby="buttons-title">
+    <div class="wrap">
+      <header class="section-head reveal">
+        <p class="eyebrow">Buttons</p>
+        <h2 id="buttons-title">Every button on the MX Vertical, yours to set.</h2>
+        <p>The MX Vertical has four buttons software can take over. A fresh install remaps nothing, so each one keeps its normal behavior until you give it a new job.</p>
+      </header>
+      <div class="card ledger mxv-table reveal" role="group" aria-labelledby="mxv-controls">
+        <p class="ledger-title" id="mxv-controls">MX Vertical controls in Upright</p>
+        <dl>
+          <div><dt>Back</dt><dd>Mouse button 4 out of the box</dd></div>
+          <div><dt>Forward</dt><dd>Mouse button 5 out of the box</dd></div>
+          <div><dt>Top (DPI) button</dt><dd>Cycles pointer speed out of the box</dd></div>
+          <div><dt>Wheel click</dt><dd>Middle click out of the box</dd></div>
+        </dl>
+      </div>
+      <article class="feature reveal">
+        <div class="feature-copy">
+          <p class="eyebrow">Remap</p>
+          <h3>Give each button a better job.</h3>
+          <p>Map any of the four to Mission Control, App Exposé, Show Desktop, switching Spaces, media keys, any keyboard shortcut, an app, a URL or a Shortcuts.app shortcut.</p>
+          <ul class="chips" aria-label="More options">
+            <li>Gestures: five actions</li>
+            <li>Per-app profiles</li>
+            <li>Cycle speed presets</li>
+            <li>Do Nothing</li>
+          </ul>
+        </div>
+        <div class="frame">
+          <div class="stage" data-scene="remap" style="--ar: 760 / 560" role="img" aria-label="Animation: in Settings, Buttons, configuring the MX Vertical, the Wheel Click is set to Mission Control, then pressing the wheel opens Mission Control."></div>
+        </div>
+      </article>
+      <article class="feature flip reveal">
+        <div class="feature-copy">
+          <p class="eyebrow">Pointer speed</p>
+          <h3>Set the MX Vertical's DPI, and keep it.</h3>
+          <p>Pick a speed with a slider, save presets and map a button to cycle through them; Upright applies your speed again whenever the mouse reconnects.</p>
+        </div>
+        <div class="frame">
+          <div class="stage" data-scene="speed" style="--ar: 760 / 560" role="img" aria-label="Animation: the pointer speed slider for the MX Vertical moves from 1,600 to 2,400 DPI, a 3,200 DPI preset is added, and the top button cycles through the presets."></div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="connect-title">
+    <div class="wrap">
+      <header class="section-head reveal">
+        <p class="eyebrow">Connections</p>
+        <h2 id="connect-title">Cable, receiver or Bluetooth.</h2>
+        <p>What's been tested with a real MX Vertical, and what hasn't.</p>
+      </header>
+      <div class="privacy-grid">
+        <div class="card privacy-card reveal">
+          <span class="badge badge-verified">Verified</span>
+          <h3>USB cable</h3>
+          <p>Plug the MX Vertical's charging cable into your Mac. Tested on real hardware.</p>
+        </div>
+        <div class="card privacy-card reveal">
+          <span class="badge badge-verified">Verified</span>
+          <h3>Unifying receiver</h3>
+          <p>The small receiver that came with the mouse. Tested on real hardware.</p>
+        </div>
+        <div class="card privacy-card reveal">
+          <span class="badge">Best effort</span>
+          <h3>Bluetooth</h3>
+          <p>Works when macOS exposes the mouse's HID++ interface, and may need Input Monitoring. The MX Vertical can't pair with a Bolt receiver.</p>
+        </div>
+      </div>
+      <p class="callout reveal">Nothing is written to the mouse. Quit Upright, or switch the MX Vertical off and on, and every button is back to factory behavior.</p>
+    </div>
+  </section>
+
+  <section class="section faq" id="faq" aria-labelledby="faq-title">
+    <div class="wrap faq-wrap">
+      <header class="faq-head reveal">
+        <p class="eyebrow">FAQ</p>
+        <h2 id="faq-title">MX Vertical questions</h2>
+        <p>More in the <a href="./#faq">main FAQ</a>, or <a href="https://github.com/dpdev69/upright/issues">open an issue on GitHub</a>.</p>
+      </header>
+      <div class="faq-list reveal">
+        <details>
+          <summary>Can I use the Logitech MX Vertical on a Mac without Logi Options+?<svg aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+          <div class="faq-a"><p>Yes. Upright talks to the MX Vertical directly over Logitech's HID++ protocol, so you can remap its buttons and set its pointer speed with no Logitech software, no account and no background daemon.</p></div>
+        </details>
+        <details>
+          <summary>How do I remap the MX Vertical's top (DPI) button on a Mac?<svg aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+          <div class="faq-a"><p>Open Upright's Settings → Buttons, choose MX Vertical under Configure, and pick an action for Top Button. It can run Mission Control, a keyboard shortcut, an app, a URL or a Shortcuts.app shortcut, cycle your pointer-speed presets, or become a Gestures button with five actions.</p></div>
+        </details>
+        <details>
+          <summary>Can the MX Vertical's back and forward buttons do something else?<svg aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+          <div class="faq-a"><p>Yes. Back and Forward can be mapped to any action, and per-app profiles let them do something different in one app, such as switching tabs in Safari while they go back and forward everywhere else.</p></div>
+        </details>
+        <details>
+          <summary>Does the MX Vertical work with Upright over Bluetooth?<svg aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+          <div class="faq-a"><p>USB cable and the Unifying receiver are verified on real hardware. Bluetooth is best effort: it depends on macOS exposing the mouse's HID++ interface, and macOS may ask for Input Monitoring. The MX Vertical can't pair with a Bolt receiver.</p></div>
+        </details>
+        <details>
+          <summary>Does Upright change my MX Vertical permanently?<svg aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+          <div class="faq-a"><p>No. Nothing is written to the mouse's memory. Buttons are only diverted while Upright runs; quit it, or switch the mouse off and on, and every button is back to factory behavior.</p></div>
+        </details>
+        <details>
+          <summary>Do I need to uninstall Logi Options+?<svg aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+          <div class="faq-a"><p>Quit it and take it out of your login items while you use Upright. Logi Options+, Solaar and LogiOps divert the same buttons, and only one app can have them.</p></div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <section class="final" aria-labelledby="final-title">
+    <div class="wrap">
+      <div class="final-card reveal">
+        <img src="assets/icon-256.png" alt="" width="96" height="96" loading="lazy">
+        <h2 id="final-title">Put your MX Vertical to work.</h2>
+        <p>Free, open source, and about a minute from download to your first remapped button.</p>
+        <div class="actions">
+          <a class="btn btn-primary btn-lg" href="https://github.com/dpdev69/upright/releases/latest">
+            <svg aria-hidden="true"><use href="#i-download"/></svg>
+            Download for Mac
+          </a>
+          <a class="btn btn-secondary btn-lg" href="./">See every feature</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a class="brand" href="./"><img src="assets/icon-256.png" alt="" width="24" height="24" loading="lazy"><span>Upright</span></a>
+        <p>Open-source button remapping for Logitech mice on macOS, without Logi Options+.</p>
+      </div>
+      <nav aria-labelledby="f-product">
+        <p class="f-title" id="f-product">Product</p>
+        <a href="./#features">Features</a>
+        <a href="./#mice">Supported mice</a>
+        <a href="./#download">Install</a>
+        <a href="./#faq">FAQ</a>
+        <a href="mx-vertical.html" aria-current="page">MX Vertical on Mac</a>
+      </nav>
+      <nav aria-labelledby="f-project">
+        <p class="f-title" id="f-project">Project</p>
+        <a href="https://github.com/dpdev69/upright">GitHub</a>
+        <a href="https://github.com/dpdev69/upright/releases">Releases</a>
+        <a href="https://github.com/dpdev69/upright/blob/main/CHANGELOG.md">Changelog</a>
+        <a href="https://github.com/dpdev69/upright/blob/main/INSTALL.md">Install guide</a>
+      </nav>
+      <nav aria-labelledby="f-legal">
+        <p class="f-title" id="f-legal">Legal</p>
+        <a href="privacy.html">Privacy</a>
+        <a href="terms.html">Terms</a>
+        <a href="https://github.com/dpdev69/upright/blob/main/SECURITY.md">Security</a>
+        <a href="https://github.com/dpdev69/upright/blob/main/LICENSE">MIT license</a>
+      </nav>
+    </div>
+    <div class="footer-base">
+      <p>© 2026 Upright contributors · MIT license</p>
+      <p>Logitech, MX, Unifying, Bolt and Logi Options+ are trademarks of Logitech. Upright is an independent project and is not affiliated with or endorsed by Logitech. The animations show the real interface with simulated mice.</p>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/site.js?v=4" defer></script>
+<script src="assets/page.js?v=4" defer></script>
+</body>
+</html>

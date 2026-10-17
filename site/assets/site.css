@@ -930,6 +930,22 @@ code {
 }
 .footer-base p { margin: 0; max-width: 100ch; }
 
+/* MX Vertical page */
+.crumbs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  font-size: 14px;
+  color: var(--ink-3);
+}
+.crumbs a { color: var(--accent); text-decoration: none; }
+.crumbs a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.mxv-table { margin: 0 0 clamp(72px, 9vw, 120px); }
+.privacy-card > .badge { display: inline-block; }
+.privacy-card > .badge + h3 { margin-top: 18px; }
+.hero-note a,
+.m-note a { color: var(--accent); text-underline-offset: 3px; }
+
 /* Privacy and terms pages */
 .doc { padding-block: clamp(56px, 8vw, 104px) var(--section); }
 .doc-wrap { max-width: 760px; }
