@@ -6,6 +6,8 @@ All notable changes to Upright are listed here. The format follows
 
 ## [Unreleased]
 
+## [1.1.2] - 2026-10-17
+
 ### Fixed
 
 - **A receiver mouse could stay disconnected after the Mac slept or after an Easy-Switch
