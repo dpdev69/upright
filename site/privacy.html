@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Privacy · Upright</title>
+<meta name="description" content="Upright collects nothing: no account, no analytics, no telemetry. What the app reads, what it stores on your Mac, and what this website does.">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#fbfbfd" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<link rel="canonical" href="https://dpdev69.github.io/upright/privacy.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Upright">
+<meta property="og:url" content="https://dpdev69.github.io/upright/privacy.html">
+<meta property="og:title" content="Privacy · Upright">
+<meta property="og:description" content="Upright collects nothing: no account, no analytics, no telemetry. What the app reads, what it stores on your Mac, and what this website does.">
+<meta property="og:image" content="https://dpdev69.github.io/upright/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://dpdev69.github.io/upright/assets/og-image.png">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="apple-touch-icon" href="assets/icon-256.png">
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="i-github" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.48 2 2 6.58 2 12.23c0 4.52 2.87 8.35 6.84 9.7.5.1.68-.22.68-.49l-.01-1.7c-2.78.62-3.37-1.37-3.37-1.37-.46-1.18-1.11-1.5-1.11-1.5-.91-.64.07-.62.07-.62 1 .07 1.53 1.06 1.53 1.06.9 1.57 2.35 1.12 2.92.85.09-.67.35-1.12.64-1.38-2.22-.26-4.56-1.14-4.56-5.07 0-1.12.39-2.04 1.03-2.76-.1-.26-.45-1.3.1-2.71 0 0 .84-.28 2.75 1.05a9.4 9.4 0 0 1 5 0c1.91-1.33 2.75-1.05 2.75-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.64 1.03 2.76 0 3.94-2.34 4.81-4.57 5.06.36.32.68.94.68 1.9l-.01 2.81c0 .27.18.6.69.49A10.14 10.14 0 0 0 22 12.23C22 6.58 17.52 2 12 2Z"/></symbol>
+  </defs>
+</svg>
+
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="./" aria-label="Upright home">
+      <img src="assets/icon-256.png" alt="" width="28" height="28">
+      <span>Upright</span>
+    </a>
+    <nav class="nav-links" aria-label="Sections">
+      <a href="./#features">Features</a>
+      <a href="./#mice">Mice</a>
+      <a href="./#faq">FAQ</a>
+    </nav>
+    <div class="nav-end">
+      <a class="nav-gh" href="https://github.com/dpdev69/upright" aria-label="GitHub"><svg aria-hidden="true"><use href="#i-github"/></svg><span>GitHub</span></a>
+      <a class="btn btn-primary btn-sm" href="https://github.com/dpdev69/upright/releases/latest">Download</a>
+    </div>
+  </div>
+</header>
+
+<main id="main" class="doc">
+  <div class="wrap doc-wrap">
+    <header class="doc-head">
+      <p class="eyebrow">Privacy</p>
+      <h1>Privacy policy</h1>
+      <p class="doc-meta">Last updated October 17, 2026</p>
+    </header>
+    <div class="doc-body">
+      <p class="doc-lede">Upright doesn't collect, sell or send your data anywhere. There's no account, no analytics and no telemetry, in the app or on this website.</p>
+
+      <h2>The Upright app</h2>
+      <p>Upright runs entirely on your Mac. It doesn't phone home or collect anything.</p>
+      <ul>
+        <li><b>What it talks to.</b> Upright only opens Logitech HID interfaces, to read your mouse's buttons, battery, connection, firmware and serial number and to show them to you. Keyboards are never opened, so it never reads what you type.</li>
+        <li><b>What it stores.</b> Your button mappings, per-app profiles, mouse nicknames, pointer speeds and other settings are kept in Upright's preferences on your Mac (<code>io.github.upright.Upright</code>). Nothing is written to the mouse's memory.</li>
+        <li><b>What leaves your Mac.</b> Nothing, unless you choose to. <b>Export…</b> saves your mappings to a JSON file where you pick, and <b>Copy Device Report</b> copies your mouse's details to the clipboard so you can paste them into a bug report if you want to.</li>
+        <li><b>Actions you assign.</b> Open URL and Open App go through macOS, and Run Shortcut starts Apple's <code>shortcuts</code> tool. What happens next is up to the app, site or shortcut you picked.</li>
+      </ul>
+
+      <h2>Permissions</h2>
+      <ul>
+        <li><b>Accessibility</b>, to send the keyboard shortcuts, clicks and media keys your buttons are mapped to, and to change scrolling.</li>
+        <li><b>Input Monitoring</b>, only if macOS hides a mouse from Upright, which can happen over Bluetooth.</li>
+        <li><b>Notifications</b>, for low-battery alerts. macOS asks for this the first time.</li>
+      </ul>
+      <p>You can turn any of these off in System Settings → Privacy &amp; Security. To remove Upright's settings and permissions completely, follow the uninstall steps in the <a href="https://github.com/dpdev69/upright/blob/main/INSTALL.md#uninstall">install guide</a>.</p>
+
+      <h2>This website</h2>
+      <p>This site is a set of static pages hosted on GitHub Pages. It sets no cookies, runs no analytics or tracking scripts, and loads no third-party fonts or embeds. GitHub, which hosts the site and the downloads, may log technical details such as IP addresses to run and secure its service. See the <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">GitHub General Privacy Statement</a>.</p>
+
+      <h2>Changes and questions</h2>
+      <p>If this policy changes, the new version is published here and the history is in the <a href="https://github.com/dpdev69/upright/commits/main/site/privacy.html">repository</a>. Questions are welcome as a <a href="https://github.com/dpdev69/upright/issues">GitHub issue</a>.</p>
+    </div>
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a class="brand" href="./"><img src="assets/icon-256.png" alt="" width="24" height="24" loading="lazy"><span>Upright</span></a>
+        <p>Open-source button remapping for Logitech mice on macOS, without Logi Options+.</p>
+      </div>
+      <nav aria-labelledby="f-product">
+        <p class="f-title" id="f-product">Product</p>
+        <a href="./#features">Features</a>
+        <a href="./#mice">Supported mice</a>
+        <a href="./#download">Install</a>
+        <a href="./#faq">FAQ</a>
+      </nav>
+      <nav aria-labelledby="f-project">
+        <p class="f-title" id="f-project">Project</p>
+        <a href="https://github.com/dpdev69/upright">GitHub</a>
+        <a href="https://github.com/dpdev69/upright/releases">Releases</a>
+        <a href="https://github.com/dpdev69/upright/blob/main/CHANGELOG.md">Changelog</a>
+        <a href="https://github.com/dpdev69/upright/blob/main/INSTALL.md">Install guide</a>
+      </nav>
+      <nav aria-labelledby="f-legal">
+        <p class="f-title" id="f-legal">Legal</p>
+        <a href="privacy.html" aria-current="page">Privacy</a>
+        <a href="terms.html">Terms</a>
+        <a href="https://github.com/dpdev69/upright/blob/main/SECURITY.md">Security</a>
+        <a href="https://github.com/dpdev69/upright/blob/main/LICENSE">MIT license</a>
+      </nav>
+    </div>
+    <div class="footer-base">
+      <p>© 2026 Upright contributors · MIT license</p>
+      <p>Logitech, MX, Unifying, Bolt and Logi Options+ are trademarks of Logitech. Upright is an independent project and is not affiliated with or endorsed by Logitech.</p>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

@@ -1752,7 +1752,7 @@
     scrolling: sceneScrolling,
   };
 
-  document.querySelectorAll('.stage[data-scene]').forEach((host) => {
+  const build = (host) => {
     const make = SCENES[host.dataset.scene];
     if (!make) return;
     try {
@@ -1760,5 +1760,26 @@
     } catch (err) {
       console.error(err);
     }
+  };
+
+  // The hero is built right away. The others wait until they come near the screen, so the
+  // first load only pays for what's visible; their aspect ratio already holds their space.
+  const later = [];
+  document.querySelectorAll('.stage[data-scene]').forEach((host) => {
+    if (host.dataset.scene === 'hero' || !('IntersectionObserver' in window)) build(host);
+    else later.push(host);
   });
+  if (later.length) {
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (!e.isIntersecting) continue;
+          io.unobserve(e.target);
+          build(e.target);
+        }
+      },
+      { rootMargin: '800px 0px' }
+    );
+    later.forEach((host) => io.observe(host));
+  }
 })();

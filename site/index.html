@@ -3,21 +3,33 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Upright for Mac</title>
-<meta name="claude:viewport-fit-sides" content="cover">
-<meta name="description" content="Upright is a free, open-source macOS menu-bar app that remaps the buttons on Logitech mice over HID++, without Logi Options+.">
-<meta name="theme-color" content="#f3f4f7" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0c0e12" media="(prefers-color-scheme: dark)">
-<meta property="og:title" content="Upright: remap your Logitech mouse on macOS">
-<meta property="og:description" content="A free, open-source menu-bar app that remaps Logitech mouse buttons without Logi Options+.">
+<title>Upright: your Logitech mouse on macOS, without Logi Options+</title>
+<meta name="description" content="Upright is a free, open-source macOS menu-bar app that remaps the buttons on Logitech mice over HID++, without Logi Options+. No account, no daemon, no kernel extension.">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#fbfbfd" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<link rel="canonical" href="https://dpdev69.github.io/upright/">
+
 <meta property="og:type" content="website">
-<meta property="og:image" content="assets/icon-512.png">
+<meta property="og:site_name" content="Upright">
+<meta property="og:url" content="https://dpdev69.github.io/upright/">
+<meta property="og:title" content="Upright: your Logitech mouse, without Logi Options+">
+<meta property="og:description" content="A free, open-source macOS menu-bar app that remaps Logitech mouse buttons over HID++. No account, no daemon, nothing written to the mouse.">
+<meta property="og:image" content="https://dpdev69.github.io/upright/assets/og-image.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Upright: your Logitech mouse, without Logi Options+. The menu-bar panel lists three mice with their battery levels.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Upright: your Logitech mouse, without Logi Options+">
+<meta name="twitter:description" content="A free, open-source macOS menu-bar app that remaps Logitech mouse buttons over HID++. No account, no daemon, nothing written to the mouse.">
+<meta name="twitter:image" content="https://dpdev69.github.io/upright/assets/og-image.png">
+<meta name="twitter:image:alt" content="Upright: your Logitech mouse, without Logi Options+. The menu-bar panel lists three mice with their battery levels.">
+
 <link rel="icon" type="image/png" href="assets/favicon.png">
 <link rel="apple-touch-icon" href="assets/icon-256.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Hanken+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="assets/site.css">
+<script>document.documentElement.classList.add('js');</script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -28,22 +40,30 @@
       <stop offset="0" class="g0"></stop>
       <stop offset="1" class="g1"></stop>
     </linearGradient>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11M7 10.5l5 5 5-5M5 20h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-github" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.48 2 2 6.58 2 12.23c0 4.52 2.87 8.35 6.84 9.7.5.1.68-.22.68-.49l-.01-1.7c-2.78.62-3.37-1.37-3.37-1.37-.46-1.18-1.11-1.5-1.11-1.5-.91-.64.07-.62.07-.62 1 .07 1.53 1.06 1.53 1.06.9 1.57 2.35 1.12 2.92.85.09-.67.35-1.12.64-1.38-2.22-.26-4.56-1.14-4.56-5.07 0-1.12.39-2.04 1.03-2.76-.1-.26-.45-1.3.1-2.71 0 0 .84-.28 2.75 1.05a9.4 9.4 0 0 1 5 0c1.91-1.33 2.75-1.05 2.75-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.64 1.03 2.76 0 3.94-2.34 4.81-4.57 5.06.36.32.68.94.68 1.9l-.01 2.81c0 .27.18.6.69.49A10.14 10.14 0 0 0 22 12.23C22 6.58 17.52 2 12 2Z"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="8.5" y="8.5" width="11" height="11" rx="2.5"/><path d="M15.5 8.5V6.5A2 2 0 0 0 13.5 4.5h-7a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h2"/></g></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5 10 17.5 19 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6.5 9.5 5.5 5.5 5.5-5.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   </defs>
 </svg>
 
 <header class="nav">
-  <div class="wrap">
+  <div class="wrap nav-inner">
     <a class="brand" href="#top" aria-label="Upright home">
-      <img src="assets/icon-256.png" alt="" width="30" height="30">
-      Upright
+      <img src="assets/icon-256.png" alt="" width="28" height="28">
+      <span>Upright</span>
     </a>
     <nav class="nav-links" aria-label="Sections">
       <a href="#features">Features</a>
       <a href="#mice">Mice</a>
       <a href="#faq">FAQ</a>
-      <a href="https://github.com/dpdev69/upright">GitHub</a>
     </nav>
-    <a class="btn btn-primary btn-sm" href="https://github.com/dpdev69/upright/releases/latest">Download</a>
+    <div class="nav-end">
+      <a class="nav-gh" href="https://github.com/dpdev69/upright" aria-label="GitHub"><svg aria-hidden="true"><use href="#i-github"/></svg><span>GitHub</span></a>
+      <a class="btn btn-primary btn-sm" href="https://github.com/dpdev69/upright/releases/latest">Download</a>
+    </div>
   </div>
 </header>
 
@@ -51,59 +71,67 @@
   <section class="hero" id="top">
     <div class="wrap">
       <div class="hero-copy">
-        <div>
-          <p class="eyebrow">Free and open source · macOS 13 or later</p>
-          <h1>Your Logitech mouse, <em>without</em> Logi Options+.</h1>
-          <p class="lede">Upright is a small menu-bar app that remaps the buttons on Logitech mice. It talks to the mouse directly over HID++, so there's no account, no background daemon and no kernel extension.</p>
+        <a class="pill" href="https://github.com/dpdev69/upright/blob/main/CHANGELOG.md">
+          <span class="pill-tag">1.1.1</span>
+          <span>Free and open source · macOS 13 or later</span>
+          <svg aria-hidden="true"><use href="#i-arrow"/></svg>
+        </a>
+        <h1>Your Logitech mouse, <span class="nb">without Logi Options+.</span></h1>
+        <p class="lede">A small native menu‑bar app that remaps your mouse's buttons over HID++.</p>
+        <div class="actions">
+          <a class="btn btn-primary btn-lg" href="https://github.com/dpdev69/upright/releases/latest">
+            <svg aria-hidden="true"><use href="#i-download"/></svg>
+            Download for Mac
+          </a>
+          <a class="btn btn-secondary btn-lg" href="https://github.com/dpdev69/upright">
+            <svg aria-hidden="true"><use href="#i-github"/></svg>
+            View on GitHub
+          </a>
         </div>
-        <div class="hero-side">
-          <div class="hero-actions">
-            <a class="btn btn-primary" href="https://github.com/dpdev69/upright/releases/latest">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10.5l5 5 5-5M5 20h14"/></svg>
-              Download for Mac
-            </a>
-            <a class="btn btn-ghost" href="https://github.com/dpdev69/upright">View on GitHub</a>
-          </div>
-          <p class="hero-meta">Version 1.1.1 · Apple silicon and Intel · MIT license</p>
-        </div>
+        <p class="trust-line">Free · MIT · No account · Apple silicon and Intel</p>
       </div>
-      <div class="stage hero-stage" data-scene="hero" style="--ar: 1100 / 620" role="img" aria-label="Interactive demo of Upright on a Mac desktop: the menu-bar panel lists three mice, and pressing the mouse's buttons runs their actions, such as Mission Control or switching tabs in Safari."></div>
-      <div class="demo-bar">
-        <p class="demo-hint"><b>Try it.</b> Click the mouse's buttons, pick a pointer speed, or click a button in the panel to change what it does.</p>
-        <div class="demo-controls">
-          <div class="seg-wrap">
-            <span class="seg-label" id="press-label">Press</span>
-            <div class="seg" role="group" aria-labelledby="press-label">
-              <button type="button" data-press="back">Back</button>
-              <button type="button" data-press="fwd">Forward</button>
-              <button type="button" data-press="top">Top</button>
-              <button type="button" data-press="wheel">Wheel</button>
+
+      <div class="hero-demo">
+        <div class="stage hero-stage" data-scene="hero" style="--ar: 1100 / 620" role="img" aria-label="Interactive demo of Upright on a Mac desktop: the menu-bar panel lists three mice, and pressing the mouse's buttons runs their actions, such as Mission Control or switching tabs in Safari."></div>
+        <div class="demo-bar">
+          <p class="demo-hint"><b>Try it.</b> Click the mouse's buttons, pick a pointer speed, or click a button in the panel to change what it does.</p>
+          <div class="demo-controls">
+            <div class="seg-wrap">
+              <span class="seg-label" id="press-label">Press</span>
+              <div class="seg" role="group" aria-labelledby="press-label">
+                <button type="button" data-press="back">Back</button>
+                <button type="button" data-press="fwd">Forward</button>
+                <button type="button" data-press="top">Top</button>
+                <button type="button" data-press="wheel">Wheel</button>
+              </div>
+            </div>
+            <div class="seg-wrap">
+              <span class="seg-label" id="app-label">In front</span>
+              <div class="seg" role="radiogroup" aria-labelledby="app-label">
+                <button type="button" role="radio" aria-checked="true" data-app="Finder">Finder</button>
+                <button type="button" role="radio" aria-checked="false" data-app="Safari">Safari</button>
+              </div>
             </div>
           </div>
-          <div class="seg-wrap">
-            <span class="seg-label" id="app-label">In front</span>
-            <div class="seg" role="radiogroup" aria-labelledby="app-label">
-              <button type="button" role="radio" aria-checked="true" data-app="Finder">Finder</button>
-              <button type="button" role="radio" aria-checked="false" data-app="Safari">Safari</button>
-            </div>
-          </div>
         </div>
       </div>
+      <p class="hero-note">No account, no background daemon and no kernel extension. Upright talks to the mouse directly.</p>
     </div>
   </section>
 
-  <section id="features">
+  <section class="section features" id="features" aria-labelledby="features-title">
     <div class="wrap">
-      <div class="section-head">
-        <h2>Everything Logi Options+ did for your buttons, in one small native app.</h2>
+      <header class="section-head reveal">
+        <p class="eyebrow">Features</p>
+        <h2 id="features-title">Everything Logi Options+ did for your buttons, in one small native app.</h2>
         <p>Upright lives in the menu bar, looks like part of macOS, and only does what you set up.</p>
-      </div>
+      </header>
 
-      <article class="feature">
+      <article class="feature reveal">
         <div class="feature-copy">
-          <p class="tag">Buttons</p>
-          <h2>Give every button a job.</h2>
-          <p>Back, Forward, the top button, the wheel click and any other button your mouse lets software take over. Map each one to Mission Control, a keyboard shortcut, an app, a URL or a Shortcuts.app shortcut.</p>
+          <p class="eyebrow">Buttons</p>
+          <h3>Give every button a job.</h3>
+          <p>Map Back, Forward, the top button, the wheel click and any other button your mouse lets software take over to Mission Control, a keyboard shortcut, an app, a URL or a Shortcuts.app shortcut.</p>
           <ul class="chips" aria-label="Some of the actions">
             <li>Mission Control</li>
             <li>App Exposé</li>
@@ -115,80 +143,112 @@
             <li>Run Shortcut</li>
           </ul>
         </div>
-        <div class="stage" data-scene="remap" style="--ar: 760 / 560" role="img" aria-label="Animation: in Settings, Buttons, the Wheel Click is set to Mission Control from the Windows and Spaces menu, then pressing the wheel opens Mission Control."></div>
-      </article>
-
-      <article class="feature flip">
-        <div class="feature-copy">
-          <p class="tag">Gestures</p>
-          <h2>One button, five actions.</h2>
-          <p>Set a button to Gestures and it gets a click, plus hold-and-move up, down, left or right. The mouse reports raw movement while you hold the button, so the cursor stays where it is.</p>
-          <p class="fineprint">Click → Mission Control · Up → Show Desktop · Down → App Exposé · Left and right → switch Spaces</p>
+        <div class="frame">
+          <div class="stage" data-scene="remap" style="--ar: 760 / 560" role="img" aria-label="Animation: in Settings, Buttons, the Wheel Click is set to Mission Control from the Windows and Spaces menu, then pressing the wheel opens Mission Control."></div>
         </div>
-        <div class="stage" data-scene="gestures" style="--ar: 760 / 560" role="img" aria-label="Animation: holding the top button and moving the mouse up shows the desktop, down shows App Exposé, and left or right switches Spaces."></div>
       </article>
 
-      <article class="feature">
+      <article class="feature flip reveal">
         <div class="feature-copy">
-          <p class="tag">Per-app profiles</p>
-          <h2>Different buttons for different apps.</h2>
-          <p>Keep one global setup and let apps override single buttons while they're in front. In Safari the thumb buttons can switch tabs. Everywhere else they go back and forward.</p>
+          <p class="eyebrow">Gestures</p>
+          <h3>One button, five actions.</h3>
+          <p>Set a button to Gestures and it gets a click plus hold-and-move up, down, left or right, while the mouse reports raw movement so the cursor stays where it is.</p>
+          <ul class="gpad" aria-label="Example gesture setup">
+            <li class="gp-up"><b>Up</b><span>Show Desktop</span></li>
+            <li class="gp-left"><b>Left</b><span>Space left</span></li>
+            <li class="gp-pad" aria-hidden="true"><span class="gp-btn"><i class="gp-dot"></i></span></li>
+            <li class="gp-right"><b>Right</b><span>Space right</span></li>
+            <li class="gp-down"><b>Down</b><span>App Exposé</span></li>
+            <li class="gp-click"><b>Click</b><span>Mission Control</span></li>
+          </ul>
         </div>
-        <div class="stage" data-scene="profiles" style="--ar: 760 / 560" role="img" aria-label="Animation: switching from Finder to Safari changes the thumb buttons from Back and Forward to Previous Tab and Next Tab in the Upright panel."></div>
+        <div class="frame">
+          <div class="stage" data-scene="gestures" style="--ar: 760 / 560" role="img" aria-label="Animation: holding the top button and moving the mouse up shows the desktop, down shows App Exposé, and left or right switches Spaces."></div>
+        </div>
       </article>
 
-      <article class="feature flip">
+      <article class="feature reveal">
         <div class="feature-copy">
-          <p class="tag">Several mice</p>
-          <h2>Every mouse you own, at once.</h2>
-          <p>USB cable, Bluetooth, Unifying, Bolt or Nano, in any mix. Each mouse gets its own row with its connection and battery, and a mouse that's asleep never holds up the others.</p>
+          <p class="eyebrow">Per-app profiles</p>
+          <h3>Different buttons for different apps.</h3>
+          <p>Keep one global setup and let apps override single buttons while they're in front, so in Safari the thumb buttons switch tabs and everywhere else they go back and forward.</p>
+        </div>
+        <div class="frame">
+          <div class="stage" data-scene="profiles" style="--ar: 760 / 560" role="img" aria-label="Animation: switching from Finder to Safari changes the thumb buttons from Back and Forward to Previous Tab and Next Tab in the Upright panel."></div>
+        </div>
+      </article>
+
+      <article class="feature flip reveal">
+        <div class="feature-copy">
+          <p class="eyebrow">Several mice · Battery alerts</p>
+          <h3>Every mouse you own, at once.</h3>
+          <p>USB cable, Bluetooth, Unifying, Bolt or Nano in any mix: each mouse gets its own row with its connection and battery, and a mouse that's asleep never holds up the others.</p>
           <p class="fineprint">Low-battery alerts at 15% and 5%, for each mouse.</p>
         </div>
-        <div class="stage" data-scene="mice" style="--ar: 760 / 560" role="img" aria-label="Animation: a Lift over Bluetooth and an MX Master 3S over Bolt join an MX Vertical in the Upright panel, then a low-battery notification for the Lift appears."></div>
+        <div class="frame">
+          <div class="stage" data-scene="mice" style="--ar: 760 / 560" role="img" aria-label="Animation: a Lift over Bluetooth and an MX Master 3S over Bolt join an MX Vertical in the Upright panel, then a low-battery notification for the Lift appears."></div>
+        </div>
       </article>
 
-      <article class="feature">
+      <article class="feature reveal">
         <div class="feature-copy">
-          <p class="tag">Pointer speed</p>
-          <h2>Pick a speed. Keep it.</h2>
-          <p>Set the DPI with a slider, save presets, and map a button to cycle through them. Upright applies your speed again whenever the mouse reconnects, rounded to what that mouse supports.</p>
+          <p class="eyebrow">Pointer speed</p>
+          <h3>Pick a speed. Keep it.</h3>
+          <p>Set the DPI with a slider, save presets and map a button to cycle through them; Upright applies your speed again whenever the mouse reconnects, rounded to what that mouse supports.</p>
           <p class="fineprint">Mice with <code>ADJUSTABLE_DPI</code> (<code>0x2201</code>)</p>
         </div>
-        <div class="stage" data-scene="speed" style="--ar: 760 / 560" role="img" aria-label="Animation: the pointer speed slider moves from 1,600 to 2,400 DPI, a 3,200 DPI preset is added, and the top button cycles through the presets."></div>
+        <div class="frame">
+          <div class="stage" data-scene="speed" style="--ar: 760 / 560" role="img" aria-label="Animation: the pointer speed slider moves from 1,600 to 2,400 DPI, a 3,200 DPI preset is added, and the top button cycles through the presets."></div>
+        </div>
       </article>
 
-      <article class="feature flip">
+      <article class="feature flip reveal">
         <div class="feature-copy">
-          <p class="tag">Scrolling</p>
-          <h2>Set the wheel apart from the trackpad.</h2>
-          <p>Reverse the mouse wheel without touching the trackpad's Natural Scrolling, change the speed from 0.5× to 3×, or try the experimental smooth scrolling. All of it is off until you turn it on.</p>
+          <p class="eyebrow">Wheel vs trackpad</p>
+          <h3>Set the wheel apart from the trackpad.</h3>
+          <p>Reverse the mouse wheel without touching the trackpad's Natural Scrolling, change the speed from 0.5× to 3×, or try the experimental smooth scrolling, all off until you turn it on.</p>
         </div>
-        <div class="stage" data-scene="scrolling" style="--ar: 760 / 560" role="img" aria-label="Animation: turning on smooth scrolling changes stepped wheel scrolling into a glide, then the speed goes up and the direction is reversed."></div>
+        <div class="frame">
+          <div class="stage" data-scene="scrolling" style="--ar: 760 / 560" role="img" aria-label="Animation: turning on smooth scrolling changes stepped wheel scrolling into a glide, then the speed goes up and the direction is reversed."></div>
+        </div>
       </article>
     </div>
   </section>
 
-  <section class="trust" aria-labelledby="trust-title">
+  <section class="section privacy" id="privacy" aria-labelledby="privacy-title">
     <div class="wrap">
-      <h2 id="trust-title">Leaves nothing behind.</h2>
-      <div class="trust-grid">
-        <div class="trust-item">
-          <div class="trust-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6.5" y="3" width="11" height="18" rx="5.5"/><path d="M12 3v6"/><path d="M3 12h1.5M19.5 12H21"/></svg></div>
+      <header class="section-head reveal">
+        <p class="eyebrow">Privacy</p>
+        <h2 id="privacy-title">Leaves nothing behind.</h2>
+        <p>Upright talks to your mouse and nothing else. It doesn't phone home or collect anything.</p>
+      </header>
+      <div class="privacy-grid">
+        <div class="card privacy-card reveal">
+          <div class="icon-tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6.5" y="3" width="11" height="18" rx="5.5"/><path d="M12 3v6"/><path d="M3 12h1.5M19.5 12H21"/></svg></div>
           <h3>Nothing written to the mouse</h3>
           <p>Buttons are only diverted while Upright runs. Quit it, or switch the mouse off and on, and every button is back to factory behavior.</p>
         </div>
-        <div class="trust-item">
-          <div class="trust-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 9h18"/><path d="M7 6.5h0M9.5 6.5h0"/></svg></div>
+        <div class="card privacy-card reveal">
+          <div class="icon-tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 9h18"/><path d="M7 6.5h0M9.5 6.5h0"/></svg></div>
           <h3>No drivers, no daemon</h3>
           <p>One native SwiftUI app in your menu bar. No kernel extension, no background service, no Logitech software and no account.</p>
         </div>
-        <div class="trust-item">
-          <div class="trust-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="6" width="19" height="12" rx="2"/><path d="M6 10h0M9 10h0M12 10h0M15 10h0M18 10h0M8.5 14.5h7"/><path d="M3 3l18 18"/></svg></div>
+        <div class="card privacy-card reveal">
+          <div class="icon-tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="6" width="19" height="12" rx="2"/><path d="M6 10h0M9 10h0M12 10h0M15 10h0M18 10h0M8.5 14.5h7"/><path d="M3 3l18 18"/></svg></div>
           <h3>Never reads your typing</h3>
           <p>Upright only opens Logitech HID interfaces and only sends the actions you assign. Keyboards are never opened.</p>
         </div>
       </div>
-      <div class="protocol" aria-label="Protocol details">
+      <div class="card ledger reveal" role="group" aria-labelledby="ledger-title">
+        <p class="ledger-title" id="ledger-title">What Upright touches</p>
+        <dl>
+          <div><dt>Your mouse</dt><dd>Buttons diverted while it runs, handed back when it quits</dd></div>
+          <div><dt>Your keyboard</dt><dd>Never opened</dd></div>
+          <div><dt>The network</dt><dd>Doesn't phone home or collect anything</dd></div>
+          <div><dt>Permissions</dt><dd>Accessibility, to send the actions you assign</dd></div>
+        </dl>
+      </div>
+      <div class="protocol reveal" aria-label="Protocol details">
         <span><b>HID++ 2.0</b> over USB, Bluetooth and receivers</span>
         <span><b>0x1B04</b> REPROG_CONTROLS_V4</span>
         <span><b>0x2201</b> ADJUSTABLE_DPI</span>
@@ -197,78 +257,147 @@
     </div>
   </section>
 
-  <section class="mice" id="mice" aria-labelledby="mice-title">
+  <section class="section mice" id="mice" aria-labelledby="mice-title">
     <div class="wrap">
-      <div class="mice-intro">
-        <p class="tag">Supported mice</p>
+      <header class="section-head reveal">
+        <p class="eyebrow">Supported mice</p>
         <h2 id="mice-title">Built on the MX Vertical. Ready for more.</h2>
         <p>The MX Vertical is tested on real hardware. Twenty-two more models are in the catalog, built from published device data and tested against Upright's mouse simulator, so they're expected to work but haven't been verified on hardware yet.</p>
-      </div>
-      <ul class="mice-grid">
+      </header>
+      <ul class="mice-grid reveal">
         <li class="verified">
-          <span class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5 10 17.5 19 7"/></svg></span>
-          <div><b>MX Vertical</b><br><span>Verified on hardware</span></div>
+          <span class="seal"><svg aria-hidden="true"><use href="#i-check"/></svg></span>
+          <span class="m-name">MX Vertical</span>
+          <span class="badge badge-verified">Verified</span>
+          <span class="m-note">Tested on real hardware</span>
         </li>
-        <li><b>MX Master 3S</b><span>Published data</span></li>
-        <li><b>MX Master 4</b><span>Published data</span></li>
-        <li><b>MX Master 3</b><span>Published data · also for Business</span></li>
-        <li><b>MX Master 2S</b><span>Published data</span></li>
-        <li><b>MX Master</b><span>Published data</span></li>
-        <li><b>MX Anywhere 3</b><span>Published data · also for Business</span></li>
-        <li><b>MX Anywhere 2S</b><span>Published data</span></li>
-        <li><b>MX Anywhere 2</b><span>Published data</span></li>
-        <li><b>MX Ergo</b><span>Published data</span></li>
-        <li><b>Lift</b><span>Published data · also for Business</span></li>
-        <li><b>M720 Triathlon</b><span>Published data</span></li>
-        <li><b>Signature M650 L</b><span>Published data</span></li>
-        <li><b>Signature M550</b><span>Published data</span></li>
-        <li><b>ERGO M575</b><span>Published data</span></li>
-        <li><b>M585 / M590</b><span>Published data</span></li>
-        <li><b>Marathon M705</b><span>Published data</span></li>
-        <li><b>M510 (v2)</b><span>Published data</span></li>
-        <li><b>Pebble M350</b><span>Published data</span></li>
-        <li><b>M185 / M235 / M310</b><span>Published data</span></li>
+        <li><span class="m-name">MX Master 3S</span><span class="badge">Published data</span></li>
+        <li><span class="m-name">MX Master 4</span><span class="badge">Published data</span></li>
+        <li><span class="m-name">MX Master 3</span><span class="badge">Published data</span><span class="m-note">Also for Business</span></li>
+        <li><span class="m-name">MX Master 2S</span><span class="badge">Published data</span></li>
+        <li><span class="m-name">MX Master</span><span class="badge">Published data</span></li>
+        <li><span class="m-name">MX Anywhere 3</span><span class="badge">Published data</span><span class="m-note">Also for Business</span></li>
+        <li><span class="m-name">MX Anywhere 2S</span><span class="badge">Published data</span></li>
+        <li><span class="m-name">MX Anywhere 2</span><span class="badge">Published data</span></li>
+        <li><span class="m-name">MX Ergo</span><span class="badge">Published data</span></li>
+        <li><span class="m-name">Lift</span><span class="badge">Published data</span><span class="m-note">Also for Business</span></li>
+        <li><span class="m-name">M720 Triathlon</span><span class="badge">Published data</span></li>
+        <li><span class="m-name">Signature M650 L</span><span class="badge">Published data</span></li>
+        <li><span class="m-name">Signature M550</span><span class="badge">Published data</span></li>
+        <li><span class="m-name">ERGO M575</span><span class="badge">Published data</span></li>
+        <li><span class="m-name">M585 / M590</span><span class="badge">Published data</span></li>
+        <li><span class="m-name">Marathon M705</span><span class="badge">Published data</span></li>
+        <li><span class="m-name">M510 (v2)</span><span class="badge">Published data</span></li>
+        <li><span class="m-name">Pebble M350</span><span class="badge">Published data</span></li>
+        <li><span class="m-name">M185 / M235 / M310</span><span class="badge">Published data</span></li>
       </ul>
-      <p class="fineprint">Connections: USB cable, Bluetooth, Unifying, Bolt and Nano receivers. G-series and PRO gaming mice keep their buttons in onboard profiles and aren't supported.</p>
-      <div class="links-row">
-        <span>Own one of these?</span>
-        <a href="https://github.com/dpdev69/upright/issues/new?template=new_mouse.md">Report your mouse</a>
-        <a href="https://github.com/dpdev69/upright/blob/main/docs/DEVICES.md">Full device list</a>
+      <div class="mice-foot reveal">
+        <p class="fineprint">Connections: USB cable, Bluetooth, Unifying, Bolt and Nano receivers. G-series and PRO gaming mice keep their buttons in onboard profiles and aren't supported.</p>
+        <div class="links-row">
+          <span>Own one of these?</span>
+          <a href="https://github.com/dpdev69/upright/issues/new?template=new_mouse.md">Report your mouse <svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
+          <a href="https://github.com/dpdev69/upright/blob/main/docs/DEVICES.md">Full device list <svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
+        </div>
       </div>
     </div>
   </section>
 
-  <section class="faq" id="faq" aria-labelledby="faq-title">
+  <section class="section install" id="download" aria-labelledby="install-title">
     <div class="wrap">
-      <h2 id="faq-title">Questions</h2>
-      <div class="faq-list">
+      <header class="section-head reveal">
+        <p class="eyebrow">Install</p>
+        <h2 id="install-title">Install in four steps.</h2>
+        <p>Download the disk image from the latest GitHub release. It runs on macOS 13 Ventura or later, on Apple silicon and Intel.</p>
+      </header>
+      <div class="install-grid">
+        <div class="card install-card reveal">
+          <div class="card-head">
+            <h3>Install</h3>
+            <button type="button" class="copy" data-copy="#install-steps" aria-label="Copy install steps">
+              <svg class="ic-copy" aria-hidden="true"><use href="#i-copy"/></svg><svg class="ic-done" aria-hidden="true"><use href="#i-check"/></svg><span>Copy steps</span>
+            </button>
+          </div>
+          <ol class="steps" id="install-steps">
+            <li><span>Download the <b>.dmg</b> from the <a href="https://github.com/dpdev69/upright/releases/latest">latest release</a>.</span></li>
+            <li><span>Open it and drag <b>Upright</b> into <b>Applications</b>.</span></li>
+            <li><span>Open Upright from Applications. The first time, right-click it, choose <b>Open</b>, then <b>Open</b> again.</span></li>
+            <li><span>Allow <b>Accessibility</b> when asked, then pick actions in <b>Settings → Buttons</b>.</span></li>
+          </ol>
+          <a class="btn btn-primary" href="https://github.com/dpdev69/upright/releases/latest">
+            <svg aria-hidden="true"><use href="#i-download"/></svg>
+            Download for Mac
+          </a>
+        </div>
+
+        <div class="install-side">
+          <div class="card note-card reveal">
+            <h3>macOS won't open it the first time?</h3>
+            <p>The release build isn't notarized by Apple, so Gatekeeper blocks the first launch. Right-click <code>Upright.app</code>, choose <b>Open</b>, then <b>Open</b> again. You only need to do this once. If there's no Open button, use <b>Open Anyway</b> in System Settings → Privacy &amp; Security, or run:</p>
+            <div class="code">
+              <pre id="cmd-xattr"><code>xattr -dr com.apple.quarantine /Applications/Upright.app</code></pre>
+              <button type="button" class="copy copy-icon" data-copy="#cmd-xattr" aria-label="Copy command">
+                <svg class="ic-copy" aria-hidden="true"><use href="#i-copy"/></svg><svg class="ic-done" aria-hidden="true"><use href="#i-check"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="card note-card reveal">
+            <h3>Prefer to build it yourself?</h3>
+            <p>You need Xcode 15.3 or later, and no Apple Developer account.</p>
+            <div class="code">
+              <pre id="cmd-build"><code>git clone https://github.com/dpdev69/upright.git
+cd upright
+make app
+open build/Build/Products/Release/Upright.app</code></pre>
+              <button type="button" class="copy copy-icon" data-copy="#cmd-build" aria-label="Copy build commands">
+                <svg class="ic-copy" aria-hidden="true"><use href="#i-copy"/></svg><svg class="ic-done" aria-hidden="true"><use href="#i-check"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="callout reveal">Quit Logi Options+ and take it out of your login items first. It, Solaar and LogiOps divert the same buttons, and only one app can have them.</p>
+    </div>
+  </section>
+
+  <section class="section faq" id="faq" aria-labelledby="faq-title">
+    <div class="wrap faq-wrap">
+      <header class="faq-head reveal">
+        <p class="eyebrow">FAQ</p>
+        <h2 id="faq-title">Questions</h2>
+        <p>Something else? <a href="https://github.com/dpdev69/upright/issues">Open an issue on GitHub</a>.</p>
+      </header>
+      <div class="faq-list reveal">
         <details>
-          <summary>Is Upright free?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></summary>
-          <p>Yes. It's open source under the MIT license, with no account and no subscription.</p>
+          <summary>Is Upright free?<svg aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+          <div class="faq-a"><p>Yes. It's open source under the MIT license, with no account and no subscription.</p></div>
         </details>
         <details>
-          <summary>Which mice work?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></summary>
-          <p>The MX Vertical is verified on real hardware. Other Logitech mice that speak HID++ 2.0 and have programmable buttons are expected to work, including the MX Master, MX Anywhere, MX Ergo and Lift families, but they haven't been verified on hardware yet. Upright decides by what a mouse answers, not by its name, so mice outside the catalog can work too.</p>
+          <summary>Which mice work?<svg aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+          <div class="faq-a"><p>The MX Vertical is verified on real hardware. Other Logitech mice that speak HID++ 2.0 and have programmable buttons are expected to work, including the MX Master, MX Anywhere, MX Ergo and Lift families, but they haven't been verified on hardware yet. Upright decides by what a mouse answers, not by its name, so mice outside the catalog can work too.</p></div>
         </details>
         <details>
-          <summary>macOS won't open Upright the first time. What do I do?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></summary>
-          <p>A build that isn't notarized is blocked by Gatekeeper on first launch. Right-click <code>Upright.app</code>, choose Open, then Open again. You only need to do this once.</p>
+          <summary>macOS won't open Upright the first time. What do I do?<svg aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+          <div class="faq-a"><p>A build that isn't notarized is blocked by Gatekeeper on first launch. Right-click <code>Upright.app</code>, choose Open, then Open again. You only need to do this once.</p></div>
         </details>
         <details>
-          <summary>Do I need to remove Logi Options+?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></summary>
-          <p>Quit it and take it out of your login items while you use Upright. Logi Options+, Solaar and LogiOps divert the same buttons, and only one app can have them.</p>
+          <summary>Do I need to remove Logi Options+?<svg aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+          <div class="faq-a"><p>Quit it and take it out of your login items while you use Upright. Logi Options+, Solaar and LogiOps divert the same buttons, and only one app can have them.</p></div>
         </details>
         <details>
-          <summary>Does it change my mouse permanently?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></summary>
-          <p>No. Nothing is written to the mouse's memory. Quit Upright and your buttons go back to normal straight away.</p>
+          <summary>Does it change my mouse permanently?<svg aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+          <div class="faq-a"><p>No. Nothing is written to the mouse's memory. Quit Upright and your buttons go back to normal straight away.</p></div>
         </details>
         <details>
-          <summary>What permissions does it ask for?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></summary>
-          <p>Accessibility, to send the shortcuts, clicks and media keys your buttons are mapped to. Input Monitoring only if macOS hides a mouse over Bluetooth. Mission Control actions, opening apps and pointer speed work without either.</p>
+          <summary>What permissions does it ask for?<svg aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+          <div class="faq-a"><p>Accessibility, to send the shortcuts, clicks and media keys your buttons are mapped to. Input Monitoring only if macOS hides a mouse over Bluetooth. Mission Control actions, opening apps and pointer speed work without either.</p></div>
         </details>
         <details>
-          <summary>Can I build it myself?<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></summary>
-          <p>Yes. Open <code>Upright.xcodeproj</code> in Xcode 15.3 or later and press ⌘R. You don't need an Apple Developer account.</p>
+          <summary>Can I build it myself?<svg aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+          <div class="faq-a"><p>Yes. Open <code>Upright.xcodeproj</code> in Xcode 15.3 or later and press ⌘R. You don't need an Apple Developer account.</p></div>
+        </details>
+        <details>
+          <summary>How do I uninstall it?<svg aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+          <div class="faq-a"><p>Turn off Open at login in Settings → General if you turned it on, quit Upright and delete <code>Upright.app</code>. Nothing was written to the mouse, so there's nothing to undo there. The <a href="https://github.com/dpdev69/upright/blob/main/INSTALL.md#uninstall">install guide</a> also shows how to remove its settings.</p></div>
         </details>
       </div>
     </div>
@@ -276,15 +405,16 @@
 
   <section class="final" aria-labelledby="final-title">
     <div class="wrap">
-      <div class="final-card">
-        <img src="assets/icon-256.png" alt="" width="88" height="88">
-        <div>
-          <h2 id="final-title">Put every button to work.</h2>
-          <p>Free, open source, and about a minute from download to your first remapped button.</p>
-        </div>
-        <div class="hero-actions">
-          <a class="btn btn-primary" href="https://github.com/dpdev69/upright/releases/latest">Download for Mac</a>
-          <a class="btn btn-ghost" href="https://github.com/dpdev69/upright/blob/main/INSTALL.md">Install guide</a>
+      <div class="final-card reveal">
+        <img src="assets/icon-256.png" alt="" width="96" height="96" loading="lazy">
+        <h2 id="final-title">Put every button to work.</h2>
+        <p>Free, open source, and about a minute from download to your first remapped button.</p>
+        <div class="actions">
+          <a class="btn btn-primary btn-lg" href="https://github.com/dpdev69/upright/releases/latest">
+            <svg aria-hidden="true"><use href="#i-download"/></svg>
+            Download for Mac
+          </a>
+          <a class="btn btn-secondary btn-lg" href="https://github.com/dpdev69/upright/blob/main/INSTALL.md">Install guide</a>
         </div>
       </div>
     </div>
@@ -293,20 +423,41 @@
 
 <footer class="footer">
   <div class="wrap">
-    <div class="footer-top">
-      <a class="brand" href="#top"><img src="assets/icon-256.png" alt="" width="24" height="24">Upright</a>
-      <nav aria-label="Project links">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a class="brand" href="#top"><img src="assets/icon-256.png" alt="" width="24" height="24" loading="lazy"><span>Upright</span></a>
+        <p>Open-source button remapping for Logitech mice on macOS, without Logi Options+.</p>
+      </div>
+      <nav aria-labelledby="f-product">
+        <p class="f-title" id="f-product">Product</p>
+        <a href="#features">Features</a>
+        <a href="#mice">Supported mice</a>
+        <a href="#download">Install</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+      <nav aria-labelledby="f-project">
+        <p class="f-title" id="f-project">Project</p>
         <a href="https://github.com/dpdev69/upright">GitHub</a>
         <a href="https://github.com/dpdev69/upright/releases">Releases</a>
         <a href="https://github.com/dpdev69/upright/blob/main/CHANGELOG.md">Changelog</a>
         <a href="https://github.com/dpdev69/upright/blob/main/INSTALL.md">Install guide</a>
+      </nav>
+      <nav aria-labelledby="f-legal">
+        <p class="f-title" id="f-legal">Legal</p>
+        <a href="privacy.html">Privacy</a>
+        <a href="terms.html">Terms</a>
+        <a href="https://github.com/dpdev69/upright/blob/main/SECURITY.md">Security</a>
         <a href="https://github.com/dpdev69/upright/blob/main/LICENSE">MIT license</a>
       </nav>
     </div>
-    <p>Logitech, MX, Unifying, Bolt and Logi Options+ are trademarks of Logitech. Upright is an independent project and is not affiliated with or endorsed by Logitech. The animations show the real interface with simulated mice.</p>
+    <div class="footer-base">
+      <p>© 2026 Upright contributors · MIT license</p>
+      <p>Logitech, MX, Unifying, Bolt and Logi Options+ are trademarks of Logitech. Upright is an independent project and is not affiliated with or endorsed by Logitech. The animations show the real interface with simulated mice.</p>
+    </div>
   </div>
 </footer>
 
 <script src="assets/site.js" defer></script>
+<script src="assets/page.js" defer></script>
 </body>
 </html>
