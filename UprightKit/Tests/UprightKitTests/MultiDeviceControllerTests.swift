@@ -557,6 +557,44 @@ final class MultiDeviceControllerTests: XCTestCase {
         XCTAssertEqual(receiver.notificationFlags, [0x00, 0x19, 0x04])
     }
 
+    // MARK: Refused reports
+
+    func testDirectMouseWhoseReportsAreRefusedFailsSoItCanBeReopened() async {
+        let mouse = SimulatedDirect(profile: DeviceProfiles.mxVertical, connection: .bluetooth)
+        let hub = makeHub(mouse)
+        hub.start()
+        let index = DeviceAddress.direct
+        await eventually("connected") { isConnected(hub, at: index) }
+
+        // After a Mac sleep, macOS refused every report on the old Bluetooth handle
+        // (kIOReturnBadArgument). Retrying there can't help, so the endpoint reports a failure,
+        // which is what makes the app open the interface again.
+        mouse.sendError = Int32(bitPattern: 0xE000_02C2)
+        hub.refresh()
+        await eventually("failed") {
+            if case .failed = state(hub, at: index) { return true }
+            return false
+        }
+        XCTAssertNotNil(hub.endpoints[index]?.snapshot, "the session is kept")
+
+        // It keeps retrying meanwhile, in case the same interface starts working again.
+        mouse.sendError = nil
+        mouse.forgetDiversion()
+        await eventually("reconnected") { isConnected(hub, at: index) }
+        XCTAssertEqual(mouse.diverted, configurable(DeviceProfiles.mxVertical))
+    }
+
+    func testReceiverSlotWhoseReportsAreRefusedOnlySleeps() async {
+        let receiver = SimulatedReceiver.unifying([1: DeviceProfiles.mxVertical])
+        let hub = makeHub(receiver)
+        hub.start()
+        await eventually("connected") { isConnected(hub, at: 1) }
+
+        receiver.sendError = Int32(bitPattern: 0xE000_02C2)
+        hub.refresh()
+        await eventually("asleep") { isAsleep(hub, at: 1) }
+    }
+
     // MARK: Device actions
 
     func testEasySwitchOnBLeavesALone() async {

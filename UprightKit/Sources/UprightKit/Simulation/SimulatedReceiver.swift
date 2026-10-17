@@ -76,6 +76,7 @@ public class SimulatedHIDPPTransport: HIDPPTransport, @unchecked Sendable {
     private var _latency: TimeInterval = 0
     private var _unansweredRequestWindow: TimeInterval = 0
     private var _isDisconnected = false
+    private var _sendError: Int32?
     private var _sent: [[UInt8]] = []
     private var featureRequests: [RequestKey: Int] = [:]
     private var pings: [UInt8: Int] = [:]
@@ -111,6 +112,7 @@ public class SimulatedHIDPPTransport: HIDPPTransport, @unchecked Sendable {
     // MARK: HIDPPTransport
 
     public func send(_ bytes: [UInt8]) throws {
+        if let code = synchronized({ _sendError }) { throw HIDPPError.sendFailed(code) }
         let outcome: Outcome? = synchronized {
             guard !_isDisconnected else { return nil }
             _sent.append(bytes)
@@ -153,6 +155,13 @@ public class SimulatedHIDPPTransport: HIDPPTransport, @unchecked Sendable {
     public var dropsRequests: Bool {
         get { synchronized { _dropsRequests } }
         set { synchronized { _dropsRequests = newValue } }
+    }
+
+    /// While set, every report sent fails with this IOReturn, the way macOS refuses reports on
+    /// an interface whose handle went stale (seen after a Mac sleep over Bluetooth).
+    public var sendError: Int32? {
+        get { synchronized { _sendError } }
+        set { synchronized { _sendError = newValue } }
     }
 
     /// Delay before every reply and report, added to each device's own latency.

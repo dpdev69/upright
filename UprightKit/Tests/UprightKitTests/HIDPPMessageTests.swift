@@ -102,6 +102,16 @@ final class HIDPPMessageTests: XCTestCase {
         XCTAssertEqual(HIDInterfaceChoicePolicy.choose(alreadyOpen: true, sameInterface: false, previousStillPresent: false), .replace)
     }
 
+    func testRefusedOpenIsRetriedWithBackoffThenGivenUp() {
+        XCTAssertNil(HIDInterfaceOpenRetryPolicy.delay(afterFailures: 0))
+        XCTAssertEqual(HIDInterfaceOpenRetryPolicy.delay(afterFailures: 1), 0.5)
+        XCTAssertEqual(HIDInterfaceOpenRetryPolicy.delay(afterFailures: 2), 1)
+        XCTAssertEqual(HIDInterfaceOpenRetryPolicy.delay(afterFailures: 4), 4)
+        XCTAssertEqual(HIDInterfaceOpenRetryPolicy.delay(afterFailures: 5), 8)
+        XCTAssertEqual(HIDInterfaceOpenRetryPolicy.delay(afterFailures: HIDInterfaceOpenRetryPolicy.maxRetries), 8)
+        XCTAssertNil(HIDInterfaceOpenRetryPolicy.delay(afterFailures: HIDInterfaceOpenRetryPolicy.maxRetries + 1))
+    }
+
     func testBatteryStatusParsing() {
         // 0x1000: [level, next level, status]
         XCTAssertEqual(BatteryStatus(batteryStatusParameters: [80, 50, 0]), BatteryStatus(percentage: 80, isCharging: false))

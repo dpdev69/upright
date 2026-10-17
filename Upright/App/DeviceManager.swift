@@ -88,6 +88,10 @@ final class DeviceManager: ObservableObject {
     /// Recovery state by interface identity, so it survives re-matching an interface.
     private var recoveryAttempts: [String: Int] = [:]
     private var recoveryTasks: [String: Task<Void, Never>] = [:]
+    /// Opens refused for a reason other than permission, by interface ID: how many failed, and
+    /// the pending retry (`HIDInterfaceOpenRetryPolicy`).
+    private var openFailures: [AnyHashable: Int] = [:]
+    private var openRetryTasks: [AnyHashable: Task<Void, Never>] = [:]
     private var started = false
     private var observers: [NSObjectProtocol] = []
     private static let maxRecoveries = 3
@@ -123,6 +127,7 @@ final class DeviceManager: ObservableObject {
     func shutdown() {
         recoveryTasks.values.forEach { $0.cancel() }
         recoveryTasks.removeAll()
+        cancelOpenRetries()
         entries.values.forEach { $0.link.shutdown() }
     }
 
@@ -256,6 +261,8 @@ final class DeviceManager: ObservableObject {
     /// After the Mac wakes (also called by Demo Mode): re-applies every mouse's configuration;
     /// receivers re-assert their notification flags.
     func systemDidWake() {
+        // A mouse whose recovery ran out before the Mac slept gets new attempts.
+        recoveryAttempts.removeAll()
         guard !entries.isEmpty else { return }
         append(String(localized: "Mac woke up; reapplying button configuration"))
         orderedEntries.forEach { $0.link.refresh() }
@@ -279,6 +286,7 @@ final class DeviceManager: ObservableObject {
     private func restartSource() {
         recoveryTasks.values.forEach { $0.cancel() }
         recoveryTasks.removeAll()
+        cancelOpenRetries()
         for id in orderedEntries.map(\.interface.id) {
             detach(id, removed: false)
         }
@@ -288,24 +296,30 @@ final class DeviceManager: ObservableObject {
         refreshPublished()
     }
 
-    private func attach(_ interface: LinkInterface) {
+    /// `isRetry`: opening it failed before (`retryOpen`), so it was already reported as found.
+    private func attach(_ interface: LinkInterface, isRetry: Bool = false) {
         let id = interface.id
         guard entries[id] == nil else { return }
         guard let superseded = InterfaceClassifier.twinsToReplace(adding: interface.descriptor, open: entries.mapValues(\.interface.descriptor)) else { return }
         superseded.forEach { detach($0, removed: false) }
 
-        append(String(localized: "Found \(interface.descriptor.summary)"))
+        if !isRetry { append(String(localized: "Found \(interface.descriptor.summary)")) }
         let transport: HIDPPTransport
         do {
             transport = try source.open(interface)
         } catch {
             let failure = error as? LinkSourceError ?? .failed("\(error)")
-            append(failure.message)
-            if failure.isPermissionDenied { blocked[id] = interface.name }
+            if failure.isPermissionDenied {
+                append(failure.message)
+                blocked[id] = interface.name
+            } else {
+                retryOpen(interface, after: failure)
+            }
             refreshBlocked()
             refreshStatus()
             return
         }
+        cancelOpenRetry(id)
         blocked[id] = nil
         // Something opened, so watching works after all; refusals stay per interface.
         watchingDenied = false
@@ -329,9 +343,41 @@ final class DeviceManager: ObservableObject {
     }
 
     private func interfaceRemoved(_ id: AnyHashable) {
+        cancelOpenRetry(id)
         let wasBlocked = blocked.removeValue(forKey: id) != nil
         detach(id, removed: true)
         if wasBlocked { refreshBlocked() }
+    }
+
+    /// A reconnected Bluetooth mouse is published a moment before macOS lets it be opened, and
+    /// nothing publishes it again, so a refused open is tried again while the interface is present.
+    private func retryOpen(_ interface: LinkInterface, after failure: LinkSourceError) {
+        let id = interface.id
+        let failures = openFailures[id, default: 0] + 1
+        openFailures[id] = failures
+        openRetryTasks.removeValue(forKey: id)?.cancel()
+        guard let delay = HIDInterfaceOpenRetryPolicy.delay(afterFailures: failures) else {
+            append(String(localized: "\(failure.message) Giving up until it reconnects."))
+            return
+        }
+        if failures == 1 { append(String(localized: "\(failure.message) Trying again.")) }
+        openRetryTasks[id] = Task { @MainActor [weak self] in
+            try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+            guard let self, !Task.isCancelled else { return }
+            self.openRetryTasks[id] = nil
+            self.attach(interface, isRetry: true)
+        }
+    }
+
+    private func cancelOpenRetry(_ id: AnyHashable) {
+        openRetryTasks.removeValue(forKey: id)?.cancel()
+        openFailures[id] = nil
+    }
+
+    private func cancelOpenRetries() {
+        openRetryTasks.values.forEach { $0.cancel() }
+        openRetryTasks.removeAll()
+        openFailures.removeAll()
     }
 
     /// `removed` is true when the source reported the interface gone; otherwise it is still
