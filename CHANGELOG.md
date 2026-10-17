@@ -15,6 +15,17 @@ All notable changes to Upright are listed here. The format follows
   without the notification.
 - If re-enabling a receiver's link notifications fails (for example right after the Mac
   wakes), absent mice go back to being probed every 30 s instead of every 5 minutes.
+- **A Bluetooth mouse could stay disconnected after the Mac slept or the mouse reconnected,**
+  for three reasons seen in an MX Vertical's activity log:
+  - macOS publishes a reconnected Bluetooth mouse a moment before it can be opened
+    (`kIOReturnNotReady`), and Upright never tried again. A refused open is now retried
+    (after 0.5, 1, 2 and 4 s, then every 8 s, for about 40 s).
+  - After a sleep, macOS can keep the old handle and refuse every report sent on it
+    (`kIOReturnBadArgument`). Upright kept retrying on that handle. A Bluetooth or USB mouse
+    whose reports are refused now shows as failed, which makes Upright open it again.
+  - **Reconnect All** reused the stopped IOKit manager, which doesn't report devices it
+    already had, so it found nothing for a mouse that was still connected. It now starts a
+    new one, and the automatic recovery that restarts the search benefits too.
 - Simulator-tested only; not yet verified on hardware.
 
 ## [1.1.1] - 2026-10-14

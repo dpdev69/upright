@@ -30,6 +30,20 @@ public enum HIDInterfaceChoicePolicy {
     }
 }
 
+/// When to try opening an interface again after macOS refused for a reason other than
+/// permission. A reconnected Bluetooth mouse is published a moment before it can be opened
+/// (kIOReturnNotReady), and nothing publishes it again afterwards.
+public enum HIDInterfaceOpenRetryPolicy {
+    /// Opens tried after the first one fails: 0.5, 1, 2, 4 s apart, then every 8 s (about 40 s in all).
+    public static let maxRetries = 8
+
+    /// The wait before the next open after `failures` failed ones, or nil to give up.
+    public static func delay(afterFailures failures: Int) -> TimeInterval? {
+        guard (1...maxRetries).contains(failures) else { return nil }
+        return min(0.5 * pow(2, Double(failures - 1)), 8)
+    }
+}
+
 /// Runs HID callbacks on the main actor in arrival order, without a `Task` hop per report:
 /// synchronously when already on the main thread (IOKit delivers on the main run loop),
 /// otherwise through the serial main queue.
