@@ -972,6 +972,25 @@ code {
 .doc-body li::marker { color: var(--ink-3); }
 .doc-body b { color: var(--ink); font-weight: 600; }
 .doc-body a { color: var(--accent); text-underline-offset: 3px; }
+
+/* Comparison pages */
+.doc-head .crumbs { margin-bottom: 20px; }
+.cmp-scroll { margin: 24px 0 0; overflow-x: auto; border: 1px solid var(--rule); border-radius: 16px; background: var(--card); -webkit-overflow-scrolling: touch; }
+.cmp-scroll:focus-visible { outline: 2px solid var(--accent-ring); outline-offset: 2px; }
+.cmp { width: 100%; min-width: 680px; border-collapse: collapse; font-size: 14.5px; line-height: 1.45; }
+.cmp th, .cmp td { padding: 12px 14px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--rule); }
+.cmp thead th { font-size: 12.5px; font-weight: 600; color: var(--ink-3); background: var(--bg-2); }
+.cmp tbody th { font-weight: 600; color: var(--ink); white-space: nowrap; }
+.cmp tbody tr:last-child > * { border-bottom: 0; }
+.cmp-us > * { background: var(--accent-soft); }
+.cmp-note, .cmp-sources { font-size: 14px; color: var(--ink-3); }
+.cmp-sources { margin-top: 48px !important; padding-top: 20px; border-top: 1px solid var(--rule); }
+.doc-body .cmp-cta { margin-top: 20px; }
+.doc-body .btn { text-decoration: none; }
+.doc-body .btn-primary { color: var(--accent-ink); }
+.cmp-faq { margin-top: 12px; border-top: 1px solid var(--rule); }
+.cmp-faq summary { font-size: 17px; color: var(--ink); }
+.cmp-faq .faq-a p { margin: -8px 0 22px; }
 .footer nav a[aria-current="page"] { color: var(--ink); }
 
 /* Motion: fade and slide in on scroll (only with JS, and never with reduced motion) */

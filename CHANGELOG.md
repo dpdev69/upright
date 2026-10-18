@@ -6,6 +6,12 @@ All notable changes to Upright are listed here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- A [Logi Options+ alternatives for Mac](https://upright.hellobasalt.dev/logi-options-alternatives)
+  page on the website, comparing Upright with BetterMouse, Mac Mouse Fix, SteerMouse and
+  LinearMouse, linked from the home page and listed in the sitemap.
+
 ### Changed
 
 - The website moved to [upright.hellobasalt.dev](https://upright.hellobasalt.dev/). The old
