@@ -2,7 +2,7 @@
 
 **Open-source button remapping for Logitech mice on macOS, without Logi Options+.**
 
-**Website:** [upright.hellobasalt.dev](https://upright.hellobasalt.dev/) · [MX Vertical on Mac](https://upright.hellobasalt.dev/mx-vertical.html) · [Download](https://github.com/dpdev69/upright/releases/latest)
+**Website:** [upright.hellobasalt.dev](https://upright.hellobasalt.dev/) · [MX Vertical on Mac](https://upright.hellobasalt.dev/mx-vertical) · [Download](https://github.com/dpdev69/upright/releases/latest)
 
 Upright is a small native SwiftUI menu-bar app. **It remaps Logitech mice over HID++**: the
 thumb buttons, the top (DPI) button, the wheel click and any other button a mouse lets software
