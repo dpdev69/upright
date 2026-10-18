@@ -17,6 +17,8 @@ All notable changes to Upright are listed here. The format follows
 
 ### Changed
 
+- The website is now served by Cloudflare Pages from `site/` on main. The GitHub Pages
+  workflow and `site/CNAME` are gone.
 - Website links, canonical URLs and the sitemap now use addresses without `.html`
   (for example /privacy). The old `.html` addresses keep working.
 - The website moved to [upright.hellobasalt.dev](https://upright.hellobasalt.dev/). The old
