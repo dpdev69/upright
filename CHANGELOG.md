@@ -13,9 +13,12 @@ All notable changes to Upright are listed here. The format follows
   LinearMouse, linked from the home page and listed in the sitemap.
 - A `robots.txt` for the website that allows all crawlers and points to the sitemap.
 - The privacy and terms pages now also give hello@hellobasalt.dev for questions about Basalt.
+- A "Page not found" page for the website, so unknown addresses answer with a real 404.
 
 ### Changed
 
+- Website links, canonical URLs and the sitemap now use addresses without `.html`
+  (for example /privacy). The old `.html` addresses keep working.
 - The website moved to [upright.hellobasalt.dev](https://upright.hellobasalt.dev/). The old
   dpdev69.github.io/upright address redirects there.
 - The website footer now follows the shared Basalt layout, with a More from Basalt column
