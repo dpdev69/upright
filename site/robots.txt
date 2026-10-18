@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://upright.hellobasalt.dev/sitemap.xml

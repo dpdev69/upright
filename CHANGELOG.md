@@ -11,6 +11,8 @@ All notable changes to Upright are listed here. The format follows
 - A [Logi Options+ alternatives for Mac](https://upright.hellobasalt.dev/logi-options-alternatives)
   page on the website, comparing Upright with BetterMouse, Mac Mouse Fix, SteerMouse and
   LinearMouse, linked from the home page and listed in the sitemap.
+- A `robots.txt` for the website that allows all crawlers and points to the sitemap.
+- The privacy and terms pages now also give hello@hellobasalt.dev for questions about Basalt.
 
 ### Changed
 
