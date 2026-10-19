@@ -8,6 +8,10 @@ All notable changes to Upright are listed here. The format follows
 
 ### Added
 
+- An [MX Master 3S on Mac without Logi Options+](https://upright.hellobasalt.dev/mx-master-3s-mac-without-options)
+  page on the website. It says plainly that the MX Master 3S entry is built from published data
+  and untested on hardware, lists what Upright does and doesn't do for the mouse, and is linked
+  from the alternatives page and listed in the sitemap and `llms.txt`.
 - A [Logi Options+ alternatives for Mac](https://upright.hellobasalt.dev/logi-options-alternatives)
   page on the website, comparing Upright with BetterMouse, Mac Mouse Fix, SteerMouse and
   LinearMouse, linked from the home page and listed in the sitemap.

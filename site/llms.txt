@@ -14,6 +14,7 @@ Nothing is written to the mouse: buttons are diverted only while Upright runs, a
 - [Upright vs BetterMouse](https://upright.hellobasalt.dev/upright-vs-bettermouse): free, open-source button remapping vs a $7.99 app with deeper Logitech hardware and keyboard settings
 - [Upright vs SteerMouse](https://upright.hellobasalt.dev/upright-vs-steermouse): free Logitech specialist vs a US$19.99 remapper for USB and Bluetooth mice of any brand
 - [MX Vertical on Mac without Logi Options+](https://upright.hellobasalt.dev/mx-vertical): remapping the MX Vertical's top (DPI), back, forward and wheel buttons
+- [MX Master 3S on Mac without Logi Options+](https://upright.hellobasalt.dev/mx-master-3s-mac-without-options): what macOS does alone, what Upright remaps (untested on this mouse) and what it skips
 - [Privacy](https://upright.hellobasalt.dev/privacy): Upright collects nothing
 - [Terms](https://upright.hellobasalt.dev/terms): MIT License, provided as is
 
