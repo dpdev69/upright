@@ -6,6 +6,8 @@ All notable changes to Upright are listed here. The format follows
 
 ## [Unreleased]
 
+## [1.1.3] - unreleased
+
 ### Added
 
 - An [MX Master 3S on Mac without Logi Options+](https://upright.hellobasalt.dev/mx-master-3s-mac-without-options)
