@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MX Master 3S on Mac without Logi Options+ · Upright</title>
+<meta name="description" content="Use a Logitech MX Master 3S on a Mac without Logi Options+: what macOS does alone, what free Upright adds, what it skips, and the first-launch catch.">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#fbfbfd" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<link rel="canonical" href="https://upright.hellobasalt.dev/mx-master-3s-mac-without-options">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Upright">
+<meta property="og:url" content="https://upright.hellobasalt.dev/mx-master-3s-mac-without-options">
+<meta property="og:title" content="MX Master 3S on a Mac, without Logi Options+">
+<meta property="og:description" content="Use a Logitech MX Master 3S on a Mac without Logi Options+: what macOS does alone, what free Upright adds, what it skips, and the first-launch catch.">
+<meta property="og:image" content="https://upright.hellobasalt.dev/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Upright: your Logitech mouse, without Logi Options+. The menu-bar panel lists three mice with their battery levels.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="MX Master 3S on a Mac, without Logi Options+">
+<meta name="twitter:description" content="Use a Logitech MX Master 3S on a Mac without Logi Options+: what macOS does alone, what free Upright adds, what it skips, and the first-launch catch.">
+<meta name="twitter:image" content="https://upright.hellobasalt.dev/assets/og-image.png">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="apple-touch-icon" href="assets/icon-256.png">
+<link rel="stylesheet" href="assets/site.css?v=6">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebPage", "@id": "https://upright.hellobasalt.dev/mx-master-3s-mac-without-options#webpage", "url": "https://upright.hellobasalt.dev/mx-master-3s-mac-without-options", "name": "MX Master 3S on Mac without Logi Options+: what works", "description": "Use a Logitech MX Master 3S on a Mac without Logi Options+: what macOS does alone, what free Upright adds, what it skips, and the first-launch catch.", "inLanguage": "en", "dateModified": "2026-10-20", "isPartOf": {"@type": "WebSite", "name": "Upright", "url": "https://upright.hellobasalt.dev/"}, "about": {"@type": "SoftwareApplication", "name": "Upright", "url": "https://upright.hellobasalt.dev/"}, "breadcrumb": {"@id": "https://upright.hellobasalt.dev/mx-master-3s-mac-without-options#breadcrumb"}, "primaryImageOfPage": "https://upright.hellobasalt.dev/assets/og-image.png", "publisher": {"@type": "Organization", "@id": "https://hellobasalt.dev/#org", "name": "Basalt Studio", "alternateName": "Basalt", "url": "https://hellobasalt.dev/", "sameAs": ["https://x.com/hellobasalt", "https://www.youtube.com/@hellobasalt"]}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "@id": "https://upright.hellobasalt.dev/mx-master-3s-mac-without-options#breadcrumb", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Upright", "item": "https://upright.hellobasalt.dev/"}, {"@type": "ListItem", "position": 2, "name": "MX Master 3S on Mac", "item": "https://upright.hellobasalt.dev/mx-master-3s-mac-without-options"}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Can I use an MX Master 3S on a Mac without Logi Options+?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Pair it over Bluetooth or plug in its Bolt receiver and macOS treats it as a normal mouse. To change what the extra buttons do, you need an app. Upright is a free, open-source option, but its MX Master 3S entry is built from published data and hasn't been tested on a real MX Master 3S yet."}}, {"@type": "Question", "name": "Which MX Master 3S buttons can Upright remap?", "acceptedAnswer": {"@type": "Answer", "text": "Back, Forward, the Gesture button, the SmartShift button and the wheel click. It doesn't remap the thumb wheel."}}, {"@type": "Question", "name": "Can Upright change SmartShift or the thumb wheel?", "acceptedAnswer": {"@type": "Answer", "text": "No. Upright can give the SmartShift button another job, but it doesn't change the wheel's own SmartShift, ratchet or hi-res settings, and it doesn't remap or tune the thumb wheel. Logi Options+ does those, and BetterMouse lists thumb-wheel support on its site."}}, {"@type": "Question", "name": "Does Upright work with the MX Master 3S over Bluetooth and Bolt?", "acceptedAnswer": {"@type": "Answer", "text": "Both are listed in its device catalog, but neither is verified on this mouse. Bluetooth is best effort and may need Input Monitoring. Bolt support is simulator-tested only."}}, {"@type": "Question", "name": "Why does macOS block Upright the first time?", "acceptedAnswer": {"@type": "Answer", "text": "The release build is ad-hoc signed and not notarized by Apple, so Gatekeeper blocks the first launch. Right-click Upright.app, choose Open, then Open again. You only need to do this once."}}, {"@type": "Question", "name": "Do I need to uninstall Logi Options+?", "acceptedAnswer": {"@type": "Answer", "text": "Quit it and take it out of your login items while you use Upright. Logi Options+, Solaar and LogiOps divert the same buttons, and only one app can have them."}}]}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="mouse-grad" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" class="g0"></stop>
+      <stop offset="1" class="g1"></stop>
+    </linearGradient>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11M7 10.5l5 5 5-5M5 20h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-github" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.48 2 2 6.58 2 12.23c0 4.52 2.87 8.35 6.84 9.7.5.1.68-.22.68-.49l-.01-1.7c-2.78.62-3.37-1.37-3.37-1.37-.46-1.18-1.11-1.5-1.11-1.5-.91-.64.07-.62.07-.62 1 .07 1.53 1.06 1.53 1.06.9 1.57 2.35 1.12 2.92.85.09-.67.35-1.12.64-1.38-2.22-.26-4.56-1.14-4.56-5.07 0-1.12.39-2.04 1.03-2.76-.1-.26-.45-1.3.1-2.71 0 0 .84-.28 2.75 1.05a9.4 9.4 0 0 1 5 0c1.91-1.33 2.75-1.05 2.75-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.64 1.03 2.76 0 3.94-2.34 4.81-4.57 5.06.36.32.68.94.68 1.9l-.01 2.81c0 .27.18.6.69.49A10.14 10.14 0 0 0 22 12.23C22 6.58 17.52 2 12 2Z"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="8.5" y="8.5" width="11" height="11" rx="2.5"/><path d="M15.5 8.5V6.5A2 2 0 0 0 13.5 4.5h-7a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h2"/></g></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5 10 17.5 19 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6.5 9.5 5.5 5.5 5.5-5.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  </defs>
+</svg>
+
+<header class="nav">
+  <div class="wrap nav-inner">
+    <div class="brand-lockup">
+      <a class="brand" href="./" aria-label="Upright home">
+        <img src="assets/icon-256.png" alt="" width="28" height="28">
+        <span>Upright</span>
+      </a>
+      <a class="by-basalt" href="https://hellobasalt.dev/">by Basalt</a>
+    </div>
+    <nav class="nav-links" aria-label="Sections">
+      <a href="./#features">Features</a>
+      <a href="./#mice">Mice</a>
+      <a href="./#faq">FAQ</a>
+    </nav>
+    <div class="nav-end">
+      <a class="nav-gh" href="https://github.com/dpdev69/upright" aria-label="GitHub"><svg aria-hidden="true"><use href="#i-github"/></svg><span>GitHub</span></a>
+      <a class="btn btn-primary btn-sm" href="https://github.com/dpdev69/upright/releases/latest">Download</a>
+    </div>
+  </div>
+</header>
+
+<main id="main" class="doc">
+  <div class="wrap doc-wrap">
+    <header class="doc-head">
+      <nav class="crumbs" aria-label="Breadcrumb"><a href="./">Upright</a><span aria-hidden="true">/</span><span aria-current="page">MX Master 3S</span></nav>
+      <h1>MX Master 3S on a Mac, without Logi Options+</h1>
+      <p class="doc-meta">Written 20 October 2026 · Facts from Upright's README and device catalog</p>
+    </header>
+    <div class="doc-body">
+      <p class="doc-lede">You can use a Logitech MX Master 3S on a Mac with no Logitech software. macOS handles the basics. If you also want the extra buttons to do something, Upright is a free, open-source menu-bar app that can do that for five of them. It can't do everything Logi Options+ does, and there are two catches, covered below.</p>
+      <p><b>Read this first: it is not tested on this mouse.</b> Upright's MX Master 3S entry is built from published device data and has only been run against a simulator. The one mouse Upright has been verified on is the MX Vertical. If you try it on an MX Master 3S, tell us how it went at <a href="mailto:support@hellobasalt.dev">support@hellobasalt.dev</a>.</p>
+
+      <h2 id="macos-alone">What macOS does on its own</h2>
+      <p>Pair the mouse over Bluetooth, or plug in its Bolt receiver. macOS then treats it as an ordinary mouse: the pointer moves and the buttons and wheel click and scroll. Back and Forward normally arrive as mouse buttons 4 and 5, which apps such as Safari and Finder use to go back and forward. Pointer speed and scroll direction are in System Settings.</p>
+      <p>What macOS can't do is change what the special buttons do. It has no settings for the Gesture button or the SmartShift button. That is the gap Logi Options+ fills, and the gap Upright and the other apps below try to fill without it.</p>
+
+      <h2 id="what-upright-does">What Upright does for the MX Master 3S</h2>
+      <ul>
+        <li><b>Remaps five buttons:</b> Back, Forward, the Gesture button, the SmartShift button and the wheel click.</li>
+        <li><b>Plenty to map them to.</b> Mission Control, App Exposé, Show Desktop, switching Spaces, tabs, media keys, any keyboard shortcut you record, or open an app, open a URL or run a Shortcuts.app shortcut.</li>
+        <li><b>Gestures on a button.</b> Set one to Gestures for five actions: a click, plus hold and move up, down, left or right. The published data says the Gesture button reports raw movement, so the cursor should stay put. If it doesn't, Upright falls back to watching the cursor and the pointer moves during the gesture.</li>
+        <li><b>A suggested starting setup,</b> if you want it: Back to &#8984;[, Forward to &#8984;], and the Gesture button to Mission Control. A fresh install remaps nothing.</li>
+        <li><b>Per-app profiles,</b> so a button can do something else while one app is in front.</li>
+        <li><b>Pointer speed (DPI) and Easy-Switch.</b> The published data lists both features for this mouse, so Upright should offer a speed slider, presets and Easy-Switch from a button. Treat that as expected, not confirmed.</li>
+        <li><b>Battery in the menu bar,</b> with low-battery alerts at 15% and 5%.</li>
+        <li><b>Leaves nothing behind.</b> Buttons are only borrowed while Upright runs. Quit it, or switch the mouse off and on, and they are back to factory behavior. Nothing is written to the mouse's memory.</li>
+      </ul>
+      <p class="cmp-cta"><a class="btn btn-primary" href="https://github.com/dpdev69/upright/releases/latest"><svg aria-hidden="true"><use href="#i-download"/></svg>Download Upright, free</a></p>
+
+      <h2 id="what-upright-skips">What Upright does not do for it</h2>
+      <ul>
+        <li><b>The thumb wheel.</b> It isn't one of the controls Upright can remap, and Upright has no thumb-wheel settings.</li>
+        <li><b>The wheel's own settings.</b> Upright can give the SmartShift button a new job, but it doesn't change SmartShift, ratchet or hi-res mode on the wheel itself. Its scrolling options (reverse, speed, experimental smooth scrolling) work on macOS scroll events and apply to every mouse wheel, not just this one. We haven't checked how they treat the thumb wheel.</li>
+        <li><b>Anything outside Logitech.</b> It only speaks Logitech's HID++ protocol. It doesn't pair mice or update firmware.</li>
+        <li><b>Proof it works.</b> The MX Master 3S is untested. Expect rough edges, and tell us about them.</li>
+      </ul>
+      <p>For the wheel and thumb-wheel settings, Logi Options+ is Logitech's own answer. BetterMouse says on its site that it covers the MX Master thumb wheel.</p>
+
+      <h2 id="connecting">Bluetooth or Bolt</h2>
+      <p>Upright's catalog lists Bluetooth and the Bolt receiver for the MX Master 3S. It has no USB entry for it, so use one of the two.</p>
+      <ul>
+        <li><b>Bluetooth:</b> best effort. It depends on macOS exposing the mouse's HID++ interface, and macOS may ask you to allow Input Monitoring. It is not verified on this model.</li>
+        <li><b>Bolt receiver:</b> implemented from Solaar's documentation and tested only in a simulator. Not verified on a real Bolt receiver.</li>
+      </ul>
+      <p>Quit Logi Options+ and take it out of your login items while you use Upright. Both apps want the same buttons, and only one can have them.</p>
+
+      <h2 id="first-launch">The catch: the first launch</h2>
+      <p>Upright needs macOS 13 or later and works on Apple silicon and Intel. Release builds are ad-hoc signed and not notarized by Apple, so macOS blocks the first launch. To open it:</p>
+      <ul>
+        <li>Right-click <code>Upright.app</code>, choose <b>Open</b>, then <b>Open</b> again. You only need to do this once.</li>
+        <li>If there is no Open button, use <b>Open Anyway</b> in System Settings &rarr; Privacy &amp; Security.</li>
+        <li>If it still refuses, run <code>xattr -dr com.apple.quarantine /Applications/Upright.app</code> in Terminal.</li>
+      </ul>
+      <p>Then allow Accessibility when asked, and pick actions in Settings &rarr; Buttons. Choose MX Master 3S under Configure.</p>
+
+      <h2 id="alternatives">Other ways to do it</h2>
+      <ul>
+        <li><b>Logi Options+.</b> Logitech's own app. Free, closed source, and some features need a Logitech account. It is the one that covers everything on this mouse.</li>
+        <li><b>BetterMouse.</b> Paid after a trial. Goes deeper into Logitech hardware, including the MX Master thumb wheel, per its site. <a href="upright-vs-bettermouse">Upright vs BetterMouse</a>.</li>
+        <li><b>Mac Mouse Fix.</b> Best for trackpad-style scrolling and gestures on any mouse. Its README says it can't recognize every button on mice built for Logitech's software. <a href="upright-vs-mac-mouse-fix">Upright vs Mac Mouse Fix</a>.</li>
+        <li><b>SteerMouse.</b> A long-standing remapper for mice of any brand. Its site says it may not support some special buttons. <a href="upright-vs-steermouse">Upright vs SteerMouse</a>.</li>
+      </ul>
+      <p>All of them side by side: <a href="logi-options-alternatives">Logi Options+ alternatives for Mac</a>.</p>
+
+      <h2 id="which-should-you-pick">Which should you pick?</h2>
+      <ul>
+        <li><b>You want Back, Forward, Gesture and SmartShift buttons remapped for free, and don't mind testing:</b> Upright.</li>
+        <li><b>You use the thumb wheel or wheel settings a lot:</b> Logi Options+ or BetterMouse.</li>
+        <li><b>You want it proven on your exact mouse today:</b> an app that lists the MX Master 3S as tested. Upright can't say that yet.</li>
+      </ul>
+
+      <h2 id="faq">FAQ</h2>
+      <div class="faq cmp-faq">
+        <details>
+          <summary>Can I use an MX Master 3S on a Mac without Logi Options+?<svg aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+          <div class="faq-a"><p>Yes. Pair it over Bluetooth or plug in its Bolt receiver and macOS treats it as a normal mouse. To change what the extra buttons do, you need an app. Upright is a free, open-source option, but its MX Master 3S entry is built from published data and hasn't been tested on a real MX Master 3S yet.</p></div>
+        </details>
+        <details>
+          <summary>Which MX Master 3S buttons can Upright remap?<svg aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+          <div class="faq-a"><p>Back, Forward, the Gesture button, the SmartShift button and the wheel click. It doesn't remap the thumb wheel.</p></div>
+        </details>
+        <details>
+          <summary>Can Upright change SmartShift or the thumb wheel?<svg aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+          <div class="faq-a"><p>No. Upright can give the SmartShift button another job, but it doesn't change the wheel's own SmartShift, ratchet or hi-res settings, and it doesn't remap or tune the thumb wheel. Logi Options+ does those, and BetterMouse lists thumb-wheel support on its site.</p></div>
+        </details>
+        <details>
+          <summary>Does Upright work with the MX Master 3S over Bluetooth and Bolt?<svg aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+          <div class="faq-a"><p>Both are listed in its device catalog, but neither is verified on this mouse. Bluetooth is best effort and may need Input Monitoring. Bolt support is simulator-tested only.</p></div>
+        </details>
+        <details>
+          <summary>Why does macOS block Upright the first time?<svg aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+          <div class="faq-a"><p>The release build is ad-hoc signed and not notarized by Apple, so Gatekeeper blocks the first launch. Right-click Upright.app, choose Open, then Open again. You only need to do this once.</p></div>
+        </details>
+        <details>
+          <summary>Do I need to uninstall Logi Options+?<svg aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+          <div class="faq-a"><p>Quit it and take it out of your login items while you use Upright. Logi Options+, Solaar and LogiOps divert the same buttons, and only one app can have them.</p></div>
+        </details>
+      </div>
+
+      <h2 id="more">More</h2>
+      <ul>
+        <li><a href="mx-vertical">MX Vertical on Mac without Logi Options+</a>: the one mouse Upright is verified on</li>
+        <li><a href="logi-options-alternatives">Logi Options+ alternatives for Mac</a></li>
+        <li><a href="./">Upright home</a>: features, supported mice, download and FAQ</li>
+      </ul>
+
+      <p class="cmp-sources">Sources: the Upright <a href="https://github.com/dpdev69/upright/blob/main/README.md">README</a>, <a href="https://github.com/dpdev69/upright/blob/main/INSTALL.md">INSTALL.md</a>, <a href="https://github.com/dpdev69/upright/blob/main/docs/DEVICES.md">docs/DEVICES.md</a> and device catalog at commit 811252d. Competitor statements come from the <a href="upright-vs-bettermouse">BetterMouse</a>, <a href="upright-vs-mac-mouse-fix">Mac Mouse Fix</a> and <a href="upright-vs-steermouse">SteerMouse</a> comparison pages.</p>
+    </div>
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a class="brand" href="./"><img src="assets/icon-256.png" alt="" width="24" height="24" loading="lazy"><span>Upright</span></a>
+        <p>Open-source button remapping for Logitech mice on macOS, without Logi Options+. A Basalt app.</p>
+      </div>
+      <nav aria-labelledby="f-product">
+        <p class="f-title" id="f-product">Product</p>
+        <a href="./#features">Features</a>
+        <a href="./#mice">Supported mice</a>
+        <a href="./#download">Install</a>
+        <a href="mx-vertical">MX Vertical on Mac</a>
+        <a href="mx-master-3s-mac-without-options" aria-current="page">MX Master 3S on Mac</a>
+        <a href="https://github.com/dpdev69/upright">GitHub</a>
+      </nav>
+      <nav aria-labelledby="f-basalt">
+        <p class="f-title" id="f-basalt">More from Basalt</p>
+        <a href="https://hellobasalt.dev/">Basalt</a>
+        <a href="https://lull.hellobasalt.dev/">Lull, coming soon</a>
+        <a href="https://gocmeden.hellobasalt.dev/">Göçmeden, remote jobs</a>
+        <a href="https://cosmicpost.lol/">Cosmic Post, space photo keepsakes</a>
+        <a href="https://kacpapel.app/">Kaç Papel?, price game</a>
+        <a href="https://github.com/dpdev69/claude-fight-hud">Fight HUD for Claude Code</a>
+        <a href="https://byewall.hellobasalt.dev/">ByeWall, find archived pages</a>
+        <a href="https://kahve.hellobasalt.dev/">KahveDrop, coffee finder</a>
+        <a href="https://outcrop.hellobasalt.dev/">Outcrop, SEO for software makers</a>
+        <a href="https://x.com/hellobasalt">X @hellobasalt</a>
+        <a href="https://www.youtube.com/@hellobasalt">YouTube @hellobasalt</a>
+      </nav>
+      <nav aria-labelledby="f-help">
+        <p class="f-title" id="f-help">Help</p>
+        <a href="mailto:support@hellobasalt.dev">support@hellobasalt.dev</a>
+        <a href="./#faq">FAQ</a>
+        <a href="privacy">Privacy</a>
+        <a href="terms">Terms</a>
+        <a href="https://github.com/dpdev69/upright/blob/main/SECURITY.md">Security</a>
+      </nav>
+    </div>
+    <div class="footer-base">
+      <p>© 2026 Upright contributors · <a href="https://github.com/dpdev69/upright/blob/main/LICENSE">MIT license</a> · A <a href="https://hellobasalt.dev/">Basalt</a> app</p>
+      <p>Logitech, MX, Unifying, Bolt and Logi Options+ are trademarks of Logitech. Upright is an independent project and is not affiliated with or endorsed by Logitech. The animations show the real interface with simulated mice.</p>
+    </div>
+  </div>
+</footer>
+</body>
+</html>
