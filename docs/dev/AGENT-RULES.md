@@ -1,6 +1,6 @@
 # Upright improvement plan (shared brief for all agents)
 
-Project root: <repo root>
+Project root: the root of this repository
 Upright is a macOS 13+ SwiftUI menu-bar app that remaps Logitech MX Vertical buttons over HID++ 2.0 (IOKit).
 - `UprightKit/` is a SwiftPM package (pure Swift core + IOKit layer guarded by `#if canImport(IOKit)`); tests run on Linux too, so
   anything outside `Platform/` must stay Foundation-only.
