@@ -1,0 +1,25 @@
+# Upright
+
+> Upright is a free, open-source (MIT) macOS menu-bar app that remaps the buttons on Logitech mice without Logi Options+. It talks to the mouse directly over Logitech's HID++ protocol: gestures, per-app profiles, pointer speed (DPI) presets and battery alerts, with no account, no analytics and no background daemon. Made by Basalt Studio (https://hellobasalt.dev/).
+
+Requirements: macOS 13 or later, Apple silicon and Intel. Verified on real hardware with the Logitech MX Vertical (USB cable and Unifying receiver; Bluetooth is best effort). Other Logitech mice that speak HID++ 2.0 with programmable buttons (MX Master, MX Anywhere, MX Ergo and Lift families) are expected to work but are not verified yet. Logitech mice only.
+
+Nothing is written to the mouse: buttons are diverted only while Upright runs, and quitting it restores factory behaviour. Quit Logi Options+, Solaar or LogiOps while using it, since only one app can divert the buttons. It asks for Accessibility to send shortcuts and clicks, and Input Monitoring only if macOS hides a Bluetooth mouse.
+
+## Pages
+
+- [Upright home](https://upright.hellobasalt.dev/): what it does, download, and FAQ
+- [Logi Options+ alternatives for Mac](https://upright.hellobasalt.dev/logi-options-alternatives): Upright, BetterMouse, Mac Mouse Fix, SteerMouse and LinearMouse compared on price, Logitech buttons and privacy
+- [MX Vertical on Mac without Logi Options+](https://upright.hellobasalt.dev/mx-vertical): remapping the MX Vertical's top (DPI), back, forward and wheel buttons
+- [Privacy](https://upright.hellobasalt.dev/privacy): Upright collects nothing
+- [Terms](https://upright.hellobasalt.dev/terms): MIT License, provided as is
+
+## Download and source
+
+- [Latest release](https://github.com/dpdev69/upright/releases/latest): Upright.app
+- [Source code](https://github.com/dpdev69/upright): build with Xcode 15.3 or later, no Apple Developer account needed
+
+## Optional
+
+- [Basalt Studio](https://hellobasalt.dev/): the studio that makes Upright
+- Support: support@hellobasalt.dev
