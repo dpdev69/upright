@@ -276,6 +276,22 @@ code {
   letter-spacing: -0.02em;
 }
 .brand img { width: 28px; height: 28px; }
+/* Quiet "by Basalt" lockup: a sibling link right after the brand. The nav gap is 32px, so the
+   negative margin pulls it to ~10px from the wordmark. */
+.by-basalt {
+  margin-left: -22px;
+  padding-top: 4px;
+  font: 400 0.75rem/1 var(--mono);
+  letter-spacing: 0.04em;
+  color: var(--ink-3);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.2s ease;
+}
+.by-basalt:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.nav-inner .brand, .by-basalt { flex: none; }
+/* Hide the tag where the header stops fitting it (about 370px and narrower). */
+@media (max-width: 369px) { .by-basalt { display: none; } }
 .nav-links {
   display: flex;
   gap: 28px;
