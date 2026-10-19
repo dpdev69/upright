@@ -262,8 +262,9 @@ API key as `NOTARY_KEY_ID`, `NOTARY_ISSUER_ID` and `NOTARY_KEY_P8`, or `APPLE_ID
 `stapler validate` and `spctl`. Without those secrets, none of this runs. See
 [docs/dev/RELEASING.md](docs/dev/RELEASING.md).
 
-An ad-hoc DMG isn't notarized, so Gatekeeper blocks the first launch. Either right-click
-`Upright.app` → **Open** → **Open**, or run:
+An ad-hoc DMG isn't notarized, so Gatekeeper blocks the first launch. On macOS 15 or later, try
+to open `Upright.app`, then use System Settings → Privacy & Security → **Open Anyway**. On macOS
+13 or 14, right-click `Upright.app` → **Open** → **Open**. Or run:
 
 ```bash
 xattr -dr com.apple.quarantine /Applications/Upright.app
