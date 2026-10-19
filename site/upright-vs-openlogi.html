@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Upright vs OpenLogi: Logitech mouse apps for Mac compared</title>
+<meta name="description" content="Upright vs OpenLogi on source code, macOS support, mice covered and first launch. Both remap Logitech buttons over HID++; Upright is mouse-only and free, OpenLogi covers more Logitech gear.">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#fbfbfd" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<link rel="canonical" href="https://upright.hellobasalt.dev/upright-vs-openlogi">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Upright">
+<meta property="og:url" content="https://upright.hellobasalt.dev/upright-vs-openlogi">
+<meta property="og:title" content="Upright vs OpenLogi">
+<meta property="og:description" content="Upright vs OpenLogi on source code, macOS support, mice covered and first launch. Both remap Logitech buttons over HID++; Upright is mouse-only and free, OpenLogi covers more Logitech gear.">
+<meta property="og:image" content="https://upright.hellobasalt.dev/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Upright: your Logitech mouse, without Logi Options+. The menu-bar panel lists three mice with their battery levels.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Upright vs OpenLogi">
+<meta name="twitter:description" content="Upright vs OpenLogi on source code, macOS support, mice covered and first launch. Both remap Logitech buttons over HID++; Upright is mouse-only and free, OpenLogi covers more Logitech gear.">
+<meta name="twitter:image" content="https://upright.hellobasalt.dev/assets/og-image.png">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="apple-touch-icon" href="assets/icon-256.png">
+<link rel="stylesheet" href="assets/site.css?v=6">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebPage", "@id": "https://upright.hellobasalt.dev/upright-vs-openlogi#webpage", "url": "https://upright.hellobasalt.dev/upright-vs-openlogi", "name": "Upright vs OpenLogi: Logitech mouse apps for Mac compared", "description": "Upright vs OpenLogi on source code, macOS support, mice covered and first launch. Both remap Logitech buttons over HID++; Upright is mouse-only and free, OpenLogi covers more Logitech gear.", "inLanguage": "en", "datePublished": "2026-10-20", "dateModified": "2026-10-20", "isPartOf": {"@type": "WebSite", "name": "Upright", "url": "https://upright.hellobasalt.dev/"}, "about": {"@type": "SoftwareApplication", "name": "Upright", "url": "https://upright.hellobasalt.dev/"}, "breadcrumb": {"@id": "https://upright.hellobasalt.dev/upright-vs-openlogi#breadcrumb"}, "primaryImageOfPage": "https://upright.hellobasalt.dev/assets/og-image.png", "publisher": {"@type": "Organization", "@id": "https://hellobasalt.dev/#org", "name": "Basalt Studio", "alternateName": "Basalt", "url": "https://hellobasalt.dev/", "sameAs": ["https://x.com/hellobasalt", "https://www.youtube.com/@hellobasalt"]}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "@id": "https://upright.hellobasalt.dev/upright-vs-openlogi#breadcrumb", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Upright", "item": "https://upright.hellobasalt.dev/"}, {"@type": "ListItem", "position": 2, "name": "Logi Options+ alternatives", "item": "https://upright.hellobasalt.dev/logi-options-alternatives"}, {"@type": "ListItem", "position": 3, "name": "Upright vs OpenLogi", "item": "https://upright.hellobasalt.dev/upright-vs-openlogi"}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Is OpenLogi free?", "acceptedAnswer": {"@type": "Answer", "text": "Yes, as far as its own pages say. The code is open source, dual-licensed under Apache-2.0 or MIT per its README, and neither the README nor openlogi.org lists a price. Upright is free and MIT-licensed."}}, {"@type": "Question", "name": "Which mice does OpenLogi support?", "acceptedAnswer": {"@type": "Answer", "text": "Its README says Logitech mice, keyboards, Litra lights and webcams, over HID++ and UVC, and it publishes no list of verified models. Its first release notes, from 30 May 2026, said only the MX Master 4 had been tested on real hardware. Upright's catalog covers mice only, and only the MX Vertical is verified on hardware."}}, {"@type": "Question", "name": "Which one is easier to open the first time?", "acceptedAnswer": {"@type": "Answer", "text": "OpenLogi. Its README says the macOS .dmg is signed and notarized. Upright is ad-hoc signed and not notarized, so macOS blocks the first launch. On macOS 15 or later, try to open it once, then go to System Settings, Privacy & Security and click Open Anyway. On macOS 13 and 14 you can right-click it and choose Open."}}, {"@type": "Question", "name": "Can I run Upright and OpenLogi together?", "acceptedAnswer": {"@type": "Answer", "text": "Not on the same mouse. Both talk to Logitech mice over HID++, and only one app can own a mouse's buttons at a time. OpenLogi's README tells you to quit Logi Options+ first for the same reason. Quit one before you open the other."}}]}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="mouse-grad" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" class="g0"></stop>
+      <stop offset="1" class="g1"></stop>
+    </linearGradient>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11M7 10.5l5 5 5-5M5 20h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-github" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.48 2 2 6.58 2 12.23c0 4.52 2.87 8.35 6.84 9.7.5.1.68-.22.68-.49l-.01-1.7c-2.78.62-3.37-1.37-3.37-1.37-.46-1.18-1.11-1.5-1.11-1.5-.91-.64.07-.62.07-.62 1 .07 1.53 1.06 1.53 1.06.9 1.57 2.35 1.12 2.92.85.09-.67.35-1.12.64-1.38-2.22-.26-4.56-1.14-4.56-5.07 0-1.12.39-2.04 1.03-2.76-.1-.26-.45-1.3.1-2.71 0 0 .84-.28 2.75 1.05a9.4 9.4 0 0 1 5 0c1.91-1.33 2.75-1.05 2.75-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.64 1.03 2.76 0 3.94-2.34 4.81-4.57 5.06.36.32.68.94.68 1.9l-.01 2.81c0 .27.18.6.69.49A10.14 10.14 0 0 0 22 12.23C22 6.58 17.52 2 12 2Z"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="8.5" y="8.5" width="11" height="11" rx="2.5"/><path d="M15.5 8.5V6.5A2 2 0 0 0 13.5 4.5h-7a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h2"/></g></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5 10 17.5 19 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6.5 9.5 5.5 5.5 5.5-5.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  </defs>
+</svg>
+
+<header class="nav">
+  <div class="wrap nav-inner">
+    <div class="brand-lockup">
+      <a class="brand" href="./" aria-label="Upright home">
+        <img src="assets/icon-256.png" alt="" width="28" height="28">
+        <span>Upright</span>
+      </a>
+      <a class="by-basalt" href="https://hellobasalt.dev/">by Basalt</a>
+    </div>
+    <nav class="nav-links" aria-label="Sections">
+      <a href="./#features">Features</a>
+      <a href="./#mice">Mice</a>
+      <a href="./#faq">FAQ</a>
+    </nav>
+    <div class="nav-end">
+      <a class="nav-gh" href="https://github.com/dpdev69/upright" aria-label="GitHub"><svg aria-hidden="true"><use href="#i-github"/></svg><span>GitHub</span></a>
+      <a class="btn btn-primary btn-sm" href="https://github.com/dpdev69/upright/releases/latest">Download</a>
+    </div>
+  </div>
+</header>
+
+<main id="main" class="doc">
+  <div class="wrap doc-wrap">
+    <header class="doc-head">
+      <nav class="crumbs" aria-label="Breadcrumb"><a href="./">Upright</a><span aria-hidden="true">/</span><a href="logi-options-alternatives">Logi Options+ alternatives</a><span aria-hidden="true">/</span><span aria-current="page">Upright vs OpenLogi</span></nav>
+      <h1>Upright vs OpenLogi</h1>
+      <p class="doc-meta">Checked 20 October 2026 · Facts from each project's README and site</p>
+    </header>
+    <div class="doc-body">
+      <p class="doc-lede">Both apps remap Logitech buttons over HID++ and both are open source. Choose OpenLogi if you want more than a mouse tool: it also handles Logitech keyboards, Litra lights and webcams, runs on Linux and Windows too, and, per its README, ships a notarized macOS build, though that README also says it is still under active development. Choose Upright if you only need your Logitech mouse's buttons remapped on a Mac, want a smaller scope, and don't mind confirming the first launch.</p>
+      <h2 id="at-a-glance">At a glance</h2>
+      <div class="cmp-scroll" role="region" aria-label="Comparison table" tabindex="0">
+        <table class="cmp">
+          <thead><tr><th scope="col">Feature</th><th scope="col">Upright</th><th scope="col">OpenLogi</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Price</th><td>Free</td><td>No price listed in its README or on openlogi.org</td></tr>
+            <tr><th scope="row">Source code</th><td>Open source, MIT license</td><td>Open source, Apache-2.0 or MIT at your option (per its README)</td></tr>
+            <tr><th scope="row">Platforms</th><td>macOS 13 Ventura or later, Apple silicon and Intel</td><td>macOS 13 or later, Linux and Windows (per its README)</td></tr>
+            <tr><th scope="row">Devices</th><td>Logitech HID++ 2.0 mice only. Only the MX Vertical is verified on real hardware; the other catalog models are built from published device data.</td><td>Logitech mice, keyboards, Litra lights and webcams. Its README lists no verified models.</td></tr>
+            <tr><th scope="row">Logitech-only buttons (gesture, DPI, SmartShift)</th><td>Yes, over HID++</td><td>Yes, over HID++ where the device exposes them: gesture, mode-shift and thumb wheel buttons, plus DPI and SmartShift controls</td></tr>
+            <tr><th scope="row">Button functions</th><td>System actions, shortcuts, Open App, Open URL, Run Shortcut, DPI, Easy-Switch; gestures with five actions per button</td><td>An action catalog plus custom shortcuts, short-press and long-press actions, hold-until-release chords, per-direction gestures and an Actions Ring overlay</td></tr>
+            <tr><th scope="row">Per-app settings</th><td>Yes</td><td>Yes, on macOS and Windows (Linux on X11 or XWayland only)</td></tr>
+            <tr><th scope="row">Config and scripting</th><td>Settings window; export and import every mapping as one file</td><td>One plain-text TOML file and a command-line tool</td></tr>
+            <tr><th scope="row">Maturity</th><td>Version 1.1.2, released 17 October 2026</td><td>Version 0.8.14, released 15 October 2026. Its README says it is not yet stable.</td></tr>
+            <tr><th scope="row">Signing</th><td>Ad-hoc signed, not notarized; macOS blocks the first launch</td><td>Signed and notarized .dmg, or install with Homebrew (per its README)</td></tr>
+            <tr><th scope="row">Account and telemetry</th><td>None</td><td>None, per its README</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="cmp-note">Checked 20 October 2026 on the pages listed under Sources. Upright's facts come from its own README and this site.</p>
+      <h2 id="upright">Upright</h2>
+      <p><a href="./">Upright</a> is a small native menu-bar app that talks to Logitech mice directly over HID++ 2.0, the protocol Logitech's own software uses. That lets it take over buttons generic remappers often can't see, such as the top (DPI), gesture and SmartShift buttons. It adds gestures (a click plus hold-and-move in four directions, five actions per button), per-app profiles, several mice at once with a setup for each model, pointer speed (DPI) presets, Easy-Switch from a button, battery alerts at 15% and 5%, and export and import of every mapping. It has no account, no analytics and no telemetry, and nothing is written to the mouse's memory: quit it and the buttons go back to factory behavior.</p>
+      <p>Honest limits: it works only with Logitech HID++ mice and does nothing for keyboards, lights or webcams. Only the <a href="mx-vertical">MX Vertical</a> has been verified on real hardware so far. It needs macOS 13 or later, and it is ad-hoc signed and not notarized, so macOS blocks the first launch (see the FAQ below).</p>
+      <p class="cmp-cta"><a class="btn btn-primary" href="https://github.com/dpdev69/upright/releases/latest"><svg aria-hidden="true"><use href="#i-download"/></svg>Download Upright, free</a></p>
+      <h2 id="openlogi">OpenLogi</h2>
+      <p><a href="https://github.com/AprilNEA/OpenLogi">OpenLogi</a> is an open-source, local-first alternative to Logi Options+, written in Rust (<a href="https://openlogi.org/">openlogi.org</a>). Per its README it runs on macOS 13 or later, Linux and Windows, and reads devices on Bolt and Unifying receivers, Bluetooth or a cable. For mice it remaps buttons, with gestures on supported buttons, short-press and long-press actions and an Actions Ring overlay, and it controls DPI and SmartShift. It switches profiles per app on macOS and Windows, keeps its settings in one TOML file and comes with a command-line tool. Beyond mice, its README lists keyboard F-key remapping and RGB, Litra lights and Logitech webcams. It says there is no account and no telemetry.</p>
+      <p>The catch, in its own words: the README opens with a warning that OpenLogi is under active development and not yet stable, and features and config may still change. The latest release when we checked was 0.8.14 on 15 October 2026, and the project releases often. The README does not publish a list of mice verified on hardware. Its macOS build is described as a signed, notarized .dmg, with a Homebrew cask as the other install path.</p>
+      <h2 id="which-should-you-pick">Which should you pick?</h2>
+      <ul>
+        <li><b>You also want to configure a Logitech keyboard, Litra light or webcam:</b> OpenLogi. Upright is for mice only.</li>
+        <li><b>You use Linux or Windows as well as a Mac:</b> OpenLogi. Upright is macOS only.</li>
+        <li><b>You want a macOS build that opens without the extra confirmation:</b> OpenLogi, going by its README. Upright is not notarized yet.</li>
+        <li><b>You want a script-friendly, plain-text config:</b> OpenLogi, with its TOML file and command-line tool.</li>
+        <li><b>You have an MX Vertical and want a mouse-only tool that has been run on that exact mouse:</b> Upright. It is the one model Upright has verified on hardware.</li>
+        <li><b>You want a smaller tool with a fixed scope:</b> Upright. It remaps Logitech mouse buttons and adds pointer speed, scrolling and battery features, and nothing else.</li>
+      </ul>
+      <p>Either way, quit Logi Options+ first, and don't run the two apps on the same mouse at once.</p>
+
+      <h2 id="faq">FAQ</h2>
+      <div class="faq cmp-faq">
+        <details>
+          <summary>Is OpenLogi free?<svg aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+          <div class="faq-a"><p>Yes, as far as its own pages say. The code is open source, dual-licensed under Apache-2.0 or MIT per its README, and neither the README nor openlogi.org lists a price. Upright is free and MIT-licensed.</p></div>
+        </details>
+        <details>
+          <summary>Which mice does OpenLogi support?<svg aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+          <div class="faq-a"><p>Its README says Logitech mice, keyboards, Litra lights and webcams, over HID++ and UVC, and it publishes no list of verified models. Its first release notes, from 30 May 2026, said only the MX Master 4 had been tested on real hardware. Upright's catalog covers mice only, and only the MX Vertical is verified on hardware.</p></div>
+        </details>
+        <details>
+          <summary>Which one is easier to open the first time?<svg aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+          <div class="faq-a"><p>OpenLogi. Its README says the macOS .dmg is signed and notarized. Upright is ad-hoc signed and not notarized, so macOS blocks the first launch. On macOS 15 or later, try to open it once, then go to System Settings, Privacy &amp; Security and click Open Anyway. On macOS 13 and 14 you can right-click it and choose Open.</p></div>
+        </details>
+        <details>
+          <summary>Can I run Upright and OpenLogi together?<svg aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+          <div class="faq-a"><p>Not on the same mouse. Both talk to Logitech mice over HID++, and only one app can own a mouse's buttons at a time. OpenLogi's README tells you to quit Logi Options+ first for the same reason. Quit one before you open the other.</p></div>
+        </details>
+      </div>
+
+      <h2 id="more-comparisons">More comparisons</h2>
+      <ul>
+        <li><a href="upright-vs-mac-mouse-fix">Upright vs Mac Mouse Fix</a>: free Logitech remapper or trackpad-style scrolling for any mouse</li>
+        <li><a href="upright-vs-bettermouse">Upright vs BetterMouse</a>: two ways to replace Logi Options+ on Logitech hardware</li>
+        <li><a href="upright-vs-steermouse">Upright vs SteerMouse</a>: a Logitech specialist or a remapper for every brand</li>
+        <li><a href="logi-options-alternatives">All seven Logi Options+ alternatives for Mac</a>, side by side</li>
+        <li><a href="mx-vertical">MX Vertical on Mac without Logi Options+</a>: the one mouse Upright is verified on</li>
+        <li><a href="./">Upright home</a>: features, supported mice, download and FAQ</li>
+      </ul>
+
+      <p class="cmp-sources">Sources, checked 20 October 2026: <a href="https://github.com/AprilNEA/OpenLogi">OpenLogi README on GitHub</a> (features, platforms, install, license, development warning), <a href="https://openlogi.org/">openlogi.org</a> (overview, platforms, signed builds), <a href="https://github.com/AprilNEA/OpenLogi/releases">OpenLogi releases</a> (version 0.8.14 of 15 October 2026 and the 0.1.0 notes), <a href="https://github.com/dpdev69/upright">Upright README</a>.</p>
+    </div>
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a class="brand" href="./"><img src="assets/icon-256.png" alt="" width="24" height="24" loading="lazy"><span>Upright</span></a>
+        <p>Open-source button remapping for Logitech mice on macOS, without Logi Options+. A Basalt app.</p>
+      </div>
+      <nav aria-labelledby="f-product">
+        <p class="f-title" id="f-product">Product</p>
+        <a href="./#features">Features</a>
+        <a href="./#mice">Supported mice</a>
+        <a href="./#download">Install</a>
+        <a href="mx-vertical">MX Vertical on Mac</a>
+        <a href="mx-master-3s-mac-without-options">MX Master 3S on Mac</a>
+        <a href="logi-options-alternatives">Logi Options+ alternatives</a>
+        <a href="upright-vs-mac-mouse-fix">Upright vs Mac Mouse Fix</a>
+        <a href="upright-vs-bettermouse">Upright vs BetterMouse</a>
+        <a href="upright-vs-steermouse">Upright vs SteerMouse</a>
+        <a href="upright-vs-openlogi" aria-current="page">Upright vs OpenLogi</a>
+        <a href="https://github.com/dpdev69/upright">GitHub</a>
+      </nav>
+      <nav aria-labelledby="f-basalt">
+        <p class="f-title" id="f-basalt">More from Basalt</p>
+        <a href="https://hellobasalt.dev/">Basalt</a>
+        <a href="https://lull.hellobasalt.dev/">Lull, coming soon</a>
+        <a href="https://gocmeden.hellobasalt.dev/">Göçmeden, remote jobs</a>
+        <a href="https://cosmicpost.lol/">Cosmic Post, space photo keepsakes</a>
+        <a href="https://kacpapel.app/">Kaç Papel?, price game</a>
+        <a href="https://github.com/dpdev69/claude-fight-hud">Fight HUD for Claude Code</a>
+        <a href="https://byewall.hellobasalt.dev/">ByeWall, find archived pages</a>
+        <a href="https://kahve.hellobasalt.dev/">KahveDrop, coffee finder</a>
+        <a href="https://outcrop.hellobasalt.dev/">Outcrop, SEO for software makers</a>
+        <a href="https://x.com/hellobasalt">X @hellobasalt</a>
+        <a href="https://www.youtube.com/@hellobasalt">YouTube @hellobasalt</a>
+      </nav>
+      <nav aria-labelledby="f-help">
+        <p class="f-title" id="f-help">Help</p>
+        <a href="mailto:support@hellobasalt.dev">support@hellobasalt.dev</a>
+        <a href="./#faq">FAQ</a>
+        <a href="privacy">Privacy</a>
+        <a href="terms">Terms</a>
+        <a href="https://github.com/dpdev69/upright/blob/main/SECURITY.md">Security</a>
+      </nav>
+    </div>
+    <div class="footer-base">
+      <p>© 2026 Upright contributors · <a href="https://github.com/dpdev69/upright/blob/main/LICENSE">MIT license</a> · A <a href="https://hellobasalt.dev/">Basalt</a> app</p>
+      <p>Logitech, MX, Unifying, Bolt and Logi Options+ are trademarks of Logitech. Upright is an independent project and is not affiliated with or endorsed by Logitech. The animations show the real interface with simulated mice.</p>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

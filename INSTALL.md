@@ -90,10 +90,11 @@ settings.
 Upright is **ad-hoc signed**: it isn't notarized by Apple. If macOS says it can't be opened or
 that the developer can't be verified:
 
-1. Right-click `Upright.app`, choose **Open**, then click **Open** again. You only need to do
-   this the first time.
-2. If there is no Open button, go to System Settings → Privacy & Security, scroll down to the
-   message about Upright and click **Open Anyway**.
+1. On macOS 15 Sequoia or later: try to open `Upright.app`, then go to System Settings →
+   Privacy & Security, scroll down to the message about Upright and click **Open Anyway**. You
+   only need to do this the first time.
+2. On macOS 13 Ventura or 14 Sonoma: right-click `Upright.app`, choose **Open**, then click
+   **Open** again. You only need to do this the first time.
 3. If it still refuses, remove the quarantine flag and try again:
 
    ```bash
