@@ -256,8 +256,11 @@ For a tag such as `v1.1.0`, the **app** job fails unless the tag matches `MARKET
 
 By default the DMG is **unsigned** (ad-hoc). If the repository defines the secrets
 `MACOS_CERTIFICATE_P12` and `MACOS_CERTIFICATE_PASSWORD`, the job also signs the app and DMG
-with a Developer ID certificate. If `APPLE_ID`, `APPLE_TEAM_ID` and `APPLE_APP_PASSWORD` are
-set as well, it notarizes and staples the DMG. Without those secrets, none of this runs.
+with a Developer ID certificate. If notary credentials are set as well (an App Store Connect
+API key as `NOTARY_KEY_ID`, `NOTARY_ISSUER_ID` and `NOTARY_KEY_P8`, or `APPLE_ID`,
+`APPLE_TEAM_ID` and `APPLE_APP_PASSWORD`), it notarizes and staples the DMG and checks it with
+`stapler validate` and `spctl`. Without those secrets, none of this runs. See
+[docs/dev/RELEASING.md](docs/dev/RELEASING.md).
 
 An ad-hoc DMG isn't notarized, so Gatekeeper blocks the first launch. Either right-click
 `Upright.app` → **Open** → **Open**, or run:

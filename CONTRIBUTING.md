@@ -367,8 +367,9 @@ message in `docs/HIDPP.md`, and say whether it was tested on hardware.
 
 ## Releasing
 
-1. Set `MARKETING_VERSION` in `project.pbxproj` and move the **Unreleased** changelog entries
-   under the new version.
+1. Set `MARKETING_VERSION` in `project.pbxproj`, raise `CURRENT_PROJECT_VERSION` by one, and
+   move the **Unreleased** changelog entries under the new version.
 2. Tag the commit `vX.Y.Z`. CI refuses a tag that doesn't match `MARKETING_VERSION`.
 3. The `release` job attaches `Upright-X.Y.Z.dmg` to a GitHub release. The DMG is ad-hoc
-   signed unless the signing and notarization secrets are set (see the README).
+   signed unless the signing and notarization secrets are set. See
+   [docs/dev/RELEASING.md](docs/dev/RELEASING.md) for the full steps.

@@ -32,6 +32,10 @@ All notable changes to Upright are listed here. The format follows
 - The website footer now follows the shared Basalt layout, with a More from Basalt column
   linking the other Basalt apps and a support address.
 - The More from Basalt column now also links ByeWall and KahveDrop.
+- CI can notarize release builds with an App Store Connect API key (`NOTARY_KEY_ID`,
+  `NOTARY_ISSUER_ID`, `NOTARY_KEY_P8`) as well as an Apple ID app-specific password, and
+  checks the result with `stapler validate` and `spctl`. Without the signing secrets the DMG
+  is still ad-hoc signed. See [docs/dev/RELEASING.md](docs/dev/RELEASING.md).
 
 ## [1.1.2] - 2026-10-17
 
