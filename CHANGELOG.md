@@ -8,6 +8,13 @@ All notable changes to Upright are listed here. The format follows
 
 ## [1.1.3] - unreleased
 
+### Verified
+
+- The 1.1.2 Bluetooth reconnect fix, on a real MX Vertical: after the mouse was switched off
+  and on, the remapped buttons worked again without restarting Upright. Sleep and wake and the
+  receiver path are still untested on hardware. See
+  [docs/dev/HARDWARE-RESULTS.md](docs/dev/HARDWARE-RESULTS.md).
+
 ### Added
 
 - An [MX Master 3S on Mac without Logi Options+](https://upright.hellobasalt.dev/mx-master-3s-mac-without-options)
