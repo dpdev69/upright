@@ -9,7 +9,7 @@ export const meta = {
   ],
 }
 
-const ROOT = '/Users/dpercinel/cursor/mouseapp/Untitled/Upright-macos-source'
+const ROOT = (args && args.root) || '.'  // pass the repo checkout path via args.root
 const S = (args && args.scratch) || '/tmp/upright-scratch'  // pass the new session's scratchpad via args.scratch
 const KIT_REPORT = (args && args.kitReport) || '(no kit report passed)'
 const BASE = `Project: ${ROOT} (git repo; macOS 13+ SwiftUI app "Upright" + SwiftPM package UprightKit). You are implementing multi-mouse / multi-model support, app side.
