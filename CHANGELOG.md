@@ -6,6 +6,23 @@ All notable changes to Upright are listed here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- An [Upright vs OpenLogi](https://upright.hellobasalt.dev/upright-vs-openlogi) comparison page
+  on the website, linked from the alternatives page and the other comparison pages, and listed
+  in the sitemap and `llms.txt`.
+- OpenLogi and Mouser on the [Logi Options+ alternatives](https://upright.hellobasalt.dev/logi-options-alternatives)
+  page, replacing the claim that Upright is the only free option there that speaks HID++, and
+  adding WebPage structured data with publish and modified dates.
+- The website footer now links the comparison pages, the MX Vertical page and the MX Master 3S
+  page on every page.
+
+### Changed
+
+- The first-launch instructions on the website, in `INSTALL.md` and in the README now lead with
+  System Settings → Privacy & Security → Open Anyway for macOS 15 and later. Right-click → Open
+  stays as the way on macOS 13 and 14.
+
 ## [1.1.3] - unreleased
 
 ### Verified
