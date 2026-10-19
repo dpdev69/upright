@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Upright vs BetterMouse: Logitech mouse apps for Mac compared</title>
+<meta name="description" content="Upright vs BetterMouse on price, source code, macOS support and Logitech features. BetterMouse goes deeper on Logitech hardware; Upright is free and MIT.">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#fbfbfd" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<link rel="canonical" href="https://upright.hellobasalt.dev/upright-vs-bettermouse">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Upright">
+<meta property="og:url" content="https://upright.hellobasalt.dev/upright-vs-bettermouse">
+<meta property="og:title" content="Upright vs BetterMouse">
+<meta property="og:description" content="Upright vs BetterMouse on price, source code, macOS support and Logitech features. BetterMouse goes deeper on Logitech hardware; Upright is free and MIT.">
+<meta property="og:image" content="https://upright.hellobasalt.dev/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Upright: your Logitech mouse, without Logi Options+. The menu-bar panel lists three mice with their battery levels.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Upright vs BetterMouse">
+<meta name="twitter:description" content="Upright vs BetterMouse on price, source code, macOS support and Logitech features. BetterMouse goes deeper on Logitech hardware; Upright is free and MIT.">
+<meta name="twitter:image" content="https://upright.hellobasalt.dev/assets/og-image.png">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="apple-touch-icon" href="assets/icon-256.png">
+<link rel="stylesheet" href="assets/site.css?v=6">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebPage", "@id": "https://upright.hellobasalt.dev/upright-vs-bettermouse#webpage", "url": "https://upright.hellobasalt.dev/upright-vs-bettermouse", "name": "Upright vs BetterMouse: Logitech mouse apps for Mac compared", "description": "Upright vs BetterMouse on price, source code, macOS support and Logitech features. BetterMouse goes deeper on Logitech hardware; Upright is free and MIT.", "inLanguage": "en", "dateModified": "2026-10-19", "isPartOf": {"@type": "WebSite", "name": "Upright", "url": "https://upright.hellobasalt.dev/"}, "about": {"@type": "SoftwareApplication", "name": "Upright", "url": "https://upright.hellobasalt.dev/"}, "breadcrumb": {"@id": "https://upright.hellobasalt.dev/upright-vs-bettermouse#breadcrumb"}, "primaryImageOfPage": "https://upright.hellobasalt.dev/assets/og-image.png", "publisher": {"@type": "Organization", "@id": "https://hellobasalt.dev/#org", "name": "Basalt Studio", "alternateName": "Basalt", "url": "https://hellobasalt.dev/", "sameAs": ["https://x.com/hellobasalt", "https://www.youtube.com/@hellobasalt"]}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "@id": "https://upright.hellobasalt.dev/upright-vs-bettermouse#breadcrumb", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Upright", "item": "https://upright.hellobasalt.dev/"}, {"@type": "ListItem", "position": 2, "name": "Logi Options+ alternatives", "item": "https://upright.hellobasalt.dev/logi-options-alternatives"}, {"@type": "ListItem", "position": 3, "name": "Upright vs BetterMouse", "item": "https://upright.hellobasalt.dev/upright-vs-bettermouse"}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How much does BetterMouse cost?", "acceptedAnswer": {"@type": "Answer", "text": "$7.99 as a one-time purchase after a 7-day free trial with full functionality. Each license includes five reusable activations."}}, {"@type": "Question", "name": "Which one goes deeper on Logitech hardware?", "acceptedAnswer": {"@type": "Answer", "text": "BetterMouse. On supported Logitech mice it sets DPI, onboard profiles, vendor-defined buttons and the MX Master thumb wheel, and it supports some Logitech keyboards. Upright diverts vendor buttons and sets pointer speed, but writes nothing to the mouse's memory."}}, {"@type": "Question", "name": "Does Upright support Logitech keyboards?", "acceptedAnswer": {"@type": "Answer", "text": "No. Upright is for Logitech mice only and never opens keyboards."}}, {"@type": "Question", "name": "Is BetterMouse open source?", "acceptedAnswer": {"@type": "Answer", "text": "Its site offers no source code. Upright is open source under the MIT license, and you can build it yourself with Xcode."}}]}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="mouse-grad" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" class="g0"></stop>
+      <stop offset="1" class="g1"></stop>
+    </linearGradient>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11M7 10.5l5 5 5-5M5 20h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-github" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.48 2 2 6.58 2 12.23c0 4.52 2.87 8.35 6.84 9.7.5.1.68-.22.68-.49l-.01-1.7c-2.78.62-3.37-1.37-3.37-1.37-.46-1.18-1.11-1.5-1.11-1.5-.91-.64.07-.62.07-.62 1 .07 1.53 1.06 1.53 1.06.9 1.57 2.35 1.12 2.92.85.09-.67.35-1.12.64-1.38-2.22-.26-4.56-1.14-4.56-5.07 0-1.12.39-2.04 1.03-2.76-.1-.26-.45-1.3.1-2.71 0 0 .84-.28 2.75 1.05a9.4 9.4 0 0 1 5 0c1.91-1.33 2.75-1.05 2.75-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.64 1.03 2.76 0 3.94-2.34 4.81-4.57 5.06.36.32.68.94.68 1.9l-.01 2.81c0 .27.18.6.69.49A10.14 10.14 0 0 0 22 12.23C22 6.58 17.52 2 12 2Z"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="8.5" y="8.5" width="11" height="11" rx="2.5"/><path d="M15.5 8.5V6.5A2 2 0 0 0 13.5 4.5h-7a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h2"/></g></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5 10 17.5 19 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6.5 9.5 5.5 5.5 5.5-5.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  </defs>
+</svg>
+
+<header class="nav">
+  <div class="wrap nav-inner">
+    <div class="brand-lockup">
+      <a class="brand" href="./" aria-label="Upright home">
+        <img src="assets/icon-256.png" alt="" width="28" height="28">
+        <span>Upright</span>
+      </a>
+      <a class="by-basalt" href="https://hellobasalt.dev/">by Basalt</a>
+    </div>
+    <nav class="nav-links" aria-label="Sections">
+      <a href="./#features">Features</a>
+      <a href="./#mice">Mice</a>
+      <a href="./#faq">FAQ</a>
+    </nav>
+    <div class="nav-end">
+      <a class="nav-gh" href="https://github.com/dpdev69/upright" aria-label="GitHub"><svg aria-hidden="true"><use href="#i-github"/></svg><span>GitHub</span></a>
+      <a class="btn btn-primary btn-sm" href="https://github.com/dpdev69/upright/releases/latest">Download</a>
+    </div>
+  </div>
+</header>
+
+<main id="main" class="doc">
+  <div class="wrap doc-wrap">
+    <header class="doc-head">
+      <nav class="crumbs" aria-label="Breadcrumb"><a href="./">Upright</a><span aria-hidden="true">/</span><a href="logi-options-alternatives">Logi Options+ alternatives</a><span aria-hidden="true">/</span><span aria-current="page">Upright vs BetterMouse</span></nav>
+      <h1>Upright vs BetterMouse</h1>
+      <p class="doc-meta">Checked 19 October 2026 · Facts from each developer's own site</p>
+    </header>
+    <div class="doc-body">
+      <p class="doc-lede">BetterMouse is the closer replacement for Logi Options+: on supported Logitech mice it sets DPI, onboard profiles, vendor buttons and the MX Master thumb wheel, it also handles supported Logitech keyboards and pairs Unifying and Bolt receivers, for $7.99 once after a 7-day trial. Upright is free and open source and remaps Logitech mouse buttons, gestures and pointer-speed presets without writing to the mouse's memory, but it covers Logitech mice only and has no keyboard support.</p>
+      <h2 id="at-a-glance">At a glance</h2>
+      <div class="cmp-scroll" role="region" aria-label="Comparison table" tabindex="0">
+        <table class="cmp">
+          <thead><tr><th scope="col">Feature</th><th scope="col">Upright</th><th scope="col">BetterMouse</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Price</th><td>Free</td><td>$7.99 one-time purchase after a 7-day trial; 5 reusable activations per license</td></tr>
+            <tr><th scope="row">Source code</th><td>Open source, MIT license</td><td>No source code offered on its site</td></tr>
+            <tr><th scope="row">macOS</th><td>13 Ventura or later, Apple silicon and Intel</td><td>12.0 or later; its download section lists Apple silicon</td></tr>
+            <tr><th scope="row">Mice</th><td>Logitech HID++ 2.0 mice only</td><td>Third-party mice in general; hardware settings on supported Logitech mice</td></tr>
+            <tr><th scope="row">Logitech mouse hardware</th><td>Diverts vendor buttons (gesture, DPI, SmartShift) and sets pointer speed (DPI); nothing written to the mouse's memory</td><td>DPI, onboard profiles, vendor-defined buttons and the MX Master thumb wheel</td></tr>
+            <tr><th scope="row">Logitech keyboards and receivers</th><td>No; keyboards are never opened</td><td>Key mapping, backlight, Fn inversion and onboard profiles on supported keyboards; Unifying and Bolt pairing tool</td></tr>
+            <tr><th scope="row">Smooth scrolling</th><td>Experimental, off by default</td><td>Yes, with configurable duration, direction and acceleration</td></tr>
+            <tr><th scope="row">Per-app settings</th><td>Yes</td><td>Yes</td></tr>
+            <tr><th scope="row">Account</th><td>None</td><td>No registration or login</td></tr>
+            <tr><th scope="row">Notarized by Apple</th><td>Not yet; confirm the first launch</td><td>Yes</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="cmp-note">Checked 19 October 2026 on the pages listed under Sources. Upright's facts come from its own README and this site.</p>
+      <h2 id="upright">Upright</h2>
+      <p><a href="./">Upright</a> is a small native menu-bar app that talks to Logitech mice directly over HID++ 2.0, the protocol Logitech's own software uses. That lets it take over buttons generic remappers often can't see, such as the top (DPI), gesture and SmartShift buttons. It adds gestures (a click plus hold-and-move in four directions, five actions per button), per-app profiles, several mice at once, pointer speed (DPI) presets, Easy-Switch from a button, battery alerts at 15% and 5%, and export and import of every mapping. It has no account, no analytics and no telemetry, and nothing is written to the mouse's memory: quit it and the buttons go back to factory behavior.</p>
+      <p>Honest limits: it works only with Logitech HID++ mice, only the <a href="mx-vertical">MX Vertical</a> has been verified on real hardware so far (the other catalog models are built from published device data), it needs macOS 13 or later, and it isn't notarized yet, so macOS asks you to confirm the first launch.</p>
+      <p class="cmp-cta"><a class="btn btn-primary" href="https://github.com/dpdev69/upright/releases/latest"><svg aria-hidden="true"><use href="#i-download"/></svg>Download Upright, free</a></p>
+      <h2 id="bettermouse">BetterMouse</h2>
+      <p><a href="https://better-mouse.com/">BetterMouse</a> describes itself as a utility for smooth scrolling, cursor speed control and mouse and keyboard bindings, built to replace heavier drivers like Logitech Options. For supported Logitech mice it goes into the hardware: DPI, onboard profiles, vendor-defined buttons and the MX Master thumb wheel, plus a Unifying and Bolt receiver pairing tool. It also maps keys on supported Logitech keyboards and sets their backlight, Fn inversion and onboard profiles.</p>
+      <p>Beyond Logitech, it offers configurable smooth scrolling, separate cursor speed and acceleration, mapping for clicks, drags, holds and hold-scroll, and per-app exceptions. It is Apple-notarized, installs no extensions, drivers or agents, and needs no registration. It costs $7.99 once after a 7-day trial with full functionality, with five reusable activations per license, and needs macOS 12.0 or later.</p>
+      <h2 id="which-should-you-pick">Which should you pick?</h2>
+      <ul>
+        <li><b>You want the most Logitech hardware control without Logi Options+:</b> BetterMouse. Onboard profiles, the MX Master thumb wheel and keyboard settings are things Upright doesn't do.</li>
+        <li><b>You also have a Logitech keyboard, or need to pair a Unifying or Bolt receiver:</b> BetterMouse.</li>
+        <li><b>You want a notarized app with polished smooth scrolling, and $7.99 is fine:</b> BetterMouse.</li>
+        <li><b>You want it free and open source:</b> Upright, under the MIT license.</li>
+        <li><b>You're on an Intel Mac:</b> Upright runs on Apple silicon and Intel; BetterMouse's download section lists Apple silicon.</li>
+        <li><b>You want nothing written to the mouse's memory:</b> Upright only borrows buttons while it runs, and power-cycling the mouse restores factory behavior.</li>
+      </ul>
+
+      <h2 id="faq">FAQ</h2>
+      <div class="faq cmp-faq">
+        <details>
+          <summary>How much does BetterMouse cost?<svg aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+          <div class="faq-a"><p>$7.99 as a one-time purchase after a 7-day free trial with full functionality. Each license includes five reusable activations.</p></div>
+        </details>
+        <details>
+          <summary>Which one goes deeper on Logitech hardware?<svg aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+          <div class="faq-a"><p>BetterMouse. On supported Logitech mice it sets DPI, onboard profiles, vendor-defined buttons and the MX Master thumb wheel, and it supports some Logitech keyboards. Upright diverts vendor buttons and sets pointer speed, but writes nothing to the mouse's memory.</p></div>
+        </details>
+        <details>
+          <summary>Does Upright support Logitech keyboards?<svg aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+          <div class="faq-a"><p>No. Upright is for Logitech mice only and never opens keyboards.</p></div>
+        </details>
+        <details>
+          <summary>Is BetterMouse open source?<svg aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+          <div class="faq-a"><p>Its site offers no source code. Upright is open source under the MIT license, and you can build it yourself with Xcode.</p></div>
+        </details>
+      </div>
+
+      <h2 id="more-comparisons">More comparisons</h2>
+      <ul>
+        <li><a href="upright-vs-mac-mouse-fix">Upright vs Mac Mouse Fix</a>: free Logitech remapper or trackpad-style scrolling for any mouse</li>
+        <li><a href="upright-vs-steermouse">Upright vs SteerMouse</a>: a Logitech specialist or a remapper for every brand</li>
+        <li><a href="logi-options-alternatives">All five Logi Options+ alternatives for Mac</a>, side by side</li>
+        <li><a href="mx-vertical">MX Vertical on Mac without Logi Options+</a>: the one mouse Upright is verified on</li>
+        <li><a href="./">Upright home</a>: features, supported mice, download and FAQ</li>
+      </ul>
+
+      <p class="cmp-sources">Sources, checked 19 October 2026: <a href="https://better-mouse.com/">better-mouse.com</a> (features, Logitech support, price, trial, activations, macOS 12.0 minimum, Apple silicon, version 1.7.9010 of 3 October 2026), <a href="https://github.com/dpdev69/upright">Upright README</a>.</p>
+    </div>
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a class="brand" href="./"><img src="assets/icon-256.png" alt="" width="24" height="24" loading="lazy"><span>Upright</span></a>
+        <p>Open-source button remapping for Logitech mice on macOS, without Logi Options+. A Basalt app.</p>
+      </div>
+      <nav aria-labelledby="f-product">
+        <p class="f-title" id="f-product">Product</p>
+        <a href="./#features">Features</a>
+        <a href="./#mice">Supported mice</a>
+        <a href="./#download">Install</a>
+        <a href="mx-vertical">MX Vertical on Mac</a>
+        <a href="https://github.com/dpdev69/upright">GitHub</a>
+      </nav>
+      <nav aria-labelledby="f-basalt">
+        <p class="f-title" id="f-basalt">More from Basalt</p>
+        <a href="https://hellobasalt.dev/">Basalt</a>
+        <a href="https://lull.hellobasalt.dev/">Lull, coming soon</a>
+        <a href="https://gocmeden.hellobasalt.dev/">Göçmeden, remote jobs</a>
+        <a href="https://cosmicpost.lol/">Cosmic Post, space photo keepsakes</a>
+        <a href="https://kacpapel.app/">Kaç Papel?, price game</a>
+        <a href="https://github.com/dpdev69/claude-fight-hud">Fight HUD for Claude Code</a>
+        <a href="https://byewall.hellobasalt.dev/">ByeWall, find archived pages</a>
+        <a href="https://kahve.hellobasalt.dev/">KahveDrop, coffee finder</a>
+        <a href="https://outcrop.hellobasalt.dev/">Outcrop, SEO for software makers</a>
+        <a href="https://x.com/hellobasalt">X @hellobasalt</a>
+        <a href="https://www.youtube.com/@hellobasalt">YouTube @hellobasalt</a>
+      </nav>
+      <nav aria-labelledby="f-help">
+        <p class="f-title" id="f-help">Help</p>
+        <a href="mailto:support@hellobasalt.dev">support@hellobasalt.dev</a>
+        <a href="./#faq">FAQ</a>
+        <a href="privacy">Privacy</a>
+        <a href="terms">Terms</a>
+        <a href="https://github.com/dpdev69/upright/blob/main/SECURITY.md">Security</a>
+      </nav>
+    </div>
+    <div class="footer-base">
+      <p>© 2026 Upright contributors · <a href="https://github.com/dpdev69/upright/blob/main/LICENSE">MIT license</a> · A <a href="https://hellobasalt.dev/">Basalt</a> app</p>
+      <p>Logitech, MX, Unifying, Bolt and Logi Options+ are trademarks of Logitech. Upright is an independent project and is not affiliated with or endorsed by Logitech. The animations show the real interface with simulated mice.</p>
+    </div>
+  </div>
+</footer>
+</body>
+</html>
