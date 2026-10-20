@@ -6,6 +6,12 @@ All notable changes to Upright are listed here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- The website now sends a strict Content-Security-Policy, HSTS and X-Frame-Options on every
+  page, with a fresh nonce per page so Cloudflare's bot check can run, and the pages.dev preview
+  host is marked noindex.
+
 ### Added
 
 - An [Upright vs OpenLogi](https://upright.hellobasalt.dev/upright-vs-openlogi) comparison page
