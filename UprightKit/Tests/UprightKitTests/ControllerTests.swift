@@ -205,6 +205,10 @@ final class ControllerTests: XCTestCase {
         let mouse = SimulatedMXVertical(mode: .receiver(slot: 1))
         let controller = makeController(mouse, kind: .receiver(.unifying))
         controller.reconnectDelay = 0.1
+        // The retry poll armed at link loss would otherwise race the wake burst and, on a slow
+        // runner, reconfigure the mouse on its own before the debounced reconfiguration runs.
+        controller.retryBaseDelay = 30
+        controller.retryMaxDelay = 30
         controller.setDesiredDiversion(defaultDiversion)
         controller.start()
         await eventually("connected") { isConnected(controller) }
