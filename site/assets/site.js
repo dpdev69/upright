@@ -796,7 +796,7 @@
   }
 
   function sliderHTML(v, w, cls = '') {
-    return `<div class="msl ${cls}" style="--v:${v};width:${w}px"><div class="track"></div><div class="fill"></div><div class="ticks"></div><div class="knob"></div></div>`;
+    return `<div class="msl ${cls}" style="--v:${v};--w:${w}px;width:${w}px"><div class="track"></div><div class="fill"></div><div class="ticks"></div><div class="knob"></div></div>`;
   }
 
   // ---------- Scenes ----------
