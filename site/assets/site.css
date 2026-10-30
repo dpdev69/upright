@@ -991,7 +991,8 @@ code {
   color: var(--ink);
 }
 .doc-body p { margin: 14px 0 0; }
-.doc-body ul { margin: 14px 0 0; padding-left: 1.2em; }
+.doc-body ul, .doc-body ol { margin: 14px 0 0; padding-left: 1.4em; }
+.doc-body li code { overflow-wrap: anywhere; }
 .doc-body li { margin-top: 10px; }
 .doc-body li::marker { color: var(--ink-3); }
 .doc-body b { color: var(--ink); font-weight: 600; }
