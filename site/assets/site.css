@@ -350,7 +350,7 @@ code {
   height: 44px;
   padding: 0 20px;
   border-radius: var(--radius-pill);
-  font: 500 17px/1 var(--sans);
+  font: 500 15px/1 var(--sans);
   letter-spacing: -0.005em;
   text-decoration: none;
   white-space: nowrap;
@@ -374,7 +374,7 @@ code {
 }
 @media (hover: hover) and (pointer: fine){.btn-secondary:hover{ box-shadow: 0 0 0 1px var(--ink-3) inset, var(--shadow-sm); }}
 .btn-lg { height: 52px; padding: 0 26px; font-size: 17px; }
-.btn-sm { height: 32px; padding: 0 14px; font-size: 15px; font-weight: 500; }
+.btn-sm { height: 36px; padding: 0 14px; font-size: 13px; font-weight: 500; }
 
 /* Shared text */
 .eyebrow {
@@ -2010,7 +2010,7 @@ code {
 @media (pointer: coarse) {
   .nav-gh, .nav-end .btn-sm { position: relative; }
   .nav-gh::after { content: ""; position: absolute; inset: -13px -10px; }
-  .nav-end .btn-sm::after { content: ""; position: absolute; inset: -6px -4px; }
+  .nav-end .btn-sm::after { content: ""; position: absolute; inset: -4px 0; }
   .footer nav { gap: 0; }
   .footer nav a { padding-block: 10px; }
 }
