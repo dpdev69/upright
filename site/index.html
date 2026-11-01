@@ -28,7 +28,7 @@
 
 <link rel="icon" type="image/png" href="assets/favicon.png">
 <link rel="apple-touch-icon" href="assets/icon-256.png">
-<link rel="stylesheet" href="assets/site.css?v=7">
+<link rel="stylesheet" href="assets/site.css?v=8">
 <script>document.documentElement.classList.add('js');</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "Upright", "description": "A free, open-source macOS menu-bar app that remaps the buttons on Logitech mice over HID++, without Logi Options+.", "applicationCategory": "UtilitiesApplication", "operatingSystem": "macOS 13 or later", "softwareVersion": "1.1.2", "url": "https://upright.hellobasalt.dev/", "downloadUrl": "https://github.com/dpdev69/upright/releases/latest", "installUrl": "https://github.com/dpdev69/upright/releases/latest", "image": "https://upright.hellobasalt.dev/assets/og-image.png", "screenshot": "https://upright.hellobasalt.dev/assets/og-image.png", "license": "https://opensource.org/licenses/MIT", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "author": {"@type": "Organization", "name": "Upright contributors", "url": "https://github.com/dpdev69/upright"}, "publisher": {"@type": "Organization", "@id": "https://hellobasalt.dev/#org", "name": "Basalt Studio", "alternateName": "Basalt", "url": "https://hellobasalt.dev/", "sameAs": ["https://x.com/hellobasalt", "https://www.youtube.com/@hellobasalt"]}, "sameAs": ["https://github.com/dpdev69/upright"]}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebSite", "name": "Upright", "url": "https://upright.hellobasalt.dev/"}</script>
@@ -127,13 +127,13 @@
 
   <section class="section features" id="features" aria-labelledby="features-title">
     <div class="wrap">
-      <header class="section-head reveal">
+      <header class="section-head">
         <p class="eyebrow">Features</p>
         <h2 id="features-title">Everything Logi Options+ did for your buttons, in one small native app.</h2>
         <p>Upright lives in the menu bar, looks like part of macOS, and only does what you set up.</p>
       </header>
 
-      <article class="feature reveal">
+      <article class="feature">
         <div class="feature-copy">
           <p class="eyebrow">Buttons</p>
           <h3>Give every button a job.</h3>
@@ -154,7 +154,7 @@
         </div>
       </article>
 
-      <article class="feature flip reveal">
+      <article class="feature flip">
         <div class="feature-copy">
           <p class="eyebrow">Gestures</p>
           <h3>One button, five actions.</h3>
@@ -173,7 +173,7 @@
         </div>
       </article>
 
-      <article class="feature reveal">
+      <article class="feature">
         <div class="feature-copy">
           <p class="eyebrow">Per-app profiles</p>
           <h3>Different buttons for different apps.</h3>
@@ -184,7 +184,7 @@
         </div>
       </article>
 
-      <article class="feature flip reveal">
+      <article class="feature flip">
         <div class="feature-copy">
           <p class="eyebrow">Several mice · Battery alerts</p>
           <h3>Every mouse you own, at once.</h3>
@@ -196,7 +196,7 @@
         </div>
       </article>
 
-      <article class="feature reveal">
+      <article class="feature">
         <div class="feature-copy">
           <p class="eyebrow">Pointer speed</p>
           <h3>Pick a speed. Keep it.</h3>
@@ -208,7 +208,7 @@
         </div>
       </article>
 
-      <article class="feature flip reveal">
+      <article class="feature flip">
         <div class="feature-copy">
           <p class="eyebrow">Wheel vs trackpad</p>
           <h3>Set the wheel apart from the trackpad.</h3>
@@ -223,29 +223,29 @@
 
   <section class="section privacy" id="privacy" aria-labelledby="privacy-title">
     <div class="wrap">
-      <header class="section-head reveal">
+      <header class="section-head">
         <p class="eyebrow">Privacy</p>
         <h2 id="privacy-title">Leaves nothing behind.</h2>
         <p>Upright talks to your mouse and nothing else. It doesn't phone home or collect anything.</p>
       </header>
       <div class="privacy-grid">
-        <div class="card privacy-card reveal">
+        <div class="card privacy-card">
           <div class="icon-tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6.5" y="3" width="11" height="18" rx="5.5"/><path d="M12 3v6"/><path d="M3 12h1.5M19.5 12H21"/></svg></div>
           <h3>Nothing written to the mouse</h3>
           <p>Buttons are only diverted while Upright runs. Quit it, or switch the mouse off and on, and every button is back to factory behavior.</p>
         </div>
-        <div class="card privacy-card reveal">
+        <div class="card privacy-card">
           <div class="icon-tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 9h18"/><path d="M7 6.5h0M9.5 6.5h0"/></svg></div>
           <h3>No drivers, no daemon</h3>
           <p>One native SwiftUI app in your menu bar. No kernel extension, no background service, no Logitech software and no account.</p>
         </div>
-        <div class="card privacy-card reveal">
+        <div class="card privacy-card">
           <div class="icon-tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="6" width="19" height="12" rx="2"/><path d="M6 10h0M9 10h0M12 10h0M15 10h0M18 10h0M8.5 14.5h7"/><path d="M3 3l18 18"/></svg></div>
           <h3>Never reads your typing</h3>
           <p>Upright only opens Logitech HID interfaces and only sends the actions you assign. Keyboards are never opened.</p>
         </div>
       </div>
-      <div class="card ledger reveal" role="group" aria-labelledby="ledger-title">
+      <div class="card ledger" role="group" aria-labelledby="ledger-title">
         <p class="ledger-title" id="ledger-title">What Upright touches</p>
         <dl>
           <div><dt>Your mouse</dt><dd>Buttons diverted while it runs, handed back when it quits</dd></div>
@@ -254,7 +254,7 @@
           <div><dt>Permissions</dt><dd>Accessibility, to send the actions you assign</dd></div>
         </dl>
       </div>
-      <div class="protocol reveal" aria-label="Protocol details">
+      <div class="protocol" aria-label="Protocol details">
         <span><b>HID++ 2.0</b> over USB, Bluetooth and receivers</span>
         <span><b>0x1B04</b> REPROG_CONTROLS_V4</span>
         <span><b>0x2201</b> ADJUSTABLE_DPI</span>
@@ -265,12 +265,12 @@
 
   <section class="section mice" id="mice" aria-labelledby="mice-title">
     <div class="wrap">
-      <header class="section-head reveal">
+      <header class="section-head">
         <p class="eyebrow">Supported mice</p>
         <h2 id="mice-title">Built on the MX Vertical. Ready for more.</h2>
         <p>The MX Vertical is tested on real hardware. Twenty-two more models are in the catalog, built from published device data and tested against Upright's mouse simulator, so they're expected to work but haven't been verified on hardware yet.</p>
       </header>
-      <ul class="mice-grid reveal">
+      <ul class="mice-grid">
         <li class="verified">
           <span class="seal"><svg aria-hidden="true"><use href="#i-check"/></svg></span>
           <span class="m-name">MX Vertical</span>
@@ -297,7 +297,7 @@
         <li><span class="m-name">Pebble M350</span><span class="badge">Published data</span></li>
         <li><span class="m-name">M185 / M235 / M310</span><span class="badge">Published data</span></li>
       </ul>
-      <div class="mice-foot reveal">
+      <div class="mice-foot">
         <p class="fineprint">Connections: USB cable, Bluetooth, Unifying, Bolt and Nano receivers. G-series and PRO gaming mice keep their buttons in onboard profiles and aren't supported.</p>
         <div class="links-row">
           <span>Own one of these?</span>
@@ -310,13 +310,13 @@
 
   <section class="section install" id="download" aria-labelledby="install-title">
     <div class="wrap">
-      <header class="section-head reveal">
+      <header class="section-head">
         <p class="eyebrow">Install</p>
         <h2 id="install-title">Install in four steps.</h2>
         <p>Download the disk image from the latest GitHub release. It runs on macOS 13 Ventura or later, on Apple silicon and Intel.</p>
       </header>
       <div class="install-grid">
-        <div class="card install-card reveal">
+        <div class="card install-card">
           <div class="card-head">
             <h3>Install</h3>
             <button type="button" class="copy" data-copy="#install-steps" aria-label="Copy install steps">
@@ -336,7 +336,7 @@
         </div>
 
         <div class="install-side">
-          <div class="card note-card reveal">
+          <div class="card note-card">
             <h3>macOS won't open it the first time?</h3>
             <p>The release build isn't notarized by Apple, so Gatekeeper blocks the first launch. On macOS 15 or later, try to open <code>Upright.app</code>, then go to System Settings → Privacy &amp; Security, scroll down to the message about Upright and click <b>Open Anyway</b>. On macOS 13 or 14, right-click <code>Upright.app</code>, choose <b>Open</b>, then <b>Open</b> again. You only need to do this once. If it still refuses, run:</p>
             <div class="code">
@@ -346,7 +346,7 @@
               </button>
             </div>
           </div>
-          <div class="card note-card reveal">
+          <div class="card note-card">
             <h3>Prefer to build it yourself?</h3>
             <p>You need Xcode 15.3 or later, and no Apple Developer account.</p>
             <div class="code">
@@ -361,18 +361,18 @@ open build/Build/Products/Release/Upright.app</code></pre>
           </div>
         </div>
       </div>
-      <p class="callout reveal">Quit Logi Options+ and take it out of your login items first. It, Solaar and LogiOps divert the same buttons, and only one app can have them.</p>
+      <p class="callout">Quit Logi Options+ and take it out of your login items first. It, Solaar and LogiOps divert the same buttons, and only one app can have them.</p>
     </div>
   </section>
 
   <section class="section faq" id="faq" aria-labelledby="faq-title">
     <div class="wrap faq-wrap">
-      <header class="faq-head reveal">
+      <header class="faq-head">
         <p class="eyebrow">FAQ</p>
         <h2 id="faq-title">Questions</h2>
         <p>Something else? <a href="https://github.com/dpdev69/upright/issues">Open an issue on GitHub</a>.</p>
       </header>
-      <div class="faq-list reveal">
+      <div class="faq-list">
         <details>
           <summary>Is Upright free?<svg aria-hidden="true"><use href="#i-chevron"/></svg></summary>
           <div class="faq-a"><p>Yes. It's open source under the MIT license, with no account and no subscription.</p></div>
@@ -411,7 +411,7 @@ open build/Build/Products/Release/Upright.app</code></pre>
 
   <section class="final" aria-labelledby="final-title">
     <div class="wrap">
-      <div class="final-card reveal">
+      <div class="final-card">
         <img src="assets/icon-256.png" alt="" width="96" height="96" loading="lazy">
         <h2 id="final-title">Put every button to work.</h2>
         <p>Free, open source, and about a minute from download to your first remapped button.</p>
@@ -481,6 +481,6 @@ open build/Build/Products/Release/Upright.app</code></pre>
 </footer>
 
 <script src="assets/site.js?v=5" defer></script>
-<script src="assets/page.js?v=4" defer></script>
+<script src="assets/page.js?v=5" defer></script>
 </body>
 </html>
