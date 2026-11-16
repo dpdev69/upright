@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Privacy · Upright</title>
-<meta name="description" content="Upright collects nothing: no account, no analytics, no telemetry. What the app reads, what it stores on your Mac, and what this website does.">
+<meta name="description" content="The Upright app collects nothing: no account, no analytics, no telemetry. What the app reads, what it stores on your Mac, and what this website does.">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#fbfbfd" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
@@ -13,7 +13,7 @@
 <meta property="og:site_name" content="Upright">
 <meta property="og:url" content="https://upright.hellobasalt.dev/privacy">
 <meta property="og:title" content="Privacy · Upright">
-<meta property="og:description" content="Upright collects nothing: no account, no analytics, no telemetry. What the app reads, what it stores on your Mac, and what this website does.">
+<meta property="og:description" content="The Upright app collects nothing: no account, no analytics, no telemetry. What the app reads, what it stores on your Mac, and what this website does.">
 <meta property="og:image" content="https://upright.hellobasalt.dev/assets/og-image.png?v=2">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -54,7 +54,7 @@
       <p class="doc-meta">Last updated November 16, 2026</p>
     </header>
     <div class="doc-body">
-      <p class="doc-lede">Upright doesn't collect, sell or send your data anywhere. There's no account, no analytics and no telemetry, in the app or on this website.</p>
+      <p class="doc-lede">Upright doesn't collect, sell or send your data anywhere. The app has no account, no analytics and no telemetry. This website is different: it counts visits with Cloudflare Web Analytics, as described under <a href="#this-website">This website</a>.</p>
 
       <h2>Who is responsible</h2>
       <p>Upright is published by Basalt (<a href="https://hellobasalt.dev/">hellobasalt.dev</a>), an independent software studio. Because the app collects nothing and sends nothing, Basalt receives no personal data through it. For any privacy question or request, write to <a href="mailto:support@hellobasalt.dev">support@hellobasalt.dev</a>. For anything else about Basalt, write to <a href="mailto:hello@hellobasalt.dev">hello@hellobasalt.dev</a>.</p>
@@ -77,8 +77,13 @@
       </ul>
       <p>You can turn any of these off in System Settings → Privacy &amp; Security. To remove Upright's settings and permissions completely, follow the <a href="./#uninstall">uninstall steps</a>.</p>
 
-      <h2>This website</h2>
-      <p>This site is a set of static pages hosted on GitHub Pages. It sets no cookies, runs no analytics or tracking scripts, and loads no third-party fonts or embeds. GitHub, which hosts the site and the downloads, may log technical details such as IP addresses to run and secure its service. See the <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">GitHub General Privacy Statement</a>.</p>
+      <h2 id="this-website">This website</h2>
+      <p>This site is a set of static pages served by Cloudflare. It has no accounts, forms, advertising or tracking scripts, and its fonts are served from this site.</p>
+      <ul>
+        <li><b>Visit statistics.</b> We use Cloudflare Web Analytics to count visits. It shows us aggregate numbers only (page views, country, browser type, referring site and load speed), sets no cookies and creates no identifier that recognises you.</li>
+        <li><b>Security cookie.</b> If Cloudflare's security system sees unusual traffic, it may show a short check and set a security cookie called <code>cf_clearance</code>. It is used only to protect the site, never for ads or analytics.</li>
+        <li><b>Downloads.</b> The download is served from this site through Cloudflare, which fetches the file from GitHub, where the releases are stored. GitHub sees that request from Cloudflare, not from your device.</li>
+      </ul>
 
       <h2>Changes and questions</h2>
       <p>If this policy changes, the new version is published here. For questions or requests about your data, email <a href="mailto:support@hellobasalt.dev">support@hellobasalt.dev</a>. Bugs and feature ideas are welcome at the same address.</p>
