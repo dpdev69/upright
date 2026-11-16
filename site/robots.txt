@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /download
 
 Sitemap: https://upright.hellobasalt.dev/sitemap.xml
