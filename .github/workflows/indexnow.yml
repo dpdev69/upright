@@ -1,0 +1,48 @@
+name: IndexNow
+
+# After a change to a page or the sitemap lands on main, tell IndexNow search engines
+# (Bing, Yandex and others) which pages changed. Google does not use IndexNow.
+# A failed ping only logs a warning; it never fails this workflow.
+# By hand: Actions, IndexNow, Run workflow (tick "all" to send every URL).
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'site/**.html'
+      - 'site/sitemap.xml'
+  workflow_dispatch:
+    inputs:
+      all:
+        description: Send every URL in the sitemap
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: indexnow
+  cancel-in-progress: false
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          fetch-depth: 0
+      - name: Wait for Cloudflare Pages to publish
+        run: sleep 120
+      - name: Send changed URLs to IndexNow
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          SEND_ALL: ${{ inputs.all }}
+          BEFORE_SHA: ${{ github.event.before }}
+        run: |
+          if [ "$EVENT_NAME" != "push" ] || [ "$SEND_ALL" = "true" ]; then
+            node tools/indexnow.mjs --all
+          else
+            node tools/indexnow.mjs --since "$BEFORE_SHA"
+          fi
